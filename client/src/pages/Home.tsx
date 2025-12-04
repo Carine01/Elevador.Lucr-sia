@@ -272,19 +272,38 @@ export default function Home() {
         <section className="py-12 bg-[var(--bg)]">
           <div className="max-w-6xl mx-auto px-6">
             <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Resultados Reais</h3>
+            <p className="text-center text-gray-600 mt-2">Veja o que nossas alunas estão dizendo</p>
             <div className="mt-8 grid md:grid-cols-3 gap-6">
-              <blockquote className="bg-white p-6 rounded-xl card-shadow">
-                <p className="italic">"O Radar de Bio mudou meu perfil em um dia. Comecei a receber leads qualificados na mesma semana."</p>
-                <footer className="mt-4 text-sm text-gray-600">— Camila, São Paulo</footer>
-              </blockquote>
-              <blockquote className="bg-white p-6 rounded-xl card-shadow">
-                <p className="italic">"Com a Automação de Blogs, virei autoridade na minha cidade sem escrever uma linha sequer."</p>
-                <footer className="mt-4 text-sm text-gray-600">— Ana, BH</footer>
-              </blockquote>
-              <blockquote className="bg-white p-6 rounded-xl card-shadow">
-                <p className="italic">"Os e-books gerados pela IA são incríveis. Uso como isca digital e minha lista de clientes explodiu."</p>
-                <footer className="mt-4 text-sm text-gray-600">— Marina, RJ</footer>
-              </blockquote>
+              <div className="bg-white p-6 rounded-xl card-shadow hover:shadow-xl transition-all">
+                <div className="flex items-center gap-4 mb-4">
+                  <img src="/sherlayne-galvane.jpg" alt="Sherlayne Galvane" className="w-16 h-16 rounded-full object-cover border-2 border-[var(--lavanda)]" />
+                  <div>
+                    <p className="font-semibold text-gray-800">Sherlayne Galvane</p>
+                    <p className="text-sm text-gray-500">Vila Velha, ES</p>
+                  </div>
+                </div>
+                <blockquote className="italic text-gray-600">"O Radar de Bio mudou meu perfil em um dia. Comecei a receber leads qualificados na mesma semana."</blockquote>
+              </div>
+              <div className="bg-white p-6 rounded-xl card-shadow hover:shadow-xl transition-all">
+                <div className="flex items-center gap-4 mb-4">
+                  <img src="/marta-amorin.jpg" alt="Marta Amorin" className="w-16 h-16 rounded-full object-cover border-2 border-[var(--lavanda)]" />
+                  <div>
+                    <p className="font-semibold text-gray-800">Marta Amorin</p>
+                    <p className="text-sm text-gray-500">Vitória, ES</p>
+                  </div>
+                </div>
+                <blockquote className="italic text-gray-600">"Com a Automação de Blogs, virei autoridade na minha cidade sem escrever uma linha sequer."</blockquote>
+              </div>
+              <div className="bg-white p-6 rounded-xl card-shadow hover:shadow-xl transition-all">
+                <div className="flex items-center gap-4 mb-4">
+                  <img src="/geisy-dias.jpg" alt="Geisy Dias" className="w-16 h-16 rounded-full object-cover border-2 border-[var(--lavanda)]" />
+                  <div>
+                    <p className="font-semibold text-gray-800">Geisy Dias</p>
+                    <p className="text-sm text-gray-500">Teixeira de Freitas, BA</p>
+                  </div>
+                </div>
+                <blockquote className="italic text-gray-600">"Os e-books gerados pela IA são incríveis. Uso como isca digital e minha lista de clientes explodiu."</blockquote>
+              </div>
             </div>
           </div>
         </section>
