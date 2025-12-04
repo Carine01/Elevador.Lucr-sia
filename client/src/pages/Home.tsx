@@ -1,278 +1,376 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { APP_LOGO, APP_TITLE, getLoginUrl } from "@/const";
-import {
-  ArrowRight,
-  Sparkles,
-  Zap,
-  BookOpen,
-  TrendingUp,
-  CheckCircle,
-} from "lucide-react";
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from "wouter";
+import { trpc } from "@/lib/trpc";
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [, navigate] = useLocation();
 
-  if (isAuthenticated) {
-    navigate("/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
 
-  const features = [
-    {
-      icon: Zap,
-      title: "Radar de Bio",
-      description: "Analise sua bio do Instagram com IA e receba recomendações",
-    },
-    {
-      icon: Sparkles,
-      title: "Gerador de Conteúdo",
-      description: "Crie posts, e-books e anúncios em minutos com IA",
-    },
-    {
-      icon: BookOpen,
-      title: "E-books Profissionais",
-      description: "Gere e-books completos com capa e áudio automaticamente",
-    },
-    {
-      icon: TrendingUp,
-      title: "Analytics Completo",
-      description: "Acompanhe seu crescimento e resultados em tempo real",
-    },
-  ];
+    videoElement.muted = true;
 
-  const benefits = [
-    "Economize horas em criação de conteúdo",
-    "Aumente suas vendas com copywriting estratégico",
-    "Automatize sua presença nas redes sociais",
-    "Acesse ferramentas de IA de ponta",
-  ];
+    const tryPlay = () => {
+      const promise = videoElement.play();
+      if (promise !== undefined) {
+        promise.catch(() => {
+          // Autoplay was prevented. A user interaction will be needed.
+        });
+      }
+    };
+
+    tryPlay();
+
+    const handleClick = () => tryPlay();
+    document.addEventListener('click', handleClick, { once: true, passive: true });
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+    };
+  }, []);
+  
+  const handleSubscribe = async (plan: 'pro' | 'pro_plus') => {
+    setIsLoading(plan);
+    navigate('/pricing');
+  };
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const closeMenu = () => setIsMenuOpen(false);
+
+  const landingPageStyles = \`
+    :root{
+      --lavanda:#A36BFF;
+      --lavanda-200:#EDE8FF;
+      --dourado:#F6C86A;
+      --bg:#F6F9FB;
+    }
+    .hero-gradient{background:linear-gradient(180deg, rgba(163,107,255,0.06) 0%, rgba(227,220,255,0.04) 100%);}    
+    .card-shadow{box-shadow: 0 6px 18px rgba(12,18,30,0.06);}    
+    .btn-primary{background:var(--lavanda);color:white}
+    .btn-ghost{border:2px solid rgba(163,107,255,0.14);color:var(--lavanda)}
+    .video-wrap{position:relative;overflow:hidden;border-radius:16px}
+    .video-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+    .video-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,20,0.25),rgba(10,6,20,0.35));display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;padding:2rem}
+  \`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <>
+      <style>{landingPageStyles}</style>
+      <header className="fixed top-0 left-0 right-0 backdrop-blur-md bg-white/80 z-[100] border-b border-gray-100 shadow-sm">
+        <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
-              <img
-                src={APP_LOGO}
-                alt={APP_TITLE}
-                className="w-6 h-6 object-contain"
-              />
-            </div>
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-300 to-purple-500 text-white flex items-center justify-center font-bold">EL</div>
             <div>
-              <h1 className="text-lg font-bold text-white">Elevare</h1>
-              <p className="text-xs text-slate-400">NeuroVendas</p>
+              <div className="font-semibold text-gray-800">Elevare AI</div>
+              <div className="text-xs text-gray-500 -mt-1">NeuroVendas & Automação</div>
             </div>
           </div>
-          <Button
-            onClick={() => (window.location.href = getLoginUrl())}
-            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold"
-          >
-            Entrar
-          </Button>
-        </div>
-      </nav>
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 mb-6">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span className="text-sm text-amber-400">Powered by IA Avançada</span>
+          <div className="hidden md:flex items-center gap-8">
+            <a href="#home" className="text-sm font-medium text-gray-600 hover:text-[var(--lavanda)] transition-colors">Início</a>
+            <a href="#modulos" className="text-sm font-medium text-gray-600 hover:text-[var(--lavanda)] transition-colors">Módulos</a>
+            <a href="#planos" className="text-sm font-medium text-gray-600 hover:text-[var(--lavanda)] transition-colors">Planos</a>
+            <a href="#mentora" className="text-sm font-medium text-gray-600 hover:text-[var(--lavanda)] transition-colors">Mentora</a>
+            <a href="#faq" className="text-sm font-medium text-gray-600 hover:text-[var(--lavanda)] transition-colors">FAQ</a>
+            <button onClick={() => navigate('/dashboard')} className="ml-2 px-5 py-2.5 rounded-full btn-primary hover:opacity-95 shadow-md transition-transform hover:scale-105">Testar grátis</button>
           </div>
 
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            Transforme Sua Estética em um Negócio{" "}
-            <span className="bg-gradient-to-r from-amber-500 to-orange-500 bg-clip-text text-transparent">
-              Lucrativo
-            </span>
-          </h1>
+          <button onClick={toggleMenu} className="md:hidden px-3 py-2 rounded bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+            {isMenuOpen ? '✕' : '☰'}
+          </button>
 
-          <p className="text-xl text-slate-400 mb-8 max-w-2xl mx-auto">
-            Gere conteúdo estratégico, automatize suas vendas e cresça com IA.
-            Tudo que você precisa para dominar o Instagram e vender mais.
-          </p>
+          {isMenuOpen && (
+            <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-lg md:hidden flex flex-col p-4 gap-4 animate-fade-in">
+                <a href="#home" onClick={closeMenu} className="text-sm font-medium text-gray-600 py-2 border-b border-gray-50">Início</a>
+                <a href="#modulos" onClick={closeMenu} className="text-sm font-medium text-gray-600 py-2 border-b border-gray-50">Módulos</a>
+                <a href="#planos" onClick={closeMenu} className="text-sm font-medium text-gray-600 py-2 border-b border-gray-50">Planos</a>
+                <a href="#mentora" onClick={closeMenu} className="text-sm font-medium text-gray-600 py-2 border-b border-gray-50">Mentora</a>
+                <a href="#faq" onClick={closeMenu} className="text-sm font-medium text-gray-600 py-2 border-b border-gray-50">FAQ</a>
+                <button onClick={() => { closeMenu(); navigate('/dashboard'); }} className="text-center px-4 py-3 rounded-lg btn-primary font-bold">Testar grátis</button>
+            </div>
+          )}
+        </nav>
+      </header>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Button
-              onClick={() => (window.location.href = getLoginUrl())}
-              className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-8 py-6 rounded-lg text-lg h-auto"
-            >
-              Começar Teste Grátis (5 dias)
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Button>
-            <Button
-              variant="outline"
-              className="border-slate-700 text-white hover:bg-slate-800 font-semibold px-8 py-6 rounded-lg text-lg h-auto"
-            >
-              Ver Demo
-            </Button>
+      <main className="pt-24 isolate">
+        <section id="home" className="hero-gradient scroll-mt-28">
+          <div className="max-w-6xl mx-auto px-6 py-20 text-center">
+            <h1 className="text-4xl md:text-5xl font-extrabold text-[#5f3fb2] leading-tight">Elevare AI NeuroVendas</h1>
+            <p className="mt-4 text-xl font-medium text-gray-700">Ecossistema Completo de Automação de Conteúdo com IA para Esteticistas</p>
+            <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+              Transforme-se em uma produtora de conteúdo estratégico. Gere posts, e-books, anúncios e automatize seu blog em minutos, não horas.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+              <button onClick={() => navigate('/dashboard')} className="px-6 py-3 rounded-full btn-primary shadow-lg hover:shadow-xl transition-all">Começar Teste Grátis</button>
+              <a href="#modulos" className="px-6 py-3 rounded-full btn-ghost shadow-sm hover:bg-purple-50 transition-colors">Ver Módulos</a>
+            </div>
+            <div className="mt-6">
+                <a href="#planos" className="text-sm font-semibold text-[#5f3fb2] hover:underline hover:opacity-80 transition-opacity">
+                    Assinar Pro
+                </a>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Features Section */}
-      <section className="py-20 px-6 bg-slate-900/50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-white text-center mb-16">
-            Tudo que Você Precisa
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <Card
-                  key={feature.title}
-                  className="bg-slate-800/50 border-slate-700 p-6 hover:border-slate-600 transition-all"
-                >
-                  <div className="p-3 bg-gradient-to-r from-amber-500/20 to-orange-500/20 rounded-lg w-fit mb-4">
-                    <Icon className="w-6 h-6 text-amber-500" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">
-                    {feature.title}
-                  </h3>
-                  <p className="text-sm text-slate-400">{feature.description}</p>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-bold text-white text-center mb-16">
-            Por Que Escolher Elevare?
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {benefits.map((benefit, idx) => (
-              <div key={idx} className="flex items-start gap-4">
-                <CheckCircle className="w-6 h-6 text-amber-500 flex-shrink-0 mt-1" />
-                <p className="text-lg text-slate-300">{benefit}</p>
+        <section className="max-w-6xl mx-auto px-6 py-12">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h2 className="text-3xl font-semibold text-[#6b2fa8]">O maior problema: Falta de Tempo.</h2>
+              <p className="mt-4 text-gray-600">A Elevare resolve isso combinando NeuroVendas com automação inteligente. Chega de encarar a tela em branco.</p>
+              <ul className="mt-4 space-y-2 text-gray-700">
+                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Gere conteúdo de qualidade em minutos</li>
+                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Automatize em múltiplos canais (Insta, Blog)</li>
+                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Aumente vendas com copy estratégica</li>
+              </ul>
+              <div className="mt-6 flex gap-3">
+                <button onClick={() => navigate('/dashboard')} className="px-5 py-3 rounded-full btn-primary">Ativar minha conta</button>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section */}
-      <section className="py-20 px-6 bg-slate-900/50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-white text-center mb-16">
-            Planos Simples e Transparentes
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Grátis",
-                price: "R$ 0",
-                period: "5 dias de teste",
-                features: [
-                  "Radar de Bio",
-                  "3 análises/mês",
-                  "Suporte por email",
-                ],
-              },
-              {
-                name: "PRO",
-                price: "R$ 107",
-                period: "/mês",
-                features: [
-                  "Tudo do Grátis",
-                  "30 posts/mês",
-                  "5 e-books/mês",
-                  "Suporte prioritário",
-                ],
-                highlight: true,
-              },
-              {
-                name: "PRO+",
-                price: "R$ 147",
-                period: "/mês",
-                features: [
-                  "Tudo do PRO",
-                  "Ilimitado",
-                  "Audiobooks",
-                  "Mentoria exclusiva",
-                ],
-              },
-            ].map((plan, idx) => (
-              <Card
-                key={idx}
-                className={`p-8 transition-all ${
-                  plan.highlight
-                    ? "bg-gradient-to-b from-amber-500/20 to-orange-500/10 border-amber-500/50 scale-105"
-                    : "bg-slate-800/50 border-slate-700"
-                }`}
-              >
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {plan.name}
-                </h3>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-white">
-                    {plan.price}
-                  </span>
-                  <span className="text-slate-400 ml-2">{plan.period}</span>
+            </div>
+            <div className="video-wrap h-72 md:h-96">
+              <video ref={videoRef} id="lucresia-video" autoPlay muted loop playsInline poster="https://images.pexels.com/videos/8743919/pexels-photo-8743919.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500">
+                <source src="https://videos.pexels.com/video-files/8743919/8743919-hd_1920_1080_25fps.mp4" type="video/mp4" />
+                Seu navegador não suporta vídeo.
+              </video>
+              <div className="video-overlay">
+                <h3 className="text-2xl font-semibold">Tecnologia NeuroVendas</h3>
+                <p className="mt-2 text-sm max-w-md text-center">Veja a IA criando anúncios e e-books em tempo real.</p>
+                <div className="mt-4 flex gap-3">
+                  <button onClick={() => videoRef.current?.play()} className="px-4 py-2 rounded-full bg-white text-[var(--lavanda)] font-semibold hover:bg-gray-100 transition-colors">Assistir</button>
                 </div>
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, fidx) => (
-                    <li
-                      key={fidx}
-                      className="flex items-center gap-2 text-slate-300"
-                    >
-                      <CheckCircle className="w-4 h-4 text-amber-500" />
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  onClick={() => (window.location.href = getLoginUrl())}
-                  className={`w-full font-semibold py-6 rounded-lg ${
-                    plan.highlight
-                      ? "bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
-                      : "bg-slate-700 hover:bg-slate-600 text-white"
-                  }`}
-                >
-                  Começar Agora
-                </Button>
-              </Card>
-            ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+        
+        <section className="bg-[var(--bg)] py-12">
+          <div className="max-w-6xl mx-auto px-6">
+            <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Sua Transformação Digital</h3>
+            <div className="mt-8 grid md:grid-cols-2 gap-6">
+              <div className="bg-white p-6 rounded-xl card-shadow hover:-translate-y-1 transition-transform duration-300">
+                <h4 className="font-semibold mb-4 text-gray-500">Sem Elevare AI</h4>
+                <ul className="text-gray-700 space-y-3">
+                  <li className="flex items-start gap-2"><span className="text-red-400">✖</span> Horas gastas criando um único post</li>
+                  <li className="flex items-start gap-2"><span className="text-red-400">✖</span> Gasto alto com agências de marketing</li>
+                  <li className="flex items-start gap-2"><span className="text-red-400">✖</span> Posts bonitos que não vendem</li>
+                  <li className="flex items-start gap-2"><span className="text-red-400">✖</span> Instabilidade e falta de previsibilidade</li>
+                </ul>
+              </div>
+              <div className="bg-white p-6 rounded-xl border-2 border-[var(--lavanda-200)] hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden">
+                <div className="absolute top-0 right-0 bg-[var(--lavanda)] text-white text-xs px-3 py-1 rounded-bl-lg">Com NeuroVendas</div>
+                <h4 className="font-semibold text-[#6b2fa8] mb-4">Com Elevare AI</h4>
+                <ul className="text-gray-700 space-y-3">
+                  <li className="flex items-start gap-2"><span className="text-green-500">✔</span> Conteúdo pronto em minutos (não horas)</li>
+                  <li className="flex items-start gap-2"><span className="text-green-500">✔</span> Economia real de dinheiro</li>
+                  <li className="flex items-start gap-2"><span className="text-green-500">✔</span> Copywriting estratégico que converte</li>
+                  <li className="flex items-start gap-2"><span className="text-green-500">✔</span> Crescimento consistente do negócio</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-6">
-        <div className="max-w-4xl mx-auto text-center bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 rounded-2xl p-12">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Pronto para Transformar Sua Estética?
-          </h2>
-          <p className="text-lg text-slate-400 mb-8">
-            Comece seu teste grátis agora. Sem cartão de crédito necessário.
-          </p>
-          <Button
-            onClick={() => (window.location.href = getLoginUrl())}
-            className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold px-8 py-6 rounded-lg text-lg h-auto"
-          >
-            Começar Agora
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-        </div>
-      </section>
+        <section id="modulos" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24">
+          <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Módulos Principais</h3>
+          <p className="text-center mt-3 text-gray-600">Um ecossistema completo para dominar o digital.</p>
+          <div className="mt-10 grid md:grid-cols-3 gap-6">
+            
+            <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#A36BFF]">
+              <div className="text-3xl mb-4">🎯</div>
+              <h5 className="text-xl font-bold text-gray-800">Radar de Bio (Lead Magnet)</h5>
+              <p className="mt-2 text-sm text-gray-600">Diagnóstico automático do seu perfil. A IA analisa sua bio e entrega recomendações de melhoria instantâneas para atrair leads qualificados.</p>
+            </div>
 
-      {/* Footer */}
-      <footer className="py-8 px-6 border-t border-slate-800 text-center text-slate-400">
-        <p>&copy; 2025 Elevare NeuroVendas. Todos os direitos reservados.</p>
+            <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#F6C86A]">
+              <div className="text-3xl mb-4">🤖</div>
+              <h5 className="text-xl font-bold text-gray-800">Robô Produtor</h5>
+              <p className="mt-2 text-sm text-gray-600">Suite de automação completa. Gerador de Prompts (Midjourney/DALL-E), Criador de Anúncios (Ads) e Assistente IA para mentoria.</p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#A36BFF]">
+              <div className="text-3xl mb-4">📘</div>
+              <h5 className="text-xl font-bold text-gray-800">Fábrica de E-books</h5>
+              <p className="mt-2 text-sm text-gray-600">Crie iscas digitais profissionais. Conteúdo, capa, diagramas e até versão <strong>Audiobook</strong> (Text-to-Speech) gerados automaticamente.</p>
+            </div>
+
+             <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#F6C86A]">
+              <div className="text-3xl mb-4">✍️</div>
+              <h5 className="text-xl font-bold text-gray-800">Automação de Blogs</h5>
+              <p className="mt-2 text-sm text-gray-600">Domine o Google. Calendário editorial e agendador de posts para blog com SEO, criando autoridade enquanto você dorme.</p>
+            </div>
+
+            <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#A36BFF]">
+              <div className="text-3xl mb-4">🎓</div>
+              <h5 className="text-xl font-bold text-gray-800">Área de Membros</h5>
+              <p className="mt-2 text-sm text-gray-600">Educação continuada. Acesso à "Imersão IA NA PRÁTICA", replays de eventos e materiais de apoio exclusivos.</p>
+            </div>
+
+             <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#F6C86A]">
+              <div className="text-3xl mb-4">📊</div>
+              <h5 className="text-xl font-bold text-gray-800">Dashboard de Controle</h5>
+              <p className="mt-2 text-sm text-gray-600">Visão total do seu negócio. Resumo de uso, histórico de gerações e atalhos rápidos para todas as ferramentas.</p>
+            </div>
+
+          </div>
+        </section>
+
+        <section id="planos" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24 bg-gray-50 rounded-3xl">
+          <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Modelo de Monetização</h3>
+          <p className="text-center text-gray-600 mt-2">Planos escaláveis para cada fase do seu negócio.</p>
+          <div className="mt-8 grid md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-xl transition-all">
+              <h4 className="font-semibold">Starter (Free)</h4>
+              <p className="text-2xl font-extrabold mt-4">R$0</p>
+              <ul className="mt-4 text-sm text-gray-700 space-y-2">
+                <li>• Acesso ao <strong>Radar de Bio</strong></li>
+                <li>• 1 crédito por mês</li>
+                <li>• Acesso limitado ao Dashboard</li>
+              </ul>
+              <div className="mt-6">
+                <button onClick={() => navigate('/dashboard')} className="w-full px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors">Começar Grátis</button>
+              </div>
+            </div>
+            <div className="relative border-2 border-[var(--dourado)] rounded-xl p-6 hover:shadow-xl transition-all scale-105 z-10 bg-white">
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-semibold bg-[var(--dourado)] shadow-sm">MAIS POPULAR</div>
+              <h4 className="font-semibold text-orange-700">PRO</h4>
+              <p className="text-2xl font-extrabold mt-4">R$29/mês</p>
+              <ul className="mt-4 text-sm text-gray-700 space-y-2">
+                <li>• <strong>10 créditos por mês</strong></li>
+                <li>• Gerador de E-books</li>
+                <li>• Gerador de Prompts</li>
+                <li>• Gerador de Anúncios</li>
+                <li>• Suporte prioritário</li>
+              </ul>
+              <div className="mt-6">
+                 <button onClick={() => navigate('/pricing')} className="w-full px-6 py-3 rounded-full font-bold shadow-md hover:shadow-lg transition-all" style={{background: 'var(--lavanda)', color: 'white'}}>
+                    Assinar PRO
+                </button>
+              </div>
+            </div>
+            <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-xl transition-all">
+              <h4 className="font-semibold">PRO+</h4>
+              <p className="text-2xl font-extrabold mt-4">R$79/mês</p>
+              <ul className="mt-4 text-sm text-gray-700 space-y-2">
+                <li>• <strong>Créditos ilimitados</strong></li>
+                <li>• Tudo do plano PRO</li>
+                <li>• Automação de Blogs (SEO)</li>
+                <li>• Área de Membros Exclusiva</li>
+                <li>• Suporte VIP</li>
+              </ul>
+              <div className="mt-6">
+                <button onClick={() => navigate('/pricing')} className="w-full px-6 py-3 rounded-full btn-ghost hover:bg-purple-50 transition-colors">
+                    Virar PRO+
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-12 bg-[var(--bg)]">
+          <div className="max-w-6xl mx-auto px-6">
+            <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Resultados Reais</h3>
+            <div className="mt-8 grid md:grid-cols-3 gap-6">
+              <blockquote className="bg-white p-6 rounded-xl card-shadow">
+                <p className="italic">"O Radar de Bio mudou meu perfil em um dia. Comecei a receber leads qualificados na mesma semana."</p>
+                <footer className="mt-4 text-sm text-gray-600">— Camila, São Paulo</footer>
+              </blockquote>
+              <blockquote className="bg-white p-6 rounded-xl card-shadow">
+                <p className="italic">"Com a Automação de Blogs, virei autoridade na minha cidade sem escrever uma linha sequer."</p>
+                <footer className="mt-4 text-sm text-gray-600">— Ana, BH</footer>
+              </blockquote>
+              <blockquote className="bg-white p-6 rounded-xl card-shadow">
+                <p className="italic">"Os e-books gerados pela IA são incríveis. Uso como isca digital e minha lista de clientes explodiu."</p>
+                <footer className="mt-4 text-sm text-gray-600">— Marina, RJ</footer>
+              </blockquote>
+            </div>
+          </div>
+        </section>
+
+        <section id="faq" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24">
+          <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Perguntas Frequentes</h3>
+          <div className="mt-8 space-y-4">
+            <details className="bg-white p-4 rounded-lg card-shadow group">
+                <summary className="font-semibold cursor-pointer list-none flex justify-between items-center">
+                    O que é a Elevare AI NeuroVendas?
+                    <span className="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <p className="mt-2 text-gray-600">Um ecossistema completo que usa IA para automatizar a criação de conteúdo, anúncios, e-books e blogs para esteticistas.</p>
+            </details>
+            <details className="bg-white p-4 rounded-lg card-shadow group">
+                <summary className="font-semibold cursor-pointer list-none flex justify-between items-center">
+                    Como funciona o Radar de Bio?
+                    <span className="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <p className="mt-2 text-gray-600">Você insere seu @ do Instagram e nossa IA analisa pontos de melhoria para transformar visitantes em seguidores e clientes.</p>
+            </details>
+            <details className="bg-white p-4 rounded-lg card-shadow group">
+                <summary className="font-semibold cursor-pointer list-none flex justify-between items-center">
+                    A IA cria imagens e textos?
+                    <span className="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <p className="mt-2 text-gray-600">Sim! O Robô Produtor gera textos persuasivos (copy) e sugestões visuais ou imagens para seus posts e anúncios.</p>
+            </details>
+             <details className="bg-white p-4 rounded-lg card-shadow group">
+                <summary className="font-semibold cursor-pointer list-none flex justify-between items-center">
+                    O que está incluso na Área de Membros?
+                    <span className="transition-transform group-open:rotate-180">▼</span>
+                </summary>
+                <p className="mt-2 text-gray-600">Conteúdo educacional exclusivo, imersões "IA NA PRÁTICA" e replays de eventos para você dominar as ferramentas.</p>
+            </details>
+          </div>
+        </section>
+
+        <section id="mentora" className="py-16 bg-white border-t border-gray-100 scroll-mt-24">
+            <div className="max-w-6xl mx-auto px-6">
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-[var(--lavanda)] rounded-2xl transform rotate-3 opacity-20"></div>
+                        <img 
+                            src="/carine-marques.jpg" 
+                            alt="Carine Marques" 
+                            className="relative rounded-2xl shadow-xl w-full object-cover h-[500px]"
+                        />
+                    </div>
+
+                    <div>
+                        <span className="text-[var(--lavanda)] font-bold tracking-wider uppercase text-sm">Quem está por trás</span>
+                        <h3 className="text-3xl font-extrabold text-[#6b2fa8] mt-2">Carine Marques</h3>
+                        <p className="text-lg text-gray-500 font-medium">Mentora Estética Lucrativa</p>
+
+                        <blockquote className="mt-6 border-l-4 border-[var(--dourado)] pl-4 italic text-gray-600 bg-gray-50 p-4 rounded-r-lg">
+                            "Não sou administradora por formação. Sou esteticista por paixão. Mas precisei, sem aviso, me tornar líder, gestora e estrategista — mesmo sem estar preparada. Entre erros e acertos, foi difícil, desafiador, e eu sei o quanto pode ser solitário. Hoje, transformo essa vivência em caminho: para te mostrar, com clareza, o que ninguém nunca te ensinou."
+                        </blockquote>
+
+                        <p className="mt-6 text-gray-600 leading-relaxed">
+                            Carine Marques é mentora e criadora da Plataforma Elevare, dedicada a transformar esteticistas em empreendedoras de sucesso através de estratégias práticas, ferramentas inteligentes e mentoria personalizada.
+                        </p>
+                        <p className="mt-4 text-gray-600 leading-relaxed">
+                            Com anos de experiência no mercado de estética, Carine desenvolveu métodos exclusivos que combinam técnica, estratégia e inteligência emocional para ajudar profissionais a se destacarem em um mercado cada vez mais competitivo.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section className="py-12 bg-white border-t border-gray-100">
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <h3 className="text-2xl font-semibold text-[#6b2fa8]">Sua estética merece estratégia — e você merece tempo.</h3>
+            <p className="mt-2 text-gray-600">Comece agora. Deixe a Elevare AI cuidar da parte difícil enquanto você cuida do que ama.</p>
+            <div className="mt-6">
+              <button onClick={() => navigate('/dashboard')} className="px-6 py-3 rounded-full btn-primary hover:shadow-lg transition-all">Ativar minha conta grátis agora</button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="mt-12 bg-[#f3f5f8] py-8 border-t border-gray-200">
+        <div className="max-w-6xl mx-auto px-6 text-center text-sm text-gray-500">
+          © 2025 Elevare Global — Transformando estética em inteligência e lucro. • Suporte: carinefisio@hotmail.com
+        </div>
       </footer>
-    </div>
+    </>
   );
 }
