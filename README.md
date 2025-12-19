@@ -1,8 +1,51 @@
-# 🚀 Elevare AI NeuroVendas
+# Elevare AI – Lead & NeuroSales Core
 
-**Slogan:** "Venda como ciência, não como esperança."
+Este repositório representa o **projeto mãe** da Elevare.
+Aqui estão definidos os **contratos de domínio**, a **arquitetura base** e a **fundação do sistema de gestão de leads e vendas assistidas por IA**.
 
-**Descrição:** O pilar que une neurovendas, comportamento e engenharia de conversão.
+## Status do Projeto
+
+Este projeto segue uma estratégia de **entrega incremental consciente**.
+Nem todas as estruturas presentes estão ativas em produção no momento.
+
+Algumas tabelas, schemas e módulos representam **contratos de domínio já definidos**, cuja ativação operacional ocorrerá conforme o roadmap planejado.
+
+**Isso é intencional.**
+
+## Objetivo
+
+Criar uma base sólida, escalável e auditável para:
+- Gestão de leads com scoring automático
+- Evolução de funil de vendas
+- Automação de vendas com IA
+- Integração futura com agentes inteligentes
+
+## Stack Técnica
+
+- **Node.js / TypeScript** - Runtime e linguagem
+- **tRPC** - API type-safe
+- **Drizzle ORM** - Database toolkit
+- **MySQL** - Database
+- **React 19** - Frontend
+- **pnpm** - Package manager
+
+## Princípios Arquiteturais
+
+1. **Clareza de domínio acima de velocidade**
+2. **Escalabilidade sem refatorações traumáticas**
+3. **Código que promete pouco e entrega sempre**
+4. **Contratos de dados definidos antes da implementação**
+
+## Documentação
+
+- **[ROADMAP.md](./ROADMAP.md)** - Fases de desenvolvimento e status atual
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Decisões arquiteturais e padrões
+- **[DEPLOY.md](./DEPLOY.md)** - Guia de implantação em produção
+- **[CHANGELOG_AUDITORIA.md](./CHANGELOG_AUDITORIA.md)** - Histórico de melhorias
+
+## Manifesto
+
+**Venda como ciência, não como esperança.**
 
 Elevare Inteligência de Vendas é a camada lógica do faturamento: leitura de perfil, jornada emocional, gatilhos de decisão, ancoragem de preço, oferta irresistível e técnicas baseadas em neurociência aplicada ao consumo estético.
 
@@ -10,39 +53,57 @@ Não é manipulação — é comunicação profissional.
 
 ---
 
-## 📋 Índice
+## Observação Importante
 
-- [Visão Geral](#visão-geral)
-- [Funcionalidades](#funcionalidades)
-- [Tecnologias](#tecnologias)
-- [Instalação](#instalação)
-- [Configuração](#configuração)
-- [Uso](#uso)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [API Reference](#api-reference)
-- [Deploy](#deploy)
-- [Contribuição](#contribuição)
+Este repositório não busca "parecer pronto".
+Busca estar **correto**.
+
+A presença de schemas de banco de dados sem implementação completa não é descuido — é design intencional.
+Contratos de domínio são estabelecidos primeiro, implementação segue conforme roadmap.
 
 ---
 
-## 🎯 Visão Geral
+## 📦 Instalação
 
-Elevare AI NeuroVendas é uma plataforma SaaS completa para profissionais de estética que desejam melhorar suas vendas através de técnicas de neurovendas e inteligência artificial.
+### Pré-requisitos
+- Node.js 20+
+- pnpm 10+
+- MySQL 8+
 
-### Manifesto
+### Passos
 
-- **Vender é traduzir valor, não baixar preço.**
-- **É conduzir, não pressionar.**
-- **É mostrar o caminho da transformação que a cliente já deseja.**
+1. **Clone o repositório**
+```bash
+git clone <repository-url>
+cd elevare_ai_neurovendas
+```
 
-### Pitch
+2. **Instale as dependências**
+```bash
+pnpm install
+```
 
-A cliente não compra o procedimento — compra a promessa.
-Elevare Inteligência de Vendas ensina você a entregar exatamente essa promessa.
+3. **Configure as variáveis de ambiente**
+```bash
+cp .env.example .env
+# Edite o arquivo .env com suas credenciais
+```
+
+4. **Configure o banco de dados**
+```bash
+pnpm db:push
+```
+
+5. **Inicie o servidor de desenvolvimento**
+```bash
+pnpm dev
+```
+
+A aplicação estará disponível em `http://localhost:5000`
 
 ---
 
-## ✨ Funcionalidades
+## ✨ Funcionalidades Ativas
 
 ### 1. Radar de Bio (Lead Magnet) ✅
 - Análise de bio do Instagram com IA
