@@ -101,6 +101,15 @@ jspm_packages/
 tmp/
 temp/
 
+# Lockfiles temporários
+pnpm-lock.yaml.bak
+.pnpm-debug.log
+
+# Arquivos temporários de scripts
+*.tmp
+.railway-*
+.jwt-secret.tmp
+
 # Database
 *.db
 *.sqlite

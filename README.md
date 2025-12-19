@@ -10,6 +10,29 @@ Não é manipulação — é comunicação profissional.
 
 ---
 
+## 🚀 Quick Start (5 minutos)
+
+```bash
+# 1. Clone e entre na pasta
+git clone https://github.com/Carine01/Elevador.Lucr-sia.git
+cd Elevador.Lucr-sia
+
+# 2. Rode o script de setup
+chmod +x scripts/quick-setup.sh
+./scripts/quick-setup.sh
+
+# 3. Configure secrets (veja docs/SECRETS_GUIDE.md)
+
+# 4. Inicie o servidor
+pnpm dev
+```
+
+Acesse: http://localhost:5000
+
+📖 **Guia completo de configuração:** [docs/SECRETS_GUIDE.md](docs/SECRETS_GUIDE.md)
+
+---
+
 ## 📋 Índice
 
 - [Visão Geral](#visão-geral)
