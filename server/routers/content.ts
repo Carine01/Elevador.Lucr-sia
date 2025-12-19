@@ -8,6 +8,7 @@ import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
+import { recordMetric, recordCreditUsage } from "../_core/metricsService";
 
 export const contentRouter = router({
   // Gerar e-book
@@ -113,6 +114,10 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           topic: input.topic 
         });
 
+        // Registrar métricas
+        await recordMetric(ctx.user.id, 'ebooksGenerated');
+        await recordCreditUsage(ctx.user.id, 'ebook-generation', 5);
+
         return {
           id: saved.id,
           ...ebook,
@@ -175,6 +180,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           .where(eq(contentGeneration.id, input.ebookId));
 
         logger.info('Cover generated for ebook', { ebookId: input.ebookId });
+
+        // Registrar métricas
+        await recordCreditUsage(ctx.user.id, 'cover-generation', 2);
 
         return {
           success: true,
@@ -282,6 +290,10 @@ Forneça no formato JSON:
 
         logger.info('Prompt generated', { userId: ctx.user.id });
 
+        // Registrar métricas
+        await recordMetric(ctx.user.id, 'promptsGenerated');
+        await recordCreditUsage(ctx.user.id, 'prompt-generation', 1);
+
         return result;
       } catch (error) {
         if (error instanceof AIServiceError) {
@@ -385,6 +397,10 @@ Use técnicas de neurovendas e gatilhos mentais.`;
         });
 
         logger.info('Ad generated', { userId: ctx.user.id, product: input.product });
+
+        // Registrar métricas
+        await recordMetric(ctx.user.id, 'adsGenerated');
+        await recordCreditUsage(ctx.user.id, 'ad-generation', 2);
 
         return ad;
       } catch (error) {

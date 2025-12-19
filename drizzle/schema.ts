@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, index } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, index, date, json } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -114,3 +114,35 @@ export const subscription = mysqlTable("subscription", {
 
 export type Subscription = typeof subscription.$inferSelect;
 export type InsertSubscription = typeof subscription.$inferInsert;
+
+/**
+ * Métricas diárias de uso
+ */
+export const dailyMetrics = mysqlTable("dailyMetrics", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  date: date("date").notNull(),
+  
+  // Uso de créditos
+  creditsUsed: int("creditsUsed").default(0),
+  creditsByFeature: json("creditsByFeature").$type<Record<string, number>>(),
+  
+  // Eventos
+  bioRadarAnalyses: int("bioRadarAnalyses").default(0),
+  leadsCaptured: int("leadsCaptured").default(0),
+  ebooksGenerated: int("ebooksGenerated").default(0),
+  promptsGenerated: int("promptsGenerated").default(0),
+  adsGenerated: int("adsGenerated").default(0),
+  
+  // Conversão
+  checkoutsStarted: int("checkoutsStarted").default(0),
+  checkoutsCompleted: int("checkoutsCompleted").default(0),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdDateIdx: index("metrics_user_date_idx").on(table.userId, table.date),
+  dateIdx: index("metrics_date_idx").on(table.date),
+}));
+
+export type DailyMetrics = typeof dailyMetrics.$inferSelect;
+export type InsertDailyMetrics = typeof dailyMetrics.$inferInsert;

@@ -5,6 +5,7 @@ import { subscription as subscriptionTable, users } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import Stripe from "stripe";
 import { env } from "../_core/env";
+import { recordMetric } from "../_core/metricsService";
 
 // Inicializar Stripe
 const stripe = new Stripe(env.STRIPE_SECRET_KEY || "", {
@@ -155,6 +156,9 @@ export const subscriptionRouter = router({
           plan: input.plan,
         },
       });
+
+      // Registrar métrica de checkout iniciado
+      await recordMetric(ctx.user.id, 'checkoutsStarted');
 
       return {
         sessionId: session.id,

@@ -7,6 +7,7 @@ import { llm } from "../_core/llm";
 import { logger } from "../_core/logger";
 import { AIServiceError, RateLimitError, AuthorizationError } from "../_core/errors";
 import { safeParse, assertOwnership } from "../../shared/_core/utils";
+import { recordMetric, recordCreditUsage } from "../_core/metricsService";
 
 // BUG-004 e BUG-006: Rate limiting por IP para análises gratuitas
 const ipRateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -126,6 +127,12 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
           userId 
         });
 
+        // Registrar métrica se usuário autenticado
+        if (userId) {
+          await recordMetric(userId, 'bioRadarAnalyses');
+          await recordCreditUsage(userId, 'bio-radar', 1);
+        }
+
         return {
           diagnosisId: savedDiagnosis.id,
           ...analysis,
@@ -172,6 +179,17 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
         .where(eq(bioRadarDiagnosis.id, input.diagnosisId));
 
       logger.info('Lead captured', { diagnosisId: input.diagnosisId });
+
+      // Registrar métrica se houver userId associado ao diagnóstico
+      const [diagnosis] = await db
+        .select()
+        .from(bioRadarDiagnosis)
+        .where(eq(bioRadarDiagnosis.id, input.diagnosisId))
+        .limit(1);
+      
+      if (diagnosis?.userId) {
+        await recordMetric(diagnosis.userId, 'leadsCaptured');
+      }
 
       return {
         success: true,
