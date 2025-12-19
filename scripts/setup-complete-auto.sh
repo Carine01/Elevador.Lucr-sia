@@ -59,6 +59,17 @@ log_section "1. VERIFICAÇÃO DE AMBIENTE"
 if [ ! -f "package.json" ]; then
     error_exit "package.json não encontrado!" "Execute este script na raiz do projeto (onde está o package.json)"
 fi
+
+# Verificar se é o projeto correto (elevare)
+if ! grep -q '"name": "elevare_ai_neurovendas"' package.json; then
+    log_warning "Atenção: Este pode não ser o projeto Elevare AI NeuroVendas"
+    read -p "$(echo -e ${YELLOW}Continuar mesmo assim? [y/N]: ${NC})" CONTINUE
+    CONTINUE=${CONTINUE:-n}
+    if [[ ! "$CONTINUE" =~ ^[Yy]$ ]]; then
+        log_info "Operação cancelada pelo usuário"
+        exit 0
+    fi
+fi
 log_success "package.json encontrado - pasta correta"
 
 # Verificar Node.js >= 18
@@ -142,17 +153,29 @@ SETUP_RAILWAY=${SETUP_RAILWAY:-n}
 if [[ "$SETUP_RAILWAY" =~ ^[Yy]$ ]]; then
     # Verificar/Instalar Railway CLI
     if ! command -v railway &> /dev/null; then
-        log_info "Railway CLI não encontrado - instalando..."
+        log_warning "Railway CLI não encontrado"
+        log_warning "IMPORTANTE: A instalação automática baixará software da internet"
+        read -p "$(echo -e ${YELLOW}Deseja instalar Railway CLI automaticamente? [y/N]: ${NC})" INSTALL_RAILWAY
+        INSTALL_RAILWAY=${INSTALL_RAILWAY:-n}
         
-        # Detectar sistema operacional
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS
-            brew install railway || error_exit "Falha ao instalar Railway CLI" "Instale manualmente: https://docs.railway.app/develop/cli"
-        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux
-            curl -fsSL https://railway.app/install.sh | sh || error_exit "Falha ao instalar Railway CLI" "Instale manualmente: https://docs.railway.app/develop/cli"
+        if [[ "$INSTALL_RAILWAY" =~ ^[Yy]$ ]]; then
+            log_info "Instalando Railway CLI..."
+            
+            # Detectar sistema operacional
+            if [[ "$OSTYPE" == "darwin"* ]]; then
+                # macOS - usa brew (mais seguro)
+                brew install railway || error_exit "Falha ao instalar Railway CLI" "Instale manualmente: https://docs.railway.app/develop/cli"
+            elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+                # Linux - avisa sobre download direto
+                log_warning "Baixando script de instalação de https://railway.app/install.sh"
+                curl -fsSL https://railway.app/install.sh | sh || error_exit "Falha ao instalar Railway CLI" "Instale manualmente: https://docs.railway.app/develop/cli"
+            else
+                error_exit "Sistema operacional não suportado para instalação automática do Railway CLI" "Instale manualmente: https://docs.railway.app/develop/cli"
+            fi
         else
-            error_exit "Sistema operacional não suportado para instalação automática do Railway CLI" "Instale manualmente: https://docs.railway.app/develop/cli"
+            log_info "Instale Railway CLI manualmente: https://docs.railway.app/develop/cli"
+            log_info "Depois execute este script novamente"
+            exit 0
         fi
     fi
     log_success "Railway CLI instalado"
@@ -227,8 +250,8 @@ if [[ "$SETUP_GITHUB_SECRETS" =~ ^[Yy]$ ]]; then
             log_warning "DATABASE_URL não disponível - configure manualmente"
         fi
         
-        # Gerar e configurar JWT_SECRET
-        log_info "Gerando JWT_SECRET (64 caracteres)..."
+        # Gerar e configurar JWT_SECRET (base64 48 bytes = ~64 caracteres)
+        log_info "Gerando JWT_SECRET..."
         JWT_SECRET=$(openssl rand -base64 48 | tr -d '\n')
         echo "$JWT_SECRET" | gh secret set JWT_SECRET || log_warning "Falha ao configurar JWT_SECRET"
         log_success "JWT_SECRET gerado e configurado"

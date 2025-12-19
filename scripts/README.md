@@ -86,6 +86,17 @@ Script de setup automático completo que automatiza todo o processo de configura
    - Configurar GitHub secrets? [y/N]
    - Fazer deploy na Vercel? [y/N]
 
+#### 🔒 Segurança
+
+O script implementa várias medidas de segurança:
+- ✅ Verifica o nome do projeto antes de executar
+- ✅ Pede confirmação antes de instalar CLIs externos
+- ✅ Gera JWT_SECRET com 64 caracteres usando openssl
+- ✅ Avisa sobre downloads da internet
+- ✅ Usa `set -e` para parar em erros críticos
+
+⚠️ **Atenção**: O script pode baixar e instalar ferramentas CLI (Railway, Vercel) da internet. Sempre revise o código antes de executar.
+
 #### 🔄 Idempotência
 
 O script é **idempotente** e pode ser executado múltiplas vezes com segurança:
