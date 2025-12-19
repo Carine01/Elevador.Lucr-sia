@@ -7,6 +7,7 @@ import { llm } from "../_core/llm";
 import { logger } from "../_core/logger";
 import { AIServiceError, RateLimitError, AuthorizationError } from "../_core/errors";
 import { safeParse, assertOwnership } from "../../shared/_core/utils";
+import { trackEvent, ANALYTICS_EVENTS } from "../../shared/analytics";
 
 // BUG-004 e BUG-006: Rate limiting por IP para análises gratuitas
 const ipRateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -126,6 +127,12 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
           userId 
         });
 
+        // Rastrear análise
+        trackEvent(ANALYTICS_EVENTS.BIO_RADAR_ANALYZED, {
+          instagramHandle: input.instagramHandle,
+          score: analysis.score,
+        }, userId);
+
         return {
           diagnosisId: savedDiagnosis.id,
           ...analysis,
@@ -172,6 +179,12 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
         .where(eq(bioRadarDiagnosis.id, input.diagnosisId));
 
       logger.info('Lead captured', { diagnosisId: input.diagnosisId });
+
+      // Rastrear captura de lead
+      trackEvent(ANALYTICS_EVENTS.BIO_RADAR_LEAD_CAPTURED, {
+        hasEmail: !!input.email,
+        hasWhatsapp: !!input.whatsapp,
+      });
 
       return {
         success: true,

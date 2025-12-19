@@ -1,13 +1,17 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { db } from "../db";
-import { contentGeneration } from "../../drizzle/schema";
+import { contentGeneration, users } from "../../drizzle/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { llm } from "../_core/llm";
 import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
+import { generateEbookPDF } from "../_core/pdfGenerator";
+import { checkAndConsumeCredit } from "../_core/creditsMiddleware";
+import { TRPCError } from "@trpc/server";
+import { trackEvent, ANALYTICS_EVENTS } from "../../shared/analytics";
 
 export const contentRouter = router({
   // Gerar e-book
@@ -113,6 +117,12 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           topic: input.topic 
         });
 
+        // Rastrear geração de e-book
+        trackEvent(ANALYTICS_EVENTS.EBOOK_GENERATED, {
+          topic: input.topic,
+          chapters: input.chapters,
+        }, ctx.user.id);
+
         return {
           id: saved.id,
           ...ebook,
@@ -175,6 +185,11 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           .where(eq(contentGeneration.id, input.ebookId));
 
         logger.info('Cover generated for ebook', { ebookId: input.ebookId });
+
+        // Rastrear geração de capa
+        trackEvent(ANALYTICS_EVENTS.COVER_GENERATED, {
+          ebookId: input.ebookId,
+        }, ctx.user.id);
 
         return {
           success: true,
@@ -282,6 +297,12 @@ Forneça no formato JSON:
 
         logger.info('Prompt generated', { userId: ctx.user.id });
 
+        // Rastrear geração de prompt
+        trackEvent(ANALYTICS_EVENTS.PROMPT_GENERATED, {
+          platform: input.platform,
+          style: input.style,
+        }, ctx.user.id);
+
         return result;
       } catch (error) {
         if (error instanceof AIServiceError) {
@@ -386,6 +407,13 @@ Use técnicas de neurovendas e gatilhos mentais.`;
 
         logger.info('Ad generated', { userId: ctx.user.id, product: input.product });
 
+        // Rastrear geração de anúncio
+        trackEvent(ANALYTICS_EVENTS.AD_GENERATED, {
+          product: input.product,
+          platform: input.platform,
+          objective: input.objective,
+        }, ctx.user.id);
+
         return ad;
       } catch (error) {
         if (error instanceof AIServiceError) {
@@ -484,6 +512,72 @@ Use técnicas de neurovendas e gatilhos mentais.`;
       return {
         success: true,
         message: "Conteúdo deletado com sucesso",
+      };
+    }),
+
+  // Exportar e-book para PDF
+  exportEbookPdf: protectedProcedure
+    .input(
+      z.object({
+        ebookId: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verificar créditos (mesmo custo que gerar e-book)
+      const creditCheck = await checkAndConsumeCredit(ctx.user.id, 'ebook-generation');
+      if (!creditCheck.success) {
+        throw new TRPCError({
+          code: 'PAYMENT_REQUIRED',
+          message: creditCheck.error,
+        });
+      }
+
+      // Buscar e-book
+      const [ebook] = await db
+        .select()
+        .from(contentGeneration)
+        .where(eq(contentGeneration.id, input.ebookId))
+        .limit(1);
+
+      if (!ebook || ebook.userId !== ctx.user.id) {
+        throw new TRPCError({
+          code: 'NOT_FOUND',
+          message: 'E-book não encontrado',
+        });
+      }
+
+      // Buscar dados do usuário
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, ctx.user.id))
+        .limit(1);
+
+      // Parse do conteúdo do e-book
+      const ebookData = safeParse(ebook.content) || {};
+      const ebookMetadata = safeParse(ebook.metadata) || {};
+
+      // Gerar PDF
+      const pdfBuffer = await generateEbookPDF({
+        title: ebook.title || ebookData.title || 'E-book',
+        content: ebookData.chapters?.map((ch: any) => `# ${ch.title}\n\n${ch.content}`).join('\n\n') || ebook.content || '',
+        coverUrl: ebookMetadata.coverUrl || undefined,
+        author: user?.name || 'Elevare AI',
+      });
+
+      logger.info('PDF exported', { ebookId: input.ebookId, userId: ctx.user.id });
+
+      // Rastrear exportação de PDF
+      trackEvent(ANALYTICS_EVENTS.EBOOK_PDF_EXPORTED, {
+        ebookId: input.ebookId,
+        title: ebook.title,
+      }, ctx.user.id);
+
+      // Retornar como base64 para download no cliente
+      return {
+        filename: `${ebook.title || 'ebook'}.pdf`,
+        data: pdfBuffer.toString('base64'),
+        mimeType: 'application/pdf',
       };
     }),
 });

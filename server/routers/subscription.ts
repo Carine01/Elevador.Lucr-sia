@@ -5,6 +5,7 @@ import { subscription as subscriptionTable, users } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import Stripe from "stripe";
 import { env } from "../_core/env";
+import { trackEvent, ANALYTICS_EVENTS } from "../../shared/analytics";
 
 // Inicializar Stripe
 const stripe = new Stripe(env.STRIPE_SECRET_KEY || "", {
@@ -156,6 +157,11 @@ export const subscriptionRouter = router({
         },
       });
 
+      // Rastrear início do checkout
+      trackEvent(ANALYTICS_EVENTS.CHECKOUT_STARTED, {
+        plan: input.plan,
+      }, ctx.user.id);
+
       return {
         sessionId: session.id,
         url: session.url,
@@ -196,6 +202,11 @@ export const subscriptionRouter = router({
         cancelledAt: new Date(),
       })
       .where(eq(subscriptionTable.id, userSubscription.id));
+
+    // Rastrear cancelamento
+    trackEvent(ANALYTICS_EVENTS.SUBSCRIPTION_CANCELLED, {
+      plan: userSubscription.plan,
+    }, ctx.user.id);
 
     return {
       success: true,

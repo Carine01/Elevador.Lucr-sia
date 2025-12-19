@@ -62,7 +62,7 @@ Elevare Inteligência de Vendas ensina você a entregar exatamente essa promessa
 - Criação automática de e-books com IA
 - Customização de tom e público-alvo
 - Geração de capas com IA
-- Export para PDF (em desenvolvimento)
+- **Export para PDF:** Exportação profissional com formatação personalizada
 - Biblioteca de e-books
 
 ### 4. Robô Produtor ✅
@@ -98,11 +98,31 @@ Elevare Inteligência de Vendas ensina você a entregar exatamente essa promessa
 - **MySQL** - Database
 - **Stripe** - Pagamentos
 - **OpenAI/Gemini** - IA
+- **Puppeteer** - PDF Generation
+- **Marked** - Markdown to HTML
 
 ### DevOps
 - **Vite** - Build tool
 - **pnpm** - Package manager
 - **ESBuild** - Bundler
+
+---
+
+## 📄 Export PDF
+
+E-books podem ser exportados para PDF com:
+- Formatação profissional
+- Capa personalizada
+- Numeração de páginas
+- Quebras de página automáticas
+
+## 📊 Analytics
+
+O sistema rastreia eventos importantes:
+- Conversões de checkout
+- Uso de funcionalidades
+- Captura de leads
+- Consumo de créditos
 
 ---
 
