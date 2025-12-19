@@ -3,6 +3,9 @@ import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
+import { sendWelcomeEmail } from "./emailService";
+import { db as drizzleDb } from "../db";
+import { userOnboarding } from "../../drizzle/schema";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -28,13 +31,30 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
-      await db.upsertUser({
+      const { isNewUser } = await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
         email: userInfo.email ?? null,
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
       });
+
+      // Se for novo usuário, enviar email de boas-vindas e criar registro de onboarding
+      if (isNewUser) {
+        const user = await db.getUserByOpenId(userInfo.openId);
+        
+        if (user) {
+          // Enviar email de boas-vindas
+          if (user.email) {
+            await sendWelcomeEmail(user.email, user.name || 'Usuário');
+          }
+          
+          // Criar registro de onboarding
+          await drizzleDb.insert(userOnboarding).values({
+            userId: user.id,
+          });
+        }
+      }
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",

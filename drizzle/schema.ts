@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, index } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, index, boolean } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -114,3 +114,27 @@ export const subscription = mysqlTable("subscription", {
 
 export type Subscription = typeof subscription.$inferSelect;
 export type InsertSubscription = typeof subscription.$inferInsert;
+
+/**
+ * Progresso do onboarding do usuário
+ */
+export const userOnboarding = mysqlTable("userOnboarding", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  // Etapas completadas
+  welcomeTourCompleted: boolean("welcomeTourCompleted").default(false),
+  bioRadarTutorialCompleted: boolean("bioRadarTutorialCompleted").default(false),
+  firstEbookGenerated: boolean("firstEbookGenerated").default(false),
+  firstPromptGenerated: boolean("firstPromptGenerated").default(false),
+  profileCompleted: boolean("profileCompleted").default(false),
+  
+  // Timestamps
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+}, (table) => ({
+  userIdIdx: index("onboarding_user_id_idx").on(table.userId),
+}));
+
+export type UserOnboarding = typeof userOnboarding.$inferSelect;
+export type InsertUserOnboarding = typeof userOnboarding.$inferInsert;

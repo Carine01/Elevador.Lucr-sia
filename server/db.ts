@@ -22,7 +22,7 @@ export async function getDb() {
 // Synchronous db instance for routers (will throw if DB not available)
 export const db = drizzle(process.env.DATABASE_URL || "");
 
-export async function upsertUser(user: InsertUser): Promise<void> {
+export async function upsertUser(user: InsertUser): Promise<{ isNewUser: boolean }> {
   if (!user.openId) {
     throw new Error("User openId is required for upsert");
   }
@@ -30,10 +30,14 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   const db = await getDb();
   if (!db) {
     logger.warn("Cannot upsert user: database not available");
-    return;
+    return { isNewUser: false };
   }
 
   try {
+    // Check if user exists first
+    const existingUser = await getUserByOpenId(user.openId);
+    const isNewUser = !existingUser;
+
     const values: InsertUser = {
       openId: user.openId,
     };
@@ -75,6 +79,8 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     await db.insert(users).values(values).onDuplicateKeyUpdate({
       set: updateSet,
     });
+
+    return { isNewUser };
   } catch (error) {
     logger.error("Failed to upsert user", error);
     throw error;

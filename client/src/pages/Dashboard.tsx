@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
+import { WelcomeTour } from "@/components/onboarding/WelcomeTour";
+import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -22,6 +24,8 @@ export default function Dashboard() {
   const { data: contentStats } = trpc.content.listGenerated.useQuery({
     limit: 100,
   });
+  const { data: progress } = trpc.onboarding.getProgress.useQuery();
+  const showWelcomeTour = progress && !progress.welcomeTourCompleted;
 
   const features = [
     {
@@ -95,6 +99,8 @@ export default function Dashboard() {
 
   return (
     <ElevareDashboardLayout>
+      {showWelcomeTour && <WelcomeTour />}
+      
       {/* Welcome Banner */}
       <Card className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/30 p-6 mb-8">
         <div className="flex items-center justify-between">
@@ -136,12 +142,14 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* Features Grid */}
-      <div className="mb-8">
-        <h3 className="text-xl font-bold text-white mb-6">
-          Funcionalidades Principais
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Main Content Grid */}
+      <div className="grid gap-6 md:grid-cols-3 mb-8">
+        <div className="md:col-span-2">
+          {/* Features Grid */}
+          <h3 className="text-xl font-bold text-white mb-6">
+            Funcionalidades Principais
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
@@ -175,6 +183,12 @@ export default function Dashboard() {
               </Card>
             );
           })}
+          </div>
+        </div>
+        
+        {/* Onboarding Checklist Sidebar */}
+        <div>
+          <OnboardingChecklist />
         </div>
       </div>
 
