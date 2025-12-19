@@ -16,6 +16,7 @@ import { getDb } from "../db";
 import { subscription as subscriptionTable } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { PLANS } from "../routers/subscription";
+import { recordMetric } from "./metricsService";
 
 // Inicializar Stripe
 const stripe = new Stripe(ENV.STRIPE_SECRET_KEY || "", {
@@ -79,6 +80,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       .where(eq(subscriptionTable.userId, userId));
 
     logger.info('Checkout completed successfully', { userId, plan });
+    
+    // Registrar métrica de checkout completado
+    await recordMetric(userId, 'checkoutsCompleted');
   } catch (error) {
     logger.error('Error handling checkout completed', error);
     throw error;
