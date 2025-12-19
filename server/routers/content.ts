@@ -8,6 +8,7 @@ import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
+import { recordMetric } from "../_core/metricsService";
 
 export const contentRouter = router({
   // Gerar e-book
@@ -112,6 +113,10 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           userId: ctx.user.id,
           topic: input.topic 
         });
+
+        // Registrar métrica
+        await recordMetric(ctx.user.id, 'ebooksGenerated');
+        await recordMetric(ctx.user.id, 'creditsConsumed', 5);
 
         return {
           id: saved.id,
@@ -282,6 +287,10 @@ Forneça no formato JSON:
 
         logger.info('Prompt generated', { userId: ctx.user.id });
 
+        // Registrar métrica
+        await recordMetric(ctx.user.id, 'promptsGenerated');
+        await recordMetric(ctx.user.id, 'creditsConsumed', 1);
+
         return result;
       } catch (error) {
         if (error instanceof AIServiceError) {
@@ -385,6 +394,10 @@ Use técnicas de neurovendas e gatilhos mentais.`;
         });
 
         logger.info('Ad generated', { userId: ctx.user.id, product: input.product });
+
+        // Registrar métrica
+        await recordMetric(ctx.user.id, 'adsGenerated');
+        await recordMetric(ctx.user.id, 'creditsConsumed', 2);
 
         return ad;
       } catch (error) {

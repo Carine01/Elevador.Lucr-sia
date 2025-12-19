@@ -7,6 +7,7 @@ import { llm } from "../_core/llm";
 import { logger } from "../_core/logger";
 import { AIServiceError, RateLimitError, AuthorizationError } from "../_core/errors";
 import { safeParse, assertOwnership } from "../../shared/_core/utils";
+import { recordMetric } from "../_core/metricsService";
 
 // BUG-004 e BUG-006: Rate limiting por IP para análises gratuitas
 const ipRateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -126,6 +127,12 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
           userId 
         });
 
+        // Registrar métrica
+        if (userId) {
+          await recordMetric(userId, 'bioRadarAnalyses');
+          await recordMetric(userId, 'creditsConsumed', 1);
+        }
+
         return {
           diagnosisId: savedDiagnosis.id,
           ...analysis,
@@ -158,10 +165,15 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
         whatsapp: z.string().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       if (!input.email && !input.whatsapp) {
         throw new Error("Forneça pelo menos email ou WhatsApp");
       }
+
+      // Get diagnosis to find userId
+      const diagnosis = await db.query.bioRadarDiagnosis.findFirst({
+        where: eq(bioRadarDiagnosis.id, input.diagnosisId),
+      });
 
       await db
         .update(bioRadarDiagnosis)
@@ -172,6 +184,11 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
         .where(eq(bioRadarDiagnosis.id, input.diagnosisId));
 
       logger.info('Lead captured', { diagnosisId: input.diagnosisId });
+
+      // Registrar métrica se houver usuário associado
+      if (diagnosis?.userId) {
+        await recordMetric(diagnosis.userId, 'leadsGenerated');
+      }
 
       return {
         success: true,

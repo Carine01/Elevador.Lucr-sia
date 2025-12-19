@@ -11,6 +11,7 @@ import RadarBio from "./pages/RadarBio";
 import Pricing from "./pages/Pricing";
 import EbookGenerator from "./pages/EbookGenerator";
 import RoboProdutor from "./pages/RoboProdutor";
+import Analytics from "./pages/Analytics";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 function Router() {
@@ -41,6 +42,7 @@ function Router() {
           <Route path="/dashboard/radar-bio" component={RadarBio} />
           <Route path="/dashboard/ebooks" component={EbookGenerator} />
           <Route path="/dashboard/robo-produtor" component={RoboProdutor} />
+          <Route path="/dashboard/analytics" component={Analytics} />
         </>
       )}
       

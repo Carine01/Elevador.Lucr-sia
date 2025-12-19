@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, index } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, index, date } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -114,3 +114,63 @@ export const subscription = mysqlTable("subscription", {
 
 export type Subscription = typeof subscription.$inferSelect;
 export type InsertSubscription = typeof subscription.$inferInsert;
+
+/**
+ * Leads table for tracking converted prospects
+ */
+export const leads = mysqlTable("leads", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: varchar("name", { length: 255 }),
+  email: varchar("email", { length: 320 }),
+  phone: varchar("phone", { length: 20 }),
+  whatsapp: varchar("whatsapp", { length: 20 }),
+  status: mysqlEnum("status", ["novo", "em_contato", "agendado", "faturado", "perdido"]).default("novo").notNull(),
+  source: varchar("source", { length: 100 }), // 'bioradar', 'outros'
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("leads_user_id_idx").on(table.userId),
+  statusIdx: index("leads_status_idx").on(table.status),
+  createdAtIdx: index("leads_created_at_idx").on(table.createdAt),
+}));
+
+export type Lead = typeof leads.$inferSelect;
+export type InsertLead = typeof leads.$inferInsert;
+
+/**
+ * Daily metrics aggregated by user for analytics dashboard
+ */
+export const dailyMetrics = mysqlTable("dailyMetrics", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  date: date("date").notNull(),
+  
+  // Uso de features
+  bioRadarAnalyses: int("bioRadarAnalyses").default(0),
+  ebooksGenerated: int("ebooksGenerated").default(0),
+  promptsGenerated: int("promptsGenerated").default(0),
+  adsGenerated: int("adsGenerated").default(0),
+  
+  // Créditos
+  creditsConsumed: int("creditsConsumed").default(0),
+  creditsAdded: int("creditsAdded").default(0),
+  
+  // Leads
+  leadsGenerated: int("leadsGenerated").default(0),
+  leadsContacted: int("leadsContacted").default(0),
+  leadsConverted: int("leadsConverted").default(0),
+  
+  // Revenue
+  revenue: int("revenue").default(0), // em centavos
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("metrics_user_id_idx").on(table.userId),
+  dateIdx: index("metrics_date_idx").on(table.date),
+  userDateIdx: index("metrics_user_date_idx").on(table.userId, table.date),
+}));
+
+export type DailyMetrics = typeof dailyMetrics.$inferSelect;
+export type InsertDailyMetrics = typeof dailyMetrics.$inferInsert;
