@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { db } from "../db";
-import { contentGeneration } from "../../drizzle/schema";
+import { contentGeneration, userOnboarding } from "../../drizzle/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { llm } from "../_core/llm";
 import { imageGeneration } from "../_core/imageGeneration";
@@ -112,6 +112,17 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           userId: ctx.user.id,
           topic: input.topic 
         });
+
+        // Mark onboarding step as complete
+        try {
+          await db
+            .update(userOnboarding)
+            .set({ firstEbookGenerated: true })
+            .where(eq(userOnboarding.userId, ctx.user.id));
+        } catch (error) {
+          // Don't fail the request if onboarding update fails
+          logger.warn('Failed to update onboarding progress', { error });
+        }
 
         return {
           id: saved.id,
@@ -281,6 +292,16 @@ Forneça no formato JSON:
         });
 
         logger.info('Prompt generated', { userId: ctx.user.id });
+
+        // Mark onboarding step as complete
+        try {
+          await db
+            .update(userOnboarding)
+            .set({ firstPromptGenerated: true })
+            .where(eq(userOnboarding.userId, ctx.user.id));
+        } catch (error) {
+          logger.warn('Failed to update onboarding progress', { error });
+        }
 
         return result;
       } catch (error) {
