@@ -5,11 +5,30 @@ import { subscription as subscriptionTable, users } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 import Stripe from "stripe";
 import { env } from "../_core/env";
+import { logger } from "../_core/logger";
 
-// Inicializar Stripe
+// Inicializar Stripe com timeout e retry
 const stripe = new Stripe(env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2025-10-29.clover",
+  timeout: 10000, // 10 segundos
+  maxNetworkRetries: 2,
 });
+
+/**
+ * Valida se um Price ID do Stripe existe e está ativo
+ */
+async function validatePriceId(priceId: string): Promise<boolean> {
+  try {
+    const price = await stripe.prices.retrieve(priceId);
+    return price.active;
+  } catch (error: any) {
+    logger.error("Error validating Stripe Price ID", {
+      priceId,
+      error: error.message,
+    });
+    return false;
+  }
+}
 
 // Definição dos planos
 export const PLANS = {
@@ -105,13 +124,34 @@ export const subscriptionRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      logger.info("Creating checkout session", {
+        userId: ctx.user.id,
+        plan: input.plan,
+      });
+
       const planConfig = PLANS[input.plan];
 
+      // Validar configuração do plano
       if (!planConfig.priceId) {
-        throw new Error("Price ID não configurado para este plano");
+        logger.error("Price ID not configured for plan", { plan: input.plan });
+        throw new Error(
+          `Configuração inválida: Price ID não encontrado para o plano ${planConfig.name}`
+        );
       }
 
-      // Verificar se já tem assinatura ativa
+      // Validar Price ID no Stripe
+      const isPriceValid = await validatePriceId(planConfig.priceId);
+      if (!isPriceValid) {
+        logger.error("Invalid or inactive Stripe Price ID", {
+          plan: input.plan,
+          priceId: planConfig.priceId,
+        });
+        throw new Error(
+          `Price ID inválido ou inativo no Stripe. Entre em contato com o suporte.`
+        );
+      }
+
+      // Verificar assinatura atual
       const [existingSubscription] = await db
         .select()
         .from(subscriptionTable)
@@ -123,47 +163,108 @@ export const subscriptionRouter = router({
         )
         .limit(1);
 
-      // Criar ou obter customer do Stripe
-      let customerId = existingSubscription?.stripeCustomerId;
+      // Impedir upgrade para plano igual ou inferior
+      if (existingSubscription && existingSubscription.plan !== "free") {
+        const planHierarchy = { free: 0, pro: 1, pro_plus: 2 };
+        const currentPlanLevel = planHierarchy[existingSubscription.plan];
+        const requestedPlanLevel = planHierarchy[input.plan];
 
-      if (!customerId) {
-        const customer = await stripe.customers.create({
-          email: ctx.user.email || undefined,
-          name: ctx.user.name || undefined,
-          metadata: {
-            userId: ctx.user.id.toString(),
-          },
-        });
-        customerId = customer.id;
+        if (requestedPlanLevel <= currentPlanLevel) {
+          logger.warn("Attempted to downgrade/same-grade plan", {
+            userId: ctx.user.id,
+            currentPlan: existingSubscription.plan,
+            requestedPlan: input.plan,
+          });
+          throw new Error(
+            `Você já possui o plano ${PLANS[existingSubscription.plan].name} ou superior. Para fazer downgrade, cancele sua assinatura atual primeiro.`
+          );
+        }
       }
 
-      // Criar sessão de checkout
-      const session = await stripe.checkout.sessions.create({
-        customer: customerId,
-        payment_method_types: ["card"],
-        line_items: [
-          {
-            price: planConfig.priceId,
-            quantity: 1,
-          },
-        ],
-        mode: "subscription",
-        success_url: input.successUrl,
-        cancel_url: input.cancelUrl,
-        metadata: {
-          userId: ctx.user.id.toString(),
-          plan: input.plan,
-        },
-      });
+      try {
+        // Criar ou obter customer do Stripe
+        let customerId = existingSubscription?.stripeCustomerId;
 
-      return {
-        sessionId: session.id,
-        url: session.url,
-      };
+        if (!customerId) {
+          logger.info("Creating new Stripe customer", { userId: ctx.user.id });
+          const customer = await stripe.customers.create({
+            email: ctx.user.email || undefined,
+            name: ctx.user.name || undefined,
+            metadata: {
+              userId: ctx.user.id.toString(),
+            },
+          });
+          customerId = customer.id;
+          logger.info("Stripe customer created", {
+            userId: ctx.user.id,
+            customerId,
+          });
+        }
+
+        // Criar sessão de checkout
+        logger.info("Creating Stripe checkout session", {
+          userId: ctx.user.id,
+          customerId,
+          priceId: planConfig.priceId,
+        });
+
+        const session = await stripe.checkout.sessions.create({
+          customer: customerId,
+          payment_method_types: ["card"],
+          line_items: [
+            {
+              price: planConfig.priceId,
+              quantity: 1,
+            },
+          ],
+          mode: "subscription",
+          success_url: input.successUrl,
+          cancel_url: input.cancelUrl,
+          metadata: {
+            userId: ctx.user.id.toString(),
+            plan: input.plan,
+          },
+        });
+
+        logger.info("Checkout session created successfully", {
+          userId: ctx.user.id,
+          sessionId: session.id,
+          plan: input.plan,
+        });
+
+        return {
+          sessionId: session.id,
+          url: session.url,
+        };
+      } catch (error: any) {
+        logger.error("Error creating checkout session", {
+          userId: ctx.user.id,
+          plan: input.plan,
+          error: error.message,
+          stripeError: error.type,
+        });
+
+        // Mensagens de erro mais amigáveis
+        if (error.type === "StripeInvalidRequestError") {
+          throw new Error(
+            "Erro ao processar o pagamento. Verifique as configurações do Stripe."
+          );
+        } else if (error.type === "StripeAPIError") {
+          throw new Error(
+            "Erro temporário na comunicação com o Stripe. Tente novamente em alguns instantes."
+          );
+        } else {
+          throw new Error(
+            "Erro ao criar sessão de checkout. Por favor, tente novamente."
+          );
+        }
+      }
     }),
 
   // Cancelar assinatura
   cancelSubscription: protectedProcedure.mutation(async ({ ctx }) => {
+    logger.info("Cancelling subscription", { userId: ctx.user.id });
+
     const [userSubscription] = await db
       .select()
       .from(subscriptionTable)
@@ -176,31 +277,56 @@ export const subscriptionRouter = router({
       .limit(1);
 
     if (!userSubscription) {
+      logger.warn("No active subscription found for cancellation", {
+        userId: ctx.user.id,
+      });
       throw new Error("Nenhuma assinatura ativa encontrada");
     }
 
     if (userSubscription.plan === "free") {
+      logger.warn("Attempted to cancel free plan", { userId: ctx.user.id });
       throw new Error("Não é possível cancelar o plano gratuito");
     }
 
-    // Cancelar no Stripe
-    if (userSubscription.stripeSubscriptionId) {
-      await stripe.subscriptions.cancel(userSubscription.stripeSubscriptionId);
+    try {
+      // Cancelar no Stripe
+      if (userSubscription.stripeSubscriptionId) {
+        await stripe.subscriptions.cancel(
+          userSubscription.stripeSubscriptionId
+        );
+        logger.info("Stripe subscription cancelled", {
+          userId: ctx.user.id,
+          subscriptionId: userSubscription.stripeSubscriptionId,
+        });
+      }
+
+      // Atualizar no banco
+      await db
+        .update(subscriptionTable)
+        .set({
+          status: "cancelled",
+          cancelledAt: new Date(),
+        })
+        .where(eq(subscriptionTable.id, userSubscription.id));
+
+      logger.info("Subscription cancelled successfully", {
+        userId: ctx.user.id,
+        plan: userSubscription.plan,
+      });
+
+      return {
+        success: true,
+        message: "Assinatura cancelada com sucesso",
+      };
+    } catch (error: any) {
+      logger.error("Error cancelling subscription", {
+        userId: ctx.user.id,
+        error: error.message,
+      });
+      throw new Error(
+        "Erro ao cancelar assinatura. Por favor, tente novamente ou entre em contato com o suporte."
+      );
     }
-
-    // Atualizar no banco
-    await db
-      .update(subscriptionTable)
-      .set({
-        status: "cancelled",
-        cancelledAt: new Date(),
-      })
-      .where(eq(subscriptionTable.id, userSubscription.id));
-
-    return {
-      success: true,
-      message: "Assinatura cancelada com sucesso",
-    };
   }),
 
   // Atualizar créditos (uso interno)
@@ -302,6 +428,8 @@ export const subscriptionRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      logger.info("Creating portal session", { userId: ctx.user.id });
+
       const [userSubscription] = await db
         .select()
         .from(subscriptionTable)
@@ -309,16 +437,36 @@ export const subscriptionRouter = router({
         .limit(1);
 
       if (!userSubscription?.stripeCustomerId) {
-        throw new Error("Customer ID não encontrado");
+        logger.error("Customer ID not found for portal session", {
+          userId: ctx.user.id,
+        });
+        throw new Error(
+          "Customer ID não encontrado. Assine um plano primeiro."
+        );
       }
 
-      const session = await stripe.billingPortal.sessions.create({
-        customer: userSubscription.stripeCustomerId,
-        return_url: input.returnUrl,
-      });
+      try {
+        const session = await stripe.billingPortal.sessions.create({
+          customer: userSubscription.stripeCustomerId,
+          return_url: input.returnUrl,
+        });
 
-      return {
-        url: session.url,
-      };
+        logger.info("Portal session created successfully", {
+          userId: ctx.user.id,
+          customerId: userSubscription.stripeCustomerId,
+        });
+
+        return {
+          url: session.url,
+        };
+      } catch (error: any) {
+        logger.error("Error creating portal session", {
+          userId: ctx.user.id,
+          error: error.message,
+        });
+        throw new Error(
+          "Erro ao acessar o portal de gerenciamento. Tente novamente."
+        );
+      }
     }),
 });
