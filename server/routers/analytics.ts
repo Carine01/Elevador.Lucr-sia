@@ -29,7 +29,7 @@ export const analyticsRouter = router({
         .from(dailyMetrics)
         .where(
           and(
-            eq(dailyMetrics.userId, ctx.userId),
+            eq(dailyMetrics.userId, ctx.user.id),
             gte(dailyMetrics.date, format(startDate, 'yyyy-MM-dd'))
           )
         );
@@ -69,7 +69,7 @@ export const analyticsRouter = router({
         .from(dailyMetrics)
         .where(
           and(
-            eq(dailyMetrics.userId, ctx.userId),
+            eq(dailyMetrics.userId, ctx.user.id),
             gte(dailyMetrics.date, format(startDate, 'yyyy-MM-dd'))
           )
         )
@@ -103,7 +103,7 @@ export const analyticsRouter = router({
         .from(dailyMetrics)
         .where(
           and(
-            eq(dailyMetrics.userId, ctx.userId),
+            eq(dailyMetrics.userId, ctx.user.id),
             gte(dailyMetrics.date, format(startDate, 'yyyy-MM-dd'))
           )
         )
@@ -115,7 +115,7 @@ export const analyticsRouter = router({
   // Funil de conversão
   getConversionFunnel: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.query.users.findFirst({
-      where: eq(users.id, ctx.userId),
+      where: eq(users.id, ctx.user.id),
       with: { subscription: true },
     });
 
@@ -123,14 +123,14 @@ export const analyticsRouter = router({
     const allLeads = await ctx.db
       .select({ count: sql<number>`COUNT(*)` })
       .from(leads)
-      .where(eq(leads.userId, ctx.userId));
+      .where(eq(leads.userId, ctx.user.id));
 
     const contacted = await ctx.db
       .select({ count: sql<number>`COUNT(*)` })
       .from(leads)
       .where(
         and(
-          eq(leads.userId, ctx.userId),
+          eq(leads.userId, ctx.user.id),
           sql`${leads.status} IN ('em_contato', 'agendado', 'faturado')`
         )
       );
@@ -140,7 +140,7 @@ export const analyticsRouter = router({
       .from(leads)
       .where(
         and(
-          eq(leads.userId, ctx.userId),
+          eq(leads.userId, ctx.user.id),
           sql`${leads.status} IN ('agendado', 'faturado')`
         )
       );
@@ -150,7 +150,7 @@ export const analyticsRouter = router({
       .from(leads)
       .where(
         and(
-          eq(leads.userId, ctx.userId),
+          eq(leads.userId, ctx.user.id),
           eq(leads.status, 'faturado')
         )
       );
@@ -166,7 +166,7 @@ export const analyticsRouter = router({
   // ROI por funcionalidade
   getFeatureROI: protectedProcedure.query(async ({ ctx }) => {
     const user = await ctx.db.query.users.findFirst({
-      where: eq(users.id, ctx.userId),
+      where: eq(users.id, ctx.user.id),
       with: { subscription: true },
     });
 
@@ -179,7 +179,7 @@ export const analyticsRouter = router({
         total: sql<number>`SUM(${dailyMetrics.revenue})`,
       })
       .from(dailyMetrics)
-      .where(eq(dailyMetrics.userId, ctx.userId));
+      .where(eq(dailyMetrics.userId, ctx.user.id));
 
     const totalRevenue = leadsRevenue[0]?.total || 0;
     const roi = planCost > 0 ? ((totalRevenue - planCost) / planCost) * 100 : 0;
@@ -211,7 +211,7 @@ export const analyticsRouter = router({
       .from(dailyMetrics)
       .where(
         and(
-          eq(dailyMetrics.userId, ctx.userId),
+          eq(dailyMetrics.userId, ctx.user.id),
           gte(dailyMetrics.date, thirtyDaysAgo)
         )
       );
