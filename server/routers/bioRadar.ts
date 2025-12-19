@@ -8,6 +8,7 @@ import { llm } from "../_core/llm";
 import { logger } from "../_core/logger";
 import { AIServiceError, RateLimitError, AuthorizationError } from "../_core/errors";
 import { safeParse, assertOwnership } from "../../shared/_core/utils";
+import { checkAndConsumeCredit } from "../_core/creditsMiddleware";
 
 // BUG-004 e BUG-006: Rate limiting por IP para análises gratuitas
 const ipRateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -51,7 +52,6 @@ export const bioRadarRouter = router({
       // VERIFICAR E CONSUMIR CRÉDITO (apenas para usuários autenticados)
       let creditsRemaining: number | undefined;
       if (ctx.user) {
-        const { checkAndConsumeCredit } = await import('../_core/creditsMiddleware');
         const creditCheck = await checkAndConsumeCredit(ctx.user.id, 'bio-radar');
         
         if (!creditCheck.success) {

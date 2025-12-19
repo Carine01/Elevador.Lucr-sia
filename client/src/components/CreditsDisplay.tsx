@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { PLAN_CREDITS } from "@shared/constants/credits";
 
 export function CreditsDisplay() {
   const [, navigate] = useLocation();
@@ -11,7 +12,7 @@ export function CreditsDisplay() {
 
   if (isLoading || !credits) return null;
 
-  const maxCredits = credits.plan === 'free' ? 1 : credits.plan === 'pro' ? 10 : 999999;
+  const maxCredits = PLAN_CREDITS[credits.plan as keyof typeof PLAN_CREDITS] || 1;
   const percentage = credits.isUnlimited ? 100 : (credits.balance / maxCredits) * 100;
 
   return (

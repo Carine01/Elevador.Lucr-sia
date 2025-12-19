@@ -3,6 +3,7 @@ import { db } from '../db';
 import { users, subscription } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { logger } from './logger';
+import { PLAN_CREDITS } from '../../shared/constants/credits';
 
 export interface CreditCost {
   'bio-radar': 1;
@@ -19,8 +20,6 @@ const CREDIT_COSTS: Record<string, number> = {
   'ad-generation': 1,
   'cover-generation': 1,
 };
-
-const FREE_FEATURES = ['bio-radar']; // Bio Radar tem 1 uso grátis/mês
 
 export async function checkAndConsumeCredit(
   userId: number,
@@ -107,12 +106,6 @@ export async function addCredits(userId: number, amount: number): Promise<void> 
 }
 
 export async function resetMonthlyCredits(userId: number, plan: string): Promise<void> {
-  const PLAN_CREDITS = {
-    free: 1,
-    pro: 10,
-    pro_plus: 999999,
-  };
-
   const credits = PLAN_CREDITS[plan as keyof typeof PLAN_CREDITS] || 1;
 
   try {
