@@ -21,13 +21,17 @@ export default function Pricing() {
 
   const handleSelectPlan = async (planId: string) => {
     if (!user) {
-      toast.error("Faça login para assinar um plano");
+      toast.error("Faça login para assinar um plano", {
+        description: "Você precisa estar autenticado para assinar um plano premium.",
+      });
       navigate("/");
       return;
     }
 
     if (planId === "free") {
-      toast.info("Você já está no plano gratuito");
+      toast.info("Você já está no plano gratuito", {
+        description: "Escolha um plano premium para desbloquear todos os recursos.",
+      });
       return;
     }
 
@@ -36,16 +40,24 @@ export default function Pricing() {
     try {
       const result = await createCheckout.mutateAsync({
         plan: planId as "pro" | "pro_plus",
-        successUrl: `${window.location.origin}/dashboard?checkout=success`,
-        cancelUrl: `${window.location.origin}/pricing?checkout=cancelled`,
+        successUrl: `${window.location.origin}/checkout/success`,
+        cancelUrl: `${window.location.origin}/checkout/cancelled`,
       });
 
       if (result.url) {
         window.location.href = result.url;
       }
-    } catch (error) {
-      toast.error("Erro ao criar checkout. Tente novamente.");
-      console.error(error);
+    } catch (error: any) {
+      const errorMessage = error?.message || "Erro ao criar checkout. Tente novamente.";
+      
+      toast.error("Erro ao processar pagamento", {
+        description: errorMessage,
+      });
+
+      // Log error only in development
+      if (process.env.NODE_ENV === "development") {
+        console.error("Checkout error:", error);
+      }
     } finally {
       setLoadingPlan(null);
     }

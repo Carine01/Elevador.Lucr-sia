@@ -11,6 +11,8 @@ import RadarBio from "./pages/RadarBio";
 import Pricing from "./pages/Pricing";
 import EbookGenerator from "./pages/EbookGenerator";
 import RoboProdutor from "./pages/RoboProdutor";
+import CheckoutSuccess from "./pages/CheckoutSuccess";
+import CheckoutCancelled from "./pages/CheckoutCancelled";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 function Router() {
@@ -33,7 +35,12 @@ function Router() {
     <Switch>
       {/* Public Routes */}
       <Route path={"/{"}  component={Home} />
-      <Route path="/pricing" component={Pricing} />      
+      <Route path="/pricing" component={Pricing} />
+      
+      {/* Checkout Routes */}
+      <Route path="/checkout/success" component={CheckoutSuccess} />
+      <Route path="/checkout/cancelled" component={CheckoutCancelled} />
+      
       {/* Protected Routes */}
       {isAuthenticated && (
         <>
