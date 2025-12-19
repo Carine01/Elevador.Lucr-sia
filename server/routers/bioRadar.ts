@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { db } from "../db";
 import { bioRadarDiagnosis } from "../../drizzle/schema";
@@ -45,6 +46,23 @@ export const bioRadarRouter = router({
         throw new RateLimitError(
           'Limite de análises gratuitas atingido. Faça login ou aguarde 1 hora para continuar.'
         );
+      }
+
+      // VERIFICAR E CONSUMIR CRÉDITO (apenas para usuários autenticados)
+      let creditsRemaining: number | undefined;
+      if (ctx.user) {
+        const { checkAndConsumeCredit } = await import('../_core/creditsMiddleware');
+        const creditCheck = await checkAndConsumeCredit(ctx.user.id, 'bio-radar');
+        
+        if (!creditCheck.success) {
+          throw new TRPCError({
+            code: 'PAYMENT_REQUIRED',
+            message: creditCheck.error || 'Créditos insuficientes. Faça upgrade!',
+          });
+        }
+        
+        creditsRemaining = creditCheck.remaining;
+        logger.info('Credits consumed for bio-radar', { userId: ctx.user.id, remaining: creditsRemaining });
       }
 
       // Prompt para análise da bio
@@ -129,6 +147,7 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
         return {
           diagnosisId: savedDiagnosis.id,
           ...analysis,
+          creditsRemaining,
         };
       } catch (error) {
         // BUG-008: Tratamento de erros apropriado

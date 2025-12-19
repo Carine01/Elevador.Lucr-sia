@@ -1,6 +1,7 @@
 import ElevareDashboardLayout from "@/components/ElevareDashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { CreditsDisplay } from "@/components/CreditsDisplay";
 import { useAuth } from "@/_core/hooks/useAuth";
 import {
   ArrowRight,
@@ -113,8 +114,8 @@ export default function Dashboard() {
         </div>
       </Card>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {/* Stats Grid and Credits Display */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -134,6 +135,7 @@ export default function Dashboard() {
             </Card>
           );
         })}
+        <CreditsDisplay />
       </div>
 
       {/* Features Grid */}

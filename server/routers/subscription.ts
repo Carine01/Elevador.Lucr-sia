@@ -321,4 +321,33 @@ export const subscriptionRouter = router({
         url: session.url,
       };
     }),
+
+  // Obter saldo de créditos
+  getCredits: protectedProcedure.query(async ({ ctx }) => {
+    const user = await db.query.users.findFirst({
+      where: eq(users.id, ctx.user.id),
+      with: { subscription: true },
+    });
+
+    if (!user) {
+      return {
+        balance: 0,
+        plan: 'free',
+        isUnlimited: false,
+      };
+    }
+
+    return {
+      balance: user.creditsBalance || 0,
+      plan: user.subscription?.plan || 'free',
+      isUnlimited: user.subscription?.plan === 'pro_plus',
+    };
+  }),
+
+  // Obter histórico de créditos (stub por enquanto)
+  getCreditHistory: protectedProcedure.query(async ({ ctx }) => {
+    // Retornar histórico de uso de créditos
+    // Por enquanto retorna vazio, implementar tabela de histórico depois
+    return [];
+  }),
 });

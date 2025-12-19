@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users } from "../drizzle/schema";
+import * as schema from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { logger } from './_core/logger';
 
@@ -10,7 +11,7 @@ let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _db = drizzle(process.env.DATABASE_URL, { schema, mode: 'default' });
     } catch (error) {
       logger.warn("Failed to connect to database", { error });
       _db = null;
@@ -20,7 +21,7 @@ export async function getDb() {
 }
 
 // Synchronous db instance for routers (will throw if DB not available)
-export const db = drizzle(process.env.DATABASE_URL || "");
+export const db = drizzle(process.env.DATABASE_URL || "", { schema, mode: 'default' });
 
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {

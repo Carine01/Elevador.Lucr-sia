@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import { db } from "../db";
 import { contentGeneration } from "../../drizzle/schema";
@@ -8,6 +9,7 @@ import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
+import { checkAndConsumeCredit } from "../_core/creditsMiddleware";
 
 export const contentRouter = router({
   // Gerar e-book
@@ -21,6 +23,15 @@ export const contentRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // VERIFICAR E CONSUMIR CRÉDITOS
+      const creditCheck = await checkAndConsumeCredit(ctx.user.id, 'ebook-generation');
+      if (!creditCheck.success) {
+        throw new TRPCError({
+          code: 'PAYMENT_REQUIRED',
+          message: creditCheck.error || 'Créditos insuficientes',
+        });
+      }
+
       const prompt = `Você é um especialista em marketing de conteúdo para clínicas de estética.
 
 Crie um e-book completo sobre: "${input.topic}"
@@ -141,6 +152,15 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // VERIFICAR E CONSUMIR CRÉDITOS
+      const creditCheck = await checkAndConsumeCredit(ctx.user.id, 'cover-generation');
+      if (!creditCheck.success) {
+        throw new TRPCError({
+          code: 'PAYMENT_REQUIRED',
+          message: creditCheck.error || 'Créditos insuficientes',
+        });
+      }
+
       try {
         const imageUrl = await imageGeneration.generate({
           prompt: input.prompt,
@@ -212,6 +232,15 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // VERIFICAR E CONSUMIR CRÉDITOS
+      const creditCheck = await checkAndConsumeCredit(ctx.user.id, 'prompt-generation');
+      if (!creditCheck.success) {
+        throw new TRPCError({
+          code: 'PAYMENT_REQUIRED',
+          message: creditCheck.error || 'Créditos insuficientes',
+        });
+      }
+
       const prompt = `Você é um especialista em criar prompts para geração de imagens com IA.
 
 Crie um prompt otimizado para ${input.platform} baseado em:
@@ -310,6 +339,15 @@ Forneça no formato JSON:
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // VERIFICAR E CONSUMIR CRÉDITOS
+      const creditCheck = await checkAndConsumeCredit(ctx.user.id, 'ad-generation');
+      if (!creditCheck.success) {
+        throw new TRPCError({
+          code: 'PAYMENT_REQUIRED',
+          message: creditCheck.error || 'Créditos insuficientes',
+        });
+      }
+
       const prompt = `Você é um especialista em copywriting para anúncios de estética.
 
 Crie um anúncio completo para:

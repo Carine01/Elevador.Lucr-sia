@@ -60,11 +60,13 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
+  const { resetMonthlyCredits } = await import('./creditsMiddleware');
   const planConfig = PLANS[plan];
   const renewalDate = new Date();
   renewalDate.setMonth(renewalDate.getMonth() + 1);
 
   try {
+    // Update subscription
     await db
       .update(subscriptionTable)
       .set({
@@ -78,7 +80,10 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       })
       .where(eq(subscriptionTable.userId, userId));
 
-    logger.info('Checkout completed successfully', { userId, plan });
+    // Reset monthly credits in users table
+    await resetMonthlyCredits(userId, plan);
+
+    logger.info('Checkout completed and credits reset', { userId, plan });
   } catch (error) {
     logger.error('Error handling checkout completed', error);
     throw error;
@@ -130,11 +135,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     return;
   }
 
+  const { resetMonthlyCredits } = await import('./creditsMiddleware');
   const planConfig = PLANS[userSub.plan];
   const renewalDate = new Date();
   renewalDate.setMonth(renewalDate.getMonth() + 1);
 
   try {
+    // Update subscription table
     await db
       .update(subscriptionTable)
       .set({
@@ -142,6 +149,9 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
         renewalDate,
       })
       .where(eq(subscriptionTable.id, userSub.id));
+
+    // Reset monthly credits in users table
+    await resetMonthlyCredits(userSub.userId, userSub.plan);
 
     logger.info('Credits renewed after payment', { userId: userSub.userId, plan: userSub.plan });
   } catch (error) {
