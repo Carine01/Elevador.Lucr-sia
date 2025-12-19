@@ -1,0 +1,241 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  install:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.4.1
+      
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+      
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: install
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.4.1
+      
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+      
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile
+      
+      - name: Run TypeScript type check
+        run: pnpm check
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: typecheck
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.4.1
+      
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+      
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build application
+        run: pnpm build
+        env:
+          # Variáveis de ambiente necessárias para o build
+          # Usando valores de teste/mock para CI
+          NODE_ENV: production
+          DATABASE_URL: mysql://test:test@localhost:3306/test_db
+          VITE_APP_ID: ci_test_app_id
+          OWNER_OPEN_ID: ci_test_owner_id
+          OAUTH_SERVER_URL: https://oauth.manus.im
+          JWT_SECRET: ci_test_jwt_secret_with_minimum_32_characters_required_for_security
+          STRIPE_SECRET_KEY: sk_test_ci_mock_key
+          STRIPE_PRO_PRICE_ID: price_ci_mock_pro
+          STRIPE_PRO_PLUS_PRICE_ID: price_ci_mock_pro_plus
+          STRIPE_WEBHOOK_SECRET: whsec_ci_mock_webhook_secret
+          BUILT_IN_FORGE_API_URL: https://api.forge.manus.im
+          BUILT_IN_FORGE_API_KEY: ci_test_forge_key
+      
+      - name: Verify build artifacts
+        run: |
+          echo "Checking build artifacts..."
+          ls -la dist/ || echo "No dist/ directory found"
+          
+          # Verificar se os arquivos principais foram gerados
+          if [ -d "dist" ]; then
+            echo "✓ dist/ directory exists"
+            
+            if [ -f "dist/index.js" ]; then
+              echo "✓ Server bundle created (dist/index.js)"
+            else
+              echo "✗ Server bundle NOT found"
+              exit 1
+            fi
+            
+            if [ -d "dist/public" ] || [ -f "dist/index.html" ]; then
+              echo "✓ Client build artifacts found"
+            else
+              echo "⚠ Client artifacts might not exist (check build config)"
+            fi
+          else
+            echo "✗ Build failed - no dist/ directory"
+            exit 1
+          fi
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: dist/
+          retention-days: 7
+
+  lint:
+    name: Code Formatting Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: install
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.4.1
+      
+      - name: Restore dependencies cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            ~/.pnpm-store
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+      
+      - name: Install dependencies (if cache miss)
+        run: pnpm install --frozen-lockfile
+      
+      - name: Check code formatting
+        run: pnpm prettier --check .
+
+  summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [install, typecheck, build, lint]
+    if: always()
+    
+    steps:
+      - name: Check job results
+        run: |
+          echo "CI Pipeline Summary:"
+          echo "===================="
+          echo "Install: ${{ needs.install.result }}"
+          echo "TypeCheck: ${{ needs.typecheck.result }}"
+          echo "Build: ${{ needs.build.result }}"
+          echo "Lint: ${{ needs.lint.result }}"
+          
+          if [[ "${{ needs.install.result }}" != "success" ]] || \
+             [[ "${{ needs.typecheck.result }}" != "success" ]] || \
+             [[ "${{ needs.build.result }}" != "success" ]] || \
+             [[ "${{ needs.lint.result }}" != "success" ]]; then
+            echo "❌ CI Pipeline FAILED"
+            exit 1
+          else
+            echo "✅ CI Pipeline PASSED"
+          fi
