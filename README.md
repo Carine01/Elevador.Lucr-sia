@@ -53,13 +53,36 @@ Não é manipulação — é comunicação profissional.
 
 ---
 
-## Observação Importante
+## 🎯 O que Funciona vs. O que Está Planejado
 
-Este repositório não busca "parecer pronto".
-Busca estar **correto**.
+### ✅ Funcionalidades Ativas em Produção
 
-A presença de schemas de banco de dados sem implementação completa não é descuido — é design intencional.
-Contratos de domínio são estabelecidos primeiro, implementação segue conforme roadmap.
+- **Bio Radar** - Lead magnet com análise de Instagram bio
+- **Sistema de Monetização** - Stripe com 3 planos (Grátis, PRO, PRO+)
+- **Geração de Conteúdo** - E-books, prompts e anúncios com IA
+- **Dashboard** - Interface de gestão e estatísticas
+- **Autenticação** - OAuth Manus integrado
+- **Segurança** - Rate limiting, CORS, validação de ENV
+
+### 🔧 Recursos com Schema Pronto (Desligados por Feature Flag)
+
+- **Lead Management System** (`FEATURE_LEADS=false`)
+  - Tabelas: `leads`, `leadInteractions`, `campaigns`
+  - Status: Schema completo, backend/frontend em desenvolvimento (PR #2)
+  - Ativação: Controlada por feature flag
+
+### 📋 Em Desenvolvimento
+
+- Router tRPC para leads
+- UI de gestão de leads
+- Sistema de scoring automático
+- Cálculo de temperatura (quente/morno/frio)
+
+## Observação de Governança
+
+Este repositório não busca "parecer pronto". Busca estar **correto**.
+
+A presença de schemas de banco de dados sem implementação completa não é descuido — é **design intencional**. Contratos de domínio são estabelecidos primeiro, implementação segue conforme roadmap, ativação controlada por feature flags.
 
 ---
 
