@@ -116,6 +116,3 @@ export const subscription = mysqlTable("subscription", {
 
 export type Subscription = typeof subscription.$inferSelect;
 export type InsertSubscription = typeof subscription.$inferInsert;
-
-// Export relations from relations.ts
-export * from "./relations";
