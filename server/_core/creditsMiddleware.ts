@@ -1,29 +1,23 @@
 import { TRPCError } from '@trpc/server';
 import { db } from '../db';
-import { users, subscription } from '../../drizzle/schema';
+import { users } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 import { logger } from './logger';
 import { PLAN_CREDITS } from '../../shared/constants/credits';
 
-export interface CreditCost {
-  'bio-radar': 1;
-  'ebook-generation': 2;
-  'prompt-generation': 1;
-  'ad-generation': 1;
-  'cover-generation': 1;
-}
-
-const CREDIT_COSTS: Record<string, number> = {
+const CREDIT_COSTS = {
   'bio-radar': 1,
   'ebook-generation': 2,
   'prompt-generation': 1,
   'ad-generation': 1,
   'cover-generation': 1,
-};
+} as const;
+
+export type CreditCost = keyof typeof CREDIT_COSTS;
 
 export async function checkAndConsumeCredit(
   userId: number,
-  feature: keyof CreditCost
+  feature: CreditCost
 ): Promise<{ success: boolean; remaining?: number; error?: string }> {
   try {
     // Buscar usuário e assinatura
