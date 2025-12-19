@@ -231,7 +231,14 @@ export async function handlePaymentSucceeded(
   }
 
   // Verificar se é uma fatura de assinatura
-  if (!invoice.subscription) {
+  // Invoice.subscription pode ser string ou objeto Subscription expandido
+  const subscriptionId = (invoice as any).subscription 
+    ? typeof (invoice as any).subscription === 'string' 
+      ? (invoice as any).subscription 
+      : (invoice as any).subscription?.id
+    : null;
+
+  if (!subscriptionId) {
     logger.info("Invoice is not for a subscription, skipping", {
       eventId,
       invoiceId: invoice.id,
@@ -244,7 +251,7 @@ export async function handlePaymentSucceeded(
       .select()
       .from(subscriptionTable)
       .where(
-        eq(subscriptionTable.stripeSubscriptionId, invoice.subscription as string)
+        eq(subscriptionTable.stripeSubscriptionId, subscriptionId)
       )
       .limit(1);
 
@@ -252,7 +259,7 @@ export async function handlePaymentSucceeded(
       logger.warn("Subscription not found for payment", {
         eventId,
         invoiceId: invoice.id,
-        subscriptionId: invoice.subscription,
+        subscriptionId,
       });
       return;
     }
@@ -310,10 +317,17 @@ export async function handlePaymentFailed(
     return;
   }
 
+  // Invoice.subscription pode ser string ou objeto Subscription expandido
+  const subscriptionId = (invoice as any).subscription 
+    ? typeof (invoice as any).subscription === 'string' 
+      ? (invoice as any).subscription 
+      : (invoice as any).subscription?.id
+    : null;
+
   logger.error("Payment failed for invoice", {
     eventId,
     invoiceId: invoice.id,
-    subscriptionId: invoice.subscription,
+    subscriptionId,
     amountDue: invoice.amount_due,
     currency: invoice.currency,
     attemptCount: invoice.attempt_count,
