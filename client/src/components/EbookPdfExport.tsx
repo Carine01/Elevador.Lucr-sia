@@ -14,13 +14,9 @@ export function EbookPdfExport({ ebookId, title }: EbookPdfExportProps) {
   
   const exportMutation = trpc.content.exportEbookPdf.useMutation({
     onSuccess: (data) => {
-      // Converter base64 para Blob
+      // Converter base64 para Blob de forma eficiente
       const byteCharacters = atob(data.data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
+      const byteArray = Uint8Array.from(byteCharacters, (char) => char.charCodeAt(0));
       const blob = new Blob([byteArray], { type: data.mimeType });
       
       // Criar link de download

@@ -8,10 +8,41 @@ export interface EbookPDFOptions {
   author: string;
 }
 
+/**
+ * Escapa caracteres HTML especiais para prevenir XSS
+ */
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
+/**
+ * Valida e sanitiza URL para prevenir ataques
+ */
+function sanitizeUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    // Permitir apenas protocolos http e https
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      return '';
+    }
+    return url;
+  } catch {
+    return '';
+  }
+}
+
 export async function generateEbookPDF(options: EbookPDFOptions): Promise<Buffer> {
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    // Use --no-sandbox apenas em ambientes containerizados (Docker)
+    args: process.env.DOCKER_CONTAINER ? ['--no-sandbox', '--disable-setuid-sandbox'] : [],
   });
 
   try {
@@ -94,9 +125,9 @@ export async function generateEbookPDF(options: EbookPDFOptions): Promise<Buffer
 </head>
 <body>
   <div class="cover">
-    ${options.coverUrl ? `<img src="${options.coverUrl}" alt="Capa" class="cover-image">` : ''}
-    <h1 class="cover-title">${options.title}</h1>
-    <p class="cover-author">Por ${options.author}</p>
+    ${options.coverUrl ? `<img src="${escapeHtml(sanitizeUrl(options.coverUrl))}" alt="Capa" class="cover-image">` : ''}
+    <h1 class="cover-title">${escapeHtml(options.title)}</h1>
+    <p class="cover-author">Por ${escapeHtml(options.author)}</p>
   </div>
   
   <div class="content">

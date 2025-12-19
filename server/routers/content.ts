@@ -13,6 +13,13 @@ import { checkAndConsumeCredit } from "../_core/creditsMiddleware";
 import { TRPCError } from "@trpc/server";
 import { trackEvent, ANALYTICS_EVENTS } from "../../shared/analytics";
 
+// Interface para estrutura de capítulo de e-book
+interface EbookChapter {
+  number?: number;
+  title: string;
+  content: string;
+}
+
 export const contentRouter = router({
   // Gerar e-book
   generateEbook: protectedProcedure
@@ -557,10 +564,14 @@ Use técnicas de neurovendas e gatilhos mentais.`;
       const ebookData = safeParse(ebook.content) || {};
       const ebookMetadata = safeParse(ebook.metadata) || {};
 
+      // Extrair capítulos com type safety
+      const chapters = (ebookData.chapters as EbookChapter[] | undefined) || [];
+      const chaptersContent = chapters.map((ch) => `# ${ch.title}\n\n${ch.content}`).join('\n\n');
+
       // Gerar PDF
       const pdfBuffer = await generateEbookPDF({
         title: ebook.title || ebookData.title || 'E-book',
-        content: ebookData.chapters?.map((ch: any) => `# ${ch.title}\n\n${ch.content}`).join('\n\n') || ebook.content || '',
+        content: chaptersContent || ebook.content || '',
         coverUrl: ebookMetadata.coverUrl || undefined,
         author: user?.name || 'Elevare AI',
       });

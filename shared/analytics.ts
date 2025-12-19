@@ -59,6 +59,16 @@ export function trackEvent(
   sendToAnalytics(analyticsEvent);
 }
 
+/**
+ * Envia evento de analytics para o endpoint configurado em produção
+ * 
+ * Esta função é chamada internamente por trackEvent() apenas em produção.
+ * Erros são capturados e logados sem interromper a aplicação, pois analytics
+ * não deve afetar o fluxo principal do sistema.
+ * 
+ * @param event - Objeto do evento contendo tipo, dados, userId e timestamp
+ * @returns Promise que resolve quando o evento é enviado (ou falha silenciosamente)
+ */
 async function sendToAnalytics(event: AnalyticsEvent): Promise<void> {
   try {
     // Exemplo: enviar para endpoint de analytics

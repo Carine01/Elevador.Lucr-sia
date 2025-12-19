@@ -8,6 +8,14 @@ export interface CreditCheckResult {
   error?: string;
 }
 
+// Tipos de operações válidas que consomem créditos
+export type CreditOperation = 
+  | 'ebook-generation'
+  | 'ad-generation'
+  | 'prompt-generation'
+  | 'cover-generation'
+  | 'bio-radar';
+
 /**
  * Verifica e consome créditos para uma operação
  * @param userId ID do usuário
@@ -16,10 +24,10 @@ export interface CreditCheckResult {
  */
 export async function checkAndConsumeCredit(
   userId: number,
-  operation: string
+  operation: CreditOperation
 ): Promise<CreditCheckResult> {
   // Determinar custo baseado na operação
-  const creditCosts: Record<string, number> = {
+  const creditCosts: Record<CreditOperation, number> = {
     'ebook-generation': 5,
     'ad-generation': 2,
     'prompt-generation': 1,
@@ -27,7 +35,7 @@ export async function checkAndConsumeCredit(
     'bio-radar': 1,
   };
 
-  const cost = creditCosts[operation] || 1;
+  const cost = creditCosts[operation];
 
   // Buscar assinatura do usuário
   const [userSubscription] = await db
