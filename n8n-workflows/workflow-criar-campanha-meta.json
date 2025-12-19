@@ -1,0 +1,207 @@
+{
+  "name": "Meta Ads - Criar Campanha",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meta-campaign",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-meta",
+      "name": "Webhook - Receber Dados",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "campaign_name",
+              "name": "campaign_name",
+              "value": "={{ $json.body.campaign_name }}",
+              "type": "string"
+            },
+            {
+              "id": "objective",
+              "name": "objective",
+              "value": "={{ $json.body.objective }}",
+              "type": "string"
+            },
+            {
+              "id": "budget",
+              "name": "daily_budget",
+              "value": "={{ $json.body.daily_budget * 100 }}",
+              "type": "number"
+            },
+            {
+              "id": "start_time",
+              "name": "start_time",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "prepare-data",
+      "name": "Preparar Dados",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "resource": "campaign",
+        "operation": "create",
+        "adAccountId": "={{ $env.META_AD_ACCOUNT_ID }}",
+        "name": "={{ $json.campaign_name }}",
+        "objective": "={{ $json.objective }}",
+        "status": "PAUSED",
+        "special_ad_categories": []
+      },
+      "id": "create-campaign",
+      "name": "Criar Campanha Meta",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [650, 300],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "1",
+          "name": "Meta Ads API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "adSet",
+        "operation": "create",
+        "adAccountId": "={{ $env.META_AD_ACCOUNT_ID }}",
+        "campaignId": "={{ $json.id }}",
+        "name": "={{ $json.campaign_name }} - Conjunto 1",
+        "optimization_goal": "REACH",
+        "billing_event": "IMPRESSIONS",
+        "bid_amount": "={{ $('Preparar Dados').item.json.daily_budget }}",
+        "daily_budget": "={{ $('Preparar Dados').item.json.daily_budget }}",
+        "status": "PAUSED",
+        "targeting": {
+          "geo_locations": {
+            "countries": ["BR"]
+          },
+          "age_min": 25,
+          "age_max": 55
+        }
+      },
+      "id": "create-adset",
+      "name": "Criar Conjunto de Anúncios",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [850, 300],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "1",
+          "name": "Meta Ads API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "ad",
+        "operation": "create",
+        "adAccountId": "={{ $env.META_AD_ACCOUNT_ID }}",
+        "adSetId": "={{ $json.id }}",
+        "name": "={{ $('Preparar Dados').item.json.campaign_name }} - Anúncio 1",
+        "creative": {
+          "creative_id": "={{ $env.META_CREATIVE_ID }}"
+        },
+        "status": "PAUSED"
+      },
+      "id": "create-ad",
+      "name": "Criar Anúncio",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [1050, 300],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "1",
+          "name": "Meta Ads API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "success",
+              "name": "success",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "campaign_id",
+              "name": "campaign_id",
+              "value": "={{ $('Criar Campanha Meta').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "adset_id",
+              "name": "adset_id",
+              "value": "={{ $('Criar Conjunto de Anúncios').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "ad_id",
+              "name": "ad_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "value": "Campanha criada com sucesso!",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "response-success",
+      "name": "Resposta de Sucesso",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond-webhook",
+      "name": "Responder Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook - Receber Dados": {
+      "main": [[{"node": "Preparar Dados", "type": "main", "index": 0}]]
+    },
+    "Preparar Dados": {
+      "main": [[{"node": "Criar Campanha Meta", "type": "main", "index": 0}]]
+    },
+    "Criar Campanha Meta": {
+      "main": [[{"node": "Criar Conjunto de Anúncios", "type": "main", "index": 0}]]
+    },
+    "Criar Conjunto de Anúncios": {
+      "main": [[{"node": "Criar Anúncio", "type": "main", "index": 0}]]
+    },
+    "Criar Anúncio": {
+      "main": [[{"node": "Resposta de Sucesso", "type": "main", "index": 0}]]
+    },
+    "Resposta de Sucesso": {
+      "main": [[{"node": "Responder Webhook", "type": "main", "index": 0}]]
+    }
+  }
+}

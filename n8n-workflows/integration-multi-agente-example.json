@@ -1,0 +1,122 @@
+{
+  "name": "Integração Multi-Agente com Meta Ads",
+  "description": "Exemplo de nó para adicionar ao final do workflow multi-agente",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "http://localhost:5678/webhook/meta-campaign",
+        "method": "POST",
+        "sendBody": true,
+        "contentType": "application/json",
+        "jsonParameters": true,
+        "bodyParametersJson": "={\n  \"campaign_name\": \"{{ $json.campaign_name }}\",\n  \"objective\": \"OUTCOME_TRAFFIC\",\n  \"daily_budget\": {{ $json.budget }},\n  \"target_audience\": {\n    \"age_min\": {{ $json.target_audience?.age_min || 25 }},\n    \"age_max\": {{ $json.target_audience?.age_max || 55 }},\n    \"genders\": {{ JSON.stringify($json.target_audience?.genders || [2]) }},\n    \"geo_locations\": {\n      \"countries\": {{ JSON.stringify($json.target_audience?.countries || [\"BR\"]) }}\n    }\n  }\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "call-meta-api",
+      "name": "Criar Campanha Real no Meta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2000, 300],
+      "notes": "Envia os insights gerados pela IA para criar uma campanha real no Meta Ads Manager"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.success }}",
+              "operation": "equal",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-success",
+      "name": "Verificar Sucesso",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2200, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status",
+              "name": "status",
+              "value": "success",
+              "type": "string"
+            },
+            {
+              "id": "campaign_id",
+              "name": "campaign_id",
+              "value": "={{ $json.campaign_id }}",
+              "type": "string"
+            },
+            {
+              "id": "campaign_url",
+              "name": "campaign_url",
+              "value": "=https://business.facebook.com/adsmanager/manage/campaigns?act={{ $env.META_AD_ACCOUNT_ID }}&selected_campaign_ids={{ $json.campaign_id }}",
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "value": "Campanha criada com sucesso! Acesse o Ads Manager para ativar.",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "format-success",
+      "name": "Formatar Resposta de Sucesso",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [2400, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "status",
+              "name": "status",
+              "value": "error",
+              "type": "string"
+            },
+            {
+              "id": "error",
+              "name": "error",
+              "value": "={{ $json.error || 'Erro ao criar campanha' }}",
+              "type": "string"
+            },
+            {
+              "id": "message",
+              "name": "message",
+              "value": "Não foi possível criar a campanha. Verifique os logs.",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "format-error",
+      "name": "Formatar Resposta de Erro",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [2400, 400]
+    }
+  ],
+  "connections": {
+    "Criar Campanha Real no Meta": {
+      "main": [[{"node": "Verificar Sucesso", "type": "main", "index": 0}]]
+    },
+    "Verificar Sucesso": {
+      "main": [
+        [{"node": "Formatar Resposta de Sucesso", "type": "main", "index": 0}],
+        [{"node": "Formatar Resposta de Erro", "type": "main", "index": 0}]
+      ]
+    }
+  }
+}
