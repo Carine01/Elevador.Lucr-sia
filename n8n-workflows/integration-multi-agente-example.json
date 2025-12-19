@@ -110,12 +110,14 @@
   ],
   "connections": {
     "Criar Campanha Real no Meta": {
-      "main": [[{"node": "Verificar Sucesso", "type": "main", "index": 0}]]
+      "main": [[{ "node": "Verificar Sucesso", "type": "main", "index": 0 }]]
     },
     "Verificar Sucesso": {
       "main": [
-        [{"node": "Formatar Resposta de Sucesso", "type": "main", "index": 0}],
-        [{"node": "Formatar Resposta de Erro", "type": "main", "index": 0}]
+        [
+          { "node": "Formatar Resposta de Sucesso", "type": "main", "index": 0 }
+        ],
+        [{ "node": "Formatar Resposta de Erro", "type": "main", "index": 0 }]
       ]
     }
   }

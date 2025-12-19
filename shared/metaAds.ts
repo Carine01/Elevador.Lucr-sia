@@ -18,16 +18,16 @@ export type MetaObjective = keyof typeof META_OBJECTIVES;
 // Mapeamento de objetivos do sistema para Meta
 export function mapObjectiveToMeta(userObjective: string): MetaObjective {
   const mapping: Record<string, MetaObjective> = {
-    "trafego": "OUTCOME_TRAFFIC",
-    "traffic": "OUTCOME_TRAFFIC",
-    "leads": "OUTCOME_LEADS",
-    "lead": "OUTCOME_LEADS",
-    "vendas": "OUTCOME_SALES",
-    "sales": "OUTCOME_SALES",
-    "reconhecimento": "OUTCOME_AWARENESS",
-    "awareness": "OUTCOME_AWARENESS",
-    "engajamento": "OUTCOME_ENGAGEMENT",
-    "engagement": "OUTCOME_ENGAGEMENT",
+    trafego: "OUTCOME_TRAFFIC",
+    traffic: "OUTCOME_TRAFFIC",
+    leads: "OUTCOME_LEADS",
+    lead: "OUTCOME_LEADS",
+    vendas: "OUTCOME_SALES",
+    sales: "OUTCOME_SALES",
+    reconhecimento: "OUTCOME_AWARENESS",
+    awareness: "OUTCOME_AWARENESS",
+    engajamento: "OUTCOME_ENGAGEMENT",
+    engagement: "OUTCOME_ENGAGEMENT",
   };
 
   const normalized = userObjective.toLowerCase().trim();

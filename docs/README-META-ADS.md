@@ -209,14 +209,14 @@ O workflow `workflow-criar-campanha-meta.json` contém:
 
 Use os seguintes valores para o campo `objective`:
 
-| Objetivo | Descrição | Quando Usar |
-|----------|-----------|-------------|
-| `OUTCOME_AWARENESS` | Reconhecimento de marca | Aumentar visibilidade |
-| `OUTCOME_ENGAGEMENT` | Engajamento | Mais interações |
-| `OUTCOME_TRAFFIC` | Tráfego | Direcionar ao site |
-| `OUTCOME_LEADS` | Geração de leads | Capturar contatos |
-| `OUTCOME_SALES` | Vendas | Conversões diretas |
-| `OUTCOME_APP_PROMOTION` | Promoção de app | Downloads de app |
+| Objetivo                | Descrição               | Quando Usar           |
+| ----------------------- | ----------------------- | --------------------- |
+| `OUTCOME_AWARENESS`     | Reconhecimento de marca | Aumentar visibilidade |
+| `OUTCOME_ENGAGEMENT`    | Engajamento             | Mais interações       |
+| `OUTCOME_TRAFFIC`       | Tráfego                 | Direcionar ao site    |
+| `OUTCOME_LEADS`         | Geração de leads        | Capturar contatos     |
+| `OUTCOME_SALES`         | Vendas                  | Conversões diretas    |
+| `OUTCOME_APP_PROMOTION` | Promoção de app         | Downloads de app      |
 
 ### Segmentação Avançada
 
@@ -304,6 +304,7 @@ Se você possui um workflow multi-agente que gera insights de campanha, adicione
 **Causa**: Token expirado ou inválido.
 
 **Solução**:
+
 1. Gere um novo token de longa duração
 2. Atualize as credenciais no n8n
 3. Se usar token de curta duração, configure renovação automática
@@ -313,6 +314,7 @@ Se você possui um workflow multi-agente que gera insights de campanha, adicione
 **Causa**: Permissões insuficientes.
 
 **Solução**:
+
 1. Verifique se o app tem as permissões: `ads_management`, `ads_read`, `business_management`
 2. No Business Manager, adicione o app à conta de anúncios
 3. Conceda permissões de "Advertiser" ou superior
@@ -322,6 +324,7 @@ Se você possui um workflow multi-agente que gera insights de campanha, adicione
 **Causa**: Usuário não tem acesso de admin na conta de anúncios.
 
 **Solução**:
+
 1. Acesse [Business Settings](https://business.facebook.com/settings/ad-accounts)
 2. Adicione seu usuário como **Admin** da conta de anúncios
 3. Aguarde alguns minutos e tente novamente
@@ -344,6 +347,7 @@ Adicione ao nó de criação de campanha:
 **Causa**: ID do creative inválido ou não pertence à conta.
 
 **Solução**:
+
 1. Crie um novo creative no Ads Manager
 2. Copie o ID correto
 3. Atualize `META_CREATIVE_ID` no `.env`
@@ -353,6 +357,7 @@ Adicione ao nó de criação de campanha:
 **Causa**: Muitas requisições em curto período.
 
 **Solução**:
+
 1. Aguarde 1 hora antes de tentar novamente
 2. Implemente throttling no workflow
 3. Use delays entre as chamadas de API
@@ -363,14 +368,14 @@ Adicione ao nó de criação de campanha:
 
 A Meta Ads API possui os seguintes limites:
 
-| Limite | Valor |
-|--------|-------|
-| Requisições por usuário/hora | 200 |
-| Requisições por app/hora | 4.800 |
-| Taxa de requisição | 1 req/s (burst de 10) |
-| Campanhas por conta | 10.000 |
-| Ad sets por campanha | 1.000 |
-| Anúncios por ad set | 50 |
+| Limite                       | Valor                 |
+| ---------------------------- | --------------------- |
+| Requisições por usuário/hora | 200                   |
+| Requisições por app/hora     | 4.800                 |
+| Taxa de requisição           | 1 req/s (burst de 10) |
+| Campanhas por conta          | 10.000                |
+| Ad sets por campanha         | 1.000                 |
+| Anúncios por ad set          | 50                    |
 
 ### Boas Práticas
 
@@ -417,19 +422,22 @@ Tokens de longa duração expiram após 60 dias. Configure renovação automáti
 
 ```javascript
 // scripts/refresh-meta-token.js
-import axios from 'axios';
+import axios from "axios";
 
 async function refreshToken() {
-  const response = await axios.get('https://graph.facebook.com/v18.0/oauth/access_token', {
-    params: {
-      grant_type: 'fb_exchange_token',
-      client_id: process.env.META_APP_ID,
-      client_secret: process.env.META_APP_SECRET,
-      fb_exchange_token: process.env.META_ACCESS_TOKEN
+  const response = await axios.get(
+    "https://graph.facebook.com/v18.0/oauth/access_token",
+    {
+      params: {
+        grant_type: "fb_exchange_token",
+        client_id: process.env.META_APP_ID,
+        client_secret: process.env.META_APP_SECRET,
+        fb_exchange_token: process.env.META_ACCESS_TOKEN,
+      },
     }
-  });
-  
-  console.log('Novo token:', response.data.access_token);
+  );
+
+  console.log("Novo token:", response.data.access_token);
   // Atualize seu .env ou secrets manager
 }
 
