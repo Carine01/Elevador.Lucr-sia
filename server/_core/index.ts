@@ -16,6 +16,7 @@ import { getDb } from "../db";
 import { subscription as subscriptionTable } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { PLANS } from "../routers/subscription";
+import { trackEvent, ANALYTICS_EVENTS } from "../../shared/analytics";
 
 // Inicializar Stripe
 const stripe = new Stripe(ENV.STRIPE_SECRET_KEY || "", {
@@ -79,6 +80,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       .where(eq(subscriptionTable.userId, userId));
 
     logger.info('Checkout completed successfully', { userId, plan });
+
+    // Rastrear conclusão do checkout
+    trackEvent(ANALYTICS_EVENTS.CHECKOUT_COMPLETED, {
+      plan,
+      amount: session.amount_total,
+    }, userId);
   } catch (error) {
     logger.error('Error handling checkout completed', error);
     throw error;
@@ -144,6 +151,11 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       .where(eq(subscriptionTable.id, userSub.id));
 
     logger.info('Credits renewed after payment', { userId: userSub.userId, plan: userSub.plan });
+
+    // Rastrear renovação de créditos
+    trackEvent(ANALYTICS_EVENTS.CREDITS_RENEWED, {
+      plan: userSub.plan,
+    }, userSub.userId);
   } catch (error) {
     logger.error('Error renewing credits', error);
   }
