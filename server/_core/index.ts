@@ -119,10 +119,18 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   const db = await getDb();
   if (!db) return;
 
+  // Stripe Invoice includes subscription as string or expanded object
+  const subscriptionId = (invoice as any).subscription as string | undefined;
+
+  if (!subscriptionId) {
+    logger.warn('No subscription ID in invoice', { invoiceId: invoice.id });
+    return;
+  }
+
   const [userSub] = await db
     .select()
     .from(subscriptionTable)
-    .where(eq(subscriptionTable.stripeSubscriptionId, invoice.subscription as string))
+    .where(eq(subscriptionTable.stripeSubscriptionId, subscriptionId))
     .limit(1);
 
   if (!userSub) {
@@ -169,7 +177,7 @@ async function startServer() {
   ];
 
   app.use(cors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       // Permitir requisições sem origin (mobile apps, postman, etc)
       if (!origin) return callback(null, true);
       

@@ -41,7 +41,7 @@ export default function Home() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
-  const landingPageStyles = \`
+  const landingPageStyles = `
     :root{
       --lavanda:#A36BFF;
       --lavanda-200:#EDE8FF;
@@ -55,7 +55,7 @@ export default function Home() {
     .video-wrap{position:relative;overflow:hidden;border-radius:16px}
     .video-wrap video{width:100%;height:100%;object-fit:cover;display:block}
     .video-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,20,0.25),rgba(10,6,20,0.35));display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;padding:2rem}
-  \`;
+  `;
 
   return (
     <>
