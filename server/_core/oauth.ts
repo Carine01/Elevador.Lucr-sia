@@ -28,6 +28,10 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
+      // Check if user already exists
+      const existingUser = await db.getUserByOpenId(userInfo.openId);
+      const isNewUser = !existingUser;
+
       await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
@@ -35,6 +39,17 @@ export function registerOAuthRoutes(app: Express) {
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
       });
+
+      // Send welcome notification for new users
+      if (isNewUser) {
+        const user = await db.getUserByOpenId(userInfo.openId);
+        if (user) {
+          const { notifyWelcome } = await import('./notificationService');
+          await notifyWelcome(user.id, user.name || 'Usuário').catch(err => {
+            console.error('[OAuth] Failed to send welcome notification', err);
+          });
+        }
+      }
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",

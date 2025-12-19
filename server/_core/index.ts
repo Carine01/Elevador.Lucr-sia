@@ -144,6 +144,10 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       .where(eq(subscriptionTable.id, userSub.id));
 
     logger.info('Credits renewed after payment', { userId: userSub.userId, plan: userSub.plan });
+    
+    // Notificar renovação de assinatura
+    const { notifySubscriptionRenewed } = await import('./notificationService');
+    await notifySubscriptionRenewed(userSub.userId, userSub.plan, planConfig.credits);
   } catch (error) {
     logger.error('Error renewing credits', error);
   }

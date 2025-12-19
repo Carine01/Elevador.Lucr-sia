@@ -248,6 +248,21 @@ export const subscriptionRouter = router({
         })
         .where(eq(subscriptionTable.id, userSubscription.id));
 
+      // Notificar sobre créditos baixos ou esgotados
+      if (input.operation === "subtract") {
+        const { notifyCreditsLow, notifyCreditsDepleted } = await import("../_core/notificationService");
+        
+        if (newCredits === 0) {
+          await notifyCreditsDepleted(ctx.user.id).catch(err => {
+            console.error('Failed to send credits depleted notification', err);
+          });
+        } else if (newCredits <= 3 && newCredits > 0) {
+          await notifyCreditsLow(ctx.user.id, newCredits).catch(err => {
+            console.error('Failed to send credits low notification', err);
+          });
+        }
+      }
+
       return {
         success: true,
         creditsRemaining: newCredits,

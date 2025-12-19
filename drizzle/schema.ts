@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, index } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, index, boolean, json } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -114,3 +114,45 @@ export const subscription = mysqlTable("subscription", {
 
 export type Subscription = typeof subscription.$inferSelect;
 export type InsertSubscription = typeof subscription.$inferInsert;
+
+/**
+ * Sistema de notificações em tempo real
+ */
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  
+  type: mysqlEnum("type", [
+    "credits_low",
+    "credits_depleted",
+    "subscription_renewed",
+    "subscription_expiring",
+    "achievement_unlocked",
+    "welcome",
+    "milestone",
+    "info",
+  ]).notNull(),
+  
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  
+  // Metadata opcional
+  metadata: json("metadata").$type<Record<string, any>>(),
+  
+  // Status
+  read: boolean("read").default(false).notNull(),
+  readAt: timestamp("readAt"),
+  
+  // Ação (opcional)
+  actionUrl: varchar("actionUrl", { length: 255 }),
+  actionLabel: varchar("actionLabel", { length: 100 }),
+  
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("notification_user_id_idx").on(table.userId),
+  readIdx: index("notification_read_idx").on(table.read),
+  createdAtIdx: index("notification_created_at_idx").on(table.createdAt),
+}));
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

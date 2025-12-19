@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 
 interface ElevareDashboardLayoutProps {
   children: React.ReactNode;
@@ -211,6 +212,7 @@ export default function ElevareDashboardLayout({
                 </span>
               </div>
             </Card>
+            <NotificationCenter />
           </div>
         </div>
 
