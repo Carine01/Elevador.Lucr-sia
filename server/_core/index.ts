@@ -115,15 +115,28 @@ async function handleSubscriptionChange(subscription: Stripe.Subscription) {
   }
 }
 
+// Helper function to extract subscription ID from Stripe Invoice
+function getSubscriptionIdFromInvoice(invoice: Stripe.Invoice): string | null {
+  // invoice.subscription can be string or Stripe.Subscription object
+  // Using type assertion as the property might not be in all API versions
+  const subscription = (invoice as any).subscription;
+  
+  if (typeof subscription === 'string') {
+    return subscription;
+  }
+  
+  if (subscription && typeof subscription === 'object' && subscription.id) {
+    return subscription.id;
+  }
+  
+  return null;
+}
+
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   const db = await getDb();
   if (!db) return;
 
-  // invoice.subscription can be string or Stripe.Subscription object
-  // Using type assertion as the property might not be in all API versions
-  const subscriptionId = typeof (invoice as any).subscription === 'string' 
-    ? (invoice as any).subscription 
-    : (invoice as any).subscription?.id;
+  const subscriptionId = getSubscriptionIdFromInvoice(invoice);
 
   if (!subscriptionId) {
     logger.warn('No subscription ID in invoice', { invoiceId: invoice.id });

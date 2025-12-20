@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e  # Exit on any error
 
 # ==========================================
 # SCRIPT DE SETUP RÁPIDO
@@ -13,6 +14,14 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+
+# Verificar se Node.js está instalado
+if ! command -v node &> /dev/null; then
+    echo -e "${RED}❌ Node.js não encontrado!${NC}"
+    echo "Por favor, instale Node.js 22+ antes de continuar:"
+    echo "https://nodejs.org/"
+    exit 1
+fi
 
 # Verificar se .env existe
 if [ -f .env ]; then
@@ -46,8 +55,14 @@ echo ""
 
 # Gerar JWT_SECRET se necessário
 echo "🔑 Gerando JWT_SECRET..."
-JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
-echo "JWT_SECRET sugerido: $JWT_SECRET"
+if command -v node &> /dev/null; then
+    JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")
+    echo "JWT_SECRET sugerido: $JWT_SECRET"
+    echo "Você pode usar este valor no seu arquivo .env"
+else
+    echo -e "${YELLOW}⚠️  Node.js não disponível para gerar JWT_SECRET automaticamente${NC}"
+    echo "Use um gerador online: https://www.uuidgenerator.net/api/guid/32"
+fi
 echo ""
 
 # Perguntar se quer editar agora
