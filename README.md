@@ -10,6 +10,37 @@ Não é manipulação — é comunicação profissional.
 
 ---
 
+## ⚡ INÍCIO RÁPIDO
+
+**Status:** ✅ Aplicação revisada e pronta para deploy!
+
+### Para Começar Agora:
+
+```bash
+# 1. Setup inicial
+./setup.sh
+
+# 2. Instalar dependências
+pnpm install
+
+# 3. Configurar .env (edite com suas credenciais)
+nano .env
+
+# 4. Aplicar migrations
+pnpm db:push
+
+# 5. Iniciar desenvolvimento
+pnpm dev
+```
+
+### 📚 Documentação Importante:
+- **[RELATORIO_REVISAO.md](RELATORIO_REVISAO.md)** - ⭐ Leia primeiro! Guia completo
+- **[DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Checklist técnico de deploy
+- **[DEPLOY.md](DEPLOY.md)** - Guia detalhado de deploy
+- **[INSTRUCOES_IMPLEMENTACAO.md](INSTRUCOES_IMPLEMENTACAO.md)** - Instruções técnicas
+
+---
+
 ## 📋 Índice
 
 - [Visão Geral](#visão-geral)
