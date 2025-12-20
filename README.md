@@ -210,8 +210,8 @@ pnpm format
 | Plano | Preço | Créditos | Recursos |
 |-------|-------|----------|----------|
 | **Grátis** | R$ 0 | 1/mês | Radar de Bio básico |
-| **PRO** | R$ 29/mês | 10/mês | E-books, Prompts, Anúncios |
-| **PRO+** | R$ 79/mês | Ilimitado | Todos os recursos + Suporte VIP |
+| **PRO** | R$ 67,00/mês | 10/mês | E-books, Prompts, Anúncios |
+| **PRO+** | R$ 117,00/mês | Ilimitado | Todos os recursos + Suporte VIP |
 
 ---
 
@@ -409,14 +409,14 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 ## 👥 Autores
 
-- **Elevare Team** - Inteligência de Vendas para Estética
+- **Elevare Team** - Inteligência de Vendas para Estética.
 
 ---
 
 ## 🙏 Agradecimentos
 
 - Comunidade de profissionais de estética
-- Equipe Manus
+- Carine Marques- Fisioterapeuta autante na Estética há mais de 20 anos.
 - Contribuidores open source
 
 ---
