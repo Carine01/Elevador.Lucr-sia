@@ -12,6 +12,7 @@ Não é manipulação — é comunicação profissional.
 
 ## 📋 Índice
 
+- [🚀 Início Rápido para Iniciantes](#-início-rápido-para-iniciantes)
 - [Visão Geral](#visão-geral)
 - [Funcionalidades](#funcionalidades)
 - [Tecnologias](#tecnologias)
@@ -22,6 +23,151 @@ Não é manipulação — é comunicação profissional.
 - [API Reference](#api-reference)
 - [Deploy](#deploy)
 - [Contribuição](#contribuição)
+- [Guias para Iniciantes](#guias-para-iniciantes)
+
+---
+
+## 🚀 Início Rápido para Iniciantes
+
+**Novo no desenvolvimento? Comece aqui!** Este guia vai te levar do zero até ter o Elevare rodando no seu computador em ~15 minutos.
+
+### ✅ Pré-requisitos Mínimos
+
+Antes de começar, instale no seu computador:
+
+1. **Node.js 22+** (JavaScript runtime)
+   - Download: https://nodejs.org/
+   - Teste: `node --version` (deve mostrar v22.x.x)
+
+2. **pnpm 10+** (Gerenciador de pacotes - mais rápido que npm)
+   - Instale: `npm install -g pnpm`
+   - Teste: `pnpm --version` (deve mostrar 10.x.x)
+
+3. **MySQL 8+** (Banco de dados)
+   - Windows/Mac: https://dev.mysql.com/downloads/mysql/
+   - Linux: `sudo apt-get install mysql-server`
+   - Teste: `mysql --version`
+
+4. **Git** (Controle de versão)
+   - Download: https://git-scm.com/
+   - Teste: `git --version`
+
+### 📦 Instalação em 5 Passos
+
+#### Passo 1: Clone o Repositório
+
+```bash
+# Clone o projeto para seu computador
+git clone https://github.com/Carine01/Elevador.Lucr-sia.git
+
+# Entre na pasta do projeto
+cd Elevador.Lucr-sia
+```
+
+#### Passo 2: Instale as Dependências
+
+```bash
+# Instala todas as bibliotecas necessárias (~2-3 minutos)
+pnpm install
+```
+
+**O que acontece aqui?** O pnpm baixa todas as bibliotecas (pacotes) que o projeto precisa. É como baixar todos os "ingredientes" da receita.
+
+#### Passo 3: Configure o Banco de Dados
+
+```bash
+# 1. Conecte ao MySQL (use sua senha)
+mysql -u root -p
+
+# 2. Dentro do MySQL, crie o banco de dados:
+CREATE DATABASE elevare_db;
+
+# 3. Saia do MySQL
+exit;
+```
+
+#### Passo 4: Configure as Variáveis de Ambiente
+
+```bash
+# 1. Copie o arquivo de exemplo
+cp .env.example .env
+
+# 2. Abra o arquivo .env para editar
+code .env
+# ou
+nano .env
+```
+
+**Configure no mínimo estas variáveis obrigatórias:**
+
+```env
+# Banco de dados (use SUA senha do MySQL)
+DATABASE_URL=mysql://root:suasenha@localhost:3306/elevare_db
+
+# Gere uma chave forte (rode este comando no terminal):
+# node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+JWT_SECRET=cole_aqui_a_chave_gerada_com_32_caracteres
+
+# OAuth Manus (obtenha em https://oauth.manus.im)
+OAUTH_SERVER_URL=https://oauth.manus.im
+VITE_APP_ID=seu_app_id_aqui
+OWNER_OPEN_ID=seu_owner_openid_aqui
+```
+
+**💡 Dica:** Para obter VITE_APP_ID e OWNER_OPEN_ID, você precisa criar uma conta em https://oauth.manus.im. Leia o guia completo em [ENV_GUIDE.md](ENV_GUIDE.md).
+
+**🎯 MVP Rápido:** Se quiser apenas testar localmente, você pode deixar Stripe e Forge API em branco por enquanto. Configure depois quando precisar de pagamentos e IA.
+
+#### Passo 5: Inicialize o Banco e Rode o Projeto
+
+```bash
+# 1. Crie as tabelas no banco de dados
+pnpm db:push
+
+# 2. Inicie o servidor de desenvolvimento
+pnpm dev
+```
+
+**🎉 Pronto!** Acesse: http://localhost:3000
+
+**O que esperar ver:**
+- ✅ Servidor rodando na porta 3000
+- ✅ Mensagem "✅ Todas as variáveis de ambiente obrigatórias foram validadas"
+- ✅ Interface do Elevare carregando no navegador
+
+### 🐛 Problemas Comuns?
+
+**Erro: "Cannot connect to database"**
+- ✅ Verifique se o MySQL está rodando: `sudo systemctl status mysql`
+- ✅ Confirme usuário e senha no .env
+- ✅ Teste a conexão: `mysql -u root -p`
+
+**Erro: "Port 3000 already in use"**
+- ✅ Mude a porta no .env: `PORT=3001`
+- ✅ Ou pare o processo usando a porta 3000
+
+**Erro: "JWT_SECRET must be at least 32 characters"**
+- ✅ Gere uma nova chave: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+- ✅ Cole no .env
+
+**Mais problemas?** Consulte o [guia completo de troubleshooting](#troubleshooting).
+
+### 📚 Próximos Passos
+
+Agora que está rodando:
+
+1. **Explore a interface** - Navegue pelas funcionalidades
+2. **Leia a documentação** - [ENV_GUIDE.md](ENV_GUIDE.md) para entender as variáveis
+3. **Configure pagamentos** - Quando quiser ativar o Stripe
+4. **Configure IA** - Para usar geração de conteúdo
+5. **Faça seu primeiro PR** - [FIRST_PR_GUIDE.md](FIRST_PR_GUIDE.md) te ensina como
+
+### 🆘 Precisa de Ajuda?
+
+- 📖 **Guia de Configuração .env:** [ENV_GUIDE.md](ENV_GUIDE.md)
+- 🎯 **Primeiro PR:** [FIRST_PR_GUIDE.md](FIRST_PR_GUIDE.md)
+- 🚀 **Deploy em Produção:** [DEPLOY.md](DEPLOY.md)
+- 🔧 **Instruções Detalhadas:** [INSTRUCOES_IMPLEMENTACAO.md](INSTRUCOES_IMPLEMENTACAO.md)
 
 ---
 
@@ -330,6 +476,38 @@ pnpm db:push
 
 ---
 
+## 📚 Guias para Iniciantes
+
+Documentação adicional para facilitar sua jornada:
+
+### 🔐 Configuração de Ambiente
+- **[ENV_GUIDE.md](ENV_GUIDE.md)** - Guia completo de configuração do arquivo .env
+  - Explicação detalhada de cada variável
+  - Como obter chaves e credenciais
+  - Boas práticas de segurança e LGPD
+  - Troubleshooting de problemas comuns
+
+### 🎯 Primeiro Pull Request
+- **[FIRST_PR_GUIDE.md](FIRST_PR_GUIDE.md)** - Como fazer seu primeiro PR
+  - Passo a passo para iniciantes em Git
+  - Comandos essenciais explicados
+  - Como usar GitHub Copilot
+  - Templates e boas práticas
+
+### 🚀 Deploy em Produção
+- **[DEPLOY.md](DEPLOY.md)** - Guia completo de deploy
+  - Configuração de servidores
+  - Stripe, banco de dados e APIs
+  - Monitoramento e escalabilidade
+
+### 🔧 Implementação Técnica
+- **[INSTRUCOES_IMPLEMENTACAO.md](INSTRUCOES_IMPLEMENTACAO.md)** - Detalhes técnicos
+  - Configurações avançadas
+  - Testes e validações
+  - Troubleshooting técnico
+
+---
+
 ## 🎨 Customização
 
 ### Temas e Cores
@@ -351,19 +529,343 @@ Atualize os seguintes arquivos:
 
 ## 🐛 Troubleshooting
 
-### Erro de conexão com banco de dados
-- Verifique se o MySQL está rodando
-- Confirme as credenciais no `.env`
-- Execute `pnpm db:push` novamente
+### Problemas Comuns e Soluções
 
-### Erro de autenticação OAuth
-- Verifique `VITE_APP_ID` e `OAUTH_SERVER_URL`
-- Confirme se o app está registrado no OAuth server
+#### ❌ Erro: "Cannot connect to database"
 
-### Erro no Stripe
-- Verifique as chaves no `.env`
-- Confirme se os Price IDs estão corretos
-- Teste com chaves de teste primeiro
+**Sintoma:** Aplicação não inicia e mostra erro de conexão com banco de dados.
+
+**Soluções:**
+
+1. **Verifique se o MySQL está rodando:**
+   ```bash
+   # Linux/Mac
+   sudo systemctl status mysql
+   # ou
+   brew services list | grep mysql
+   
+   # Iniciar se necessário
+   sudo systemctl start mysql
+   # ou
+   brew services start mysql
+   ```
+
+2. **Teste a conexão manualmente:**
+   ```bash
+   mysql -u root -p
+   # Digite sua senha quando solicitado
+   ```
+
+3. **Verifique a DATABASE_URL no .env:**
+   ```env
+   # Formato correto:
+   DATABASE_URL=mysql://usuario:senha@localhost:3306/elevare_db
+   
+   # Comum em produção (com SSL):
+   DATABASE_URL=mysql://user:pass@host.psdb.cloud/elevare_db?ssl={"rejectUnauthorized":true}
+   ```
+
+4. **Crie o banco se não existir:**
+   ```bash
+   mysql -u root -p
+   CREATE DATABASE elevare_db;
+   exit;
+   ```
+
+5. **Execute as migrations:**
+   ```bash
+   pnpm db:push
+   ```
+
+---
+
+#### ❌ Erro: "JWT_SECRET must be at least 32 characters"
+
+**Sintoma:** Servidor não inicia e reclama do tamanho do JWT_SECRET.
+
+**Solução:**
+
+```bash
+# Gere uma chave forte de 64 bytes (128 caracteres hex)
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+
+# Copie o resultado e cole no .env:
+JWT_SECRET=resultado_aqui_vai_ter_pelo_menos_32_caracteres
+```
+
+**Exemplo de chave válida:**
+```env
+JWT_SECRET=a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6
+```
+
+---
+
+#### ❌ Erro: "Port 3000 is already in use"
+
+**Sintoma:** Não consegue iniciar o servidor porque a porta já está ocupada.
+
+**Soluções:**
+
+1. **Mude a porta no .env:**
+   ```env
+   PORT=3001
+   # ou qualquer outra porta livre
+   ```
+
+2. **Ou pare o processo usando a porta 3000:**
+   ```bash
+   # Linux/Mac - encontre o processo
+   lsof -i :3000
+   
+   # Mate o processo (use o PID do comando acima)
+   kill -9 <PID>
+   
+   # Windows
+   netstat -ano | findstr :3000
+   taskkill /PID <PID> /F
+   ```
+
+---
+
+#### ❌ Erro de autenticação OAuth
+
+**Sintoma:** Login não funciona ou retorna erro "Invalid redirect_uri" ou "Invalid client_id".
+
+**Soluções:**
+
+1. **Verifique as variáveis no .env:**
+   ```env
+   OAUTH_SERVER_URL=https://oauth.manus.im  # Não altere!
+   VITE_APP_ID=seu_app_id_aqui              # Do Dashboard Manus
+   OWNER_OPEN_ID=seu_owner_openid_aqui      # Do Dashboard Manus
+   ```
+
+2. **Confirme se o app está registrado:**
+   - Acesse https://oauth.manus.im
+   - Verifique se sua aplicação existe
+   - Confirme a URL de callback está correta
+
+3. **URL de callback correta:**
+   - Desenvolvimento: `http://localhost:3000/api/oauth/callback`
+   - Produção: `https://seudominio.com/api/oauth/callback`
+
+---
+
+#### ❌ Erro no Stripe (Pagamentos)
+
+**Sintomas:** 
+- "No such price: 'price_...'"
+- "Invalid API key"
+- "Webhook signature verification failed"
+
+**Soluções:**
+
+1. **Verifique se está usando chaves do mesmo ambiente:**
+   ```env
+   # Desenvolvimento (TESTE)
+   STRIPE_SECRET_KEY=sk_test_...
+   
+   # Produção (LIVE)
+   STRIPE_SECRET_KEY=sk_live_...
+   ```
+
+2. **Confirme os Price IDs:**
+   - Dashboard Stripe → Products
+   - Copie exatamente o "Price ID" de cada produto
+   - Cole no .env:
+   ```env
+   STRIPE_PRO_PRICE_ID=price_1Abc123...
+   STRIPE_PRO_PLUS_PRICE_ID=price_2Xyz789...
+   ```
+
+3. **Webhook em desenvolvimento:**
+   ```bash
+   # Instale Stripe CLI
+   brew install stripe/stripe-cli/stripe
+   
+   # Autentique
+   stripe login
+   
+   # Escute webhooks localmente
+   stripe listen --forward-to localhost:3000/api/stripe/webhook
+   
+   # Copie o "whsec_..." que aparece e cole no .env
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   ```
+
+4. **Webhook em produção:**
+   - Dashboard Stripe → Developers → Webhooks
+   - Add endpoint: `https://seudominio.com/api/stripe/webhook`
+   - Eventos: `checkout.session.completed`, `customer.subscription.*`, `invoice.payment_*`
+   - Copie o "Signing secret"
+
+5. **Teste com cartão de teste:**
+   ```
+   Número: 4242 4242 4242 4242
+   Data: Qualquer data futura
+   CVC: Qualquer 3 dígitos
+   CEP: Qualquer CEP
+   ```
+
+---
+
+#### ❌ Erro: "OPENAI_API_KEY is not configured" ou erro de IA
+
+**Sintoma:** Funcionalidades de IA (e-books, prompts, anúncios) não funcionam.
+
+**Solução:**
+
+1. **Configure as variáveis do Forge API:**
+   ```env
+   BUILT_IN_FORGE_API_URL=https://api.forge.manus.im
+   BUILT_IN_FORGE_API_KEY=sua_forge_api_key
+   ```
+
+2. **Obtenha a API Key:**
+   - Acesse Dashboard Manus
+   - Vá em "API Keys" ou "Forge API"
+   - Gere uma nova chave ou copie existente
+   - Cole no .env
+
+3. **Verifique se a chave é válida:**
+   ```bash
+   # Teste básico (substitua pela sua chave)
+   curl -H "Authorization: Bearer sua_forge_api_key" \
+        https://api.forge.manus.im/health
+   ```
+
+---
+
+#### ❌ Erro: "CORS blocked" ou "Access-Control-Allow-Origin"
+
+**Sintoma:** Frontend não consegue chamar a API, erro de CORS no console do navegador.
+
+**Solução:**
+
+1. **Adicione sua origem em ALLOWED_ORIGINS:**
+   ```env
+   # Desenvolvimento
+   ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+   
+   # Produção (sem espaços!)
+   ALLOWED_ORIGINS=https://seudominio.com,https://www.seudominio.com
+   ```
+
+2. **Verifique se não há espaços:**
+   ```env
+   # ❌ ERRADO (tem espaços)
+   ALLOWED_ORIGINS=http://localhost:3000, http://localhost:5173
+   
+   # ✅ CORRETO (sem espaços)
+   ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
+   ```
+
+3. **Reinicie o servidor após mudar:**
+   ```bash
+   # Pare o servidor (Ctrl+C)
+   # Inicie novamente
+   pnpm dev
+   ```
+
+---
+
+#### ❌ Erro: "pnpm: command not found"
+
+**Sintoma:** Comando pnpm não é reconhecido.
+
+**Solução:**
+
+```bash
+# Instale o pnpm globalmente
+npm install -g pnpm
+
+# Verifique a instalação
+pnpm --version
+```
+
+---
+
+#### ❌ Erro: Build falha ou "Module not found"
+
+**Sintoma:** Build não completa ou mostra erros de módulos faltando.
+
+**Soluções:**
+
+1. **Limpe e reinstale dependências:**
+   ```bash
+   # Remova node_modules e lock file
+   rm -rf node_modules pnpm-lock.yaml
+   
+   # Limpe cache
+   pnpm store prune
+   
+   # Reinstale
+   pnpm install
+   ```
+
+2. **Verifique a versão do Node:**
+   ```bash
+   node --version
+   # Deve ser v22.x.x ou superior
+   ```
+
+3. **Use a versão correta do Node:**
+   ```bash
+   # Com nvm (recomendado)
+   nvm install 22
+   nvm use 22
+   ```
+
+---
+
+#### ❌ Erro: "Too many requests" ou Rate Limit
+
+**Sintoma:** API retorna erro 429 após várias requisições.
+
+**O que é:** Proteção contra abuso - limite de requisições por IP/usuário.
+
+**Solução:**
+
+- ✅ Aguarde 15 minutos (limite reseta automaticamente)
+- ✅ Faça login (usuários autenticados têm limites maiores)
+- ✅ Em desenvolvimento, você pode desabilitar temporariamente (não recomendado)
+
+**Limites padrão:**
+- Anônimos: 10 req/15min
+- Autenticados: 100 req/15min
+
+---
+
+### 🆘 Ainda com Problemas?
+
+Se nenhuma solução acima funcionou:
+
+1. **Verifique os logs do servidor**
+   ```bash
+   # Logs aparecem no terminal onde rodou `pnpm dev`
+   # Procure por mensagens de erro em vermelho
+   ```
+
+2. **Consulte guias detalhados:**
+   - [ENV_GUIDE.md](ENV_GUIDE.md) - Problemas de configuração
+   - [DEPLOY.md](DEPLOY.md) - Problemas de deploy
+   - [INSTRUCOES_IMPLEMENTACAO.md](INSTRUCOES_IMPLEMENTACAO.md) - Troubleshooting técnico
+
+3. **Limpe tudo e comece do zero:**
+   ```bash
+   # Última solução - reset completo
+   git clean -fdx
+   pnpm install
+   cp .env.example .env
+   # Configure o .env novamente
+   pnpm db:push
+   pnpm dev
+   ```
+
+4. **Abra uma Issue no GitHub:**
+   - Descreva o problema detalhadamente
+   - Inclua mensagens de erro completas
+   - Informe seu sistema operacional e versões (Node, pnpm, MySQL)
 
 ---
 
