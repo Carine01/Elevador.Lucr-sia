@@ -85,19 +85,17 @@ JWT_SECRET=sua_chave_secreta_aqui_minimo_32_caracteres
 
 **Como gerar uma chave forte:**
 
-**Opção 1 - No terminal (recomendado):**
+**Opção 1 - No terminal (RECOMENDADO):**
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-**Opção 2 - Online (use apenas em desenvolvimento):**
-- Acesse: https://generate-secret.vercel.app/32
-- Copie a chave gerada
-
-**Opção 3 - Manual:**
+**Opção 2 - Manual:**
 ```env
 JWT_SECRET=A1b2C3d4E5f6G7h8I9j0K1l2M3n4O5p6Q7r8S9t0U1v2W3x4Y5z6
 ```
+
+**⚠️ NUNCA use geradores online para produção!** Apenas gere localmente no seu computador.
 
 **⚠️ Requisitos OBRIGATÓRIOS:**
 - Mínimo 32 caracteres
@@ -119,10 +117,12 @@ VITE_APP_ID=seu_app_id_aqui
 ```
 
 **Como obter:**
-1. Acesse o Dashboard Manus OAuth
-2. Crie uma nova aplicação
-3. Copie o "App ID" gerado
-4. Cole no `.env`
+1. Acesse https://oauth.manus.im e faça login
+2. No dashboard, vá em "Aplicações" ou "Apps"
+3. Clique em "Criar Nova Aplicação"
+4. Preencha as informações básicas
+5. Copie o "App ID" gerado
+6. Cole no `.env`
 
 **Exemplo:**
 ```env

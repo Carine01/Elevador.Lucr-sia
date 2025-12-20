@@ -148,7 +148,13 @@ VITE_APP_ID=seu_app_id_aqui
 OWNER_OPEN_ID=seu_owner_openid_aqui
 ```
 
-**💡 Dica:** Para obter VITE_APP_ID e OWNER_OPEN_ID, você precisa criar uma conta em https://oauth.manus.im. Leia o guia completo em [ENV_GUIDE.md](ENV_GUIDE.md).
+**💡 Dica:** Para obter VITE_APP_ID e OWNER_OPEN_ID, você precisa:
+1. Criar conta em https://oauth.manus.im
+2. No dashboard, ir em "Aplicações" → "Criar Nova Aplicação"
+3. Copiar o "App ID" gerado
+4. Seu "Owner OpenID" estará em "Perfil" ou "Configurações"
+
+Leia o guia completo em [ENV_GUIDE.md](ENV_GUIDE.md).
 
 **🎯 MVP Rápido:** Se quiser apenas testar localmente, você pode deixar Stripe e Forge API em branco por enquanto. Configure depois quando precisar de pagamentos e IA.
 
@@ -581,15 +587,16 @@ Atualize os seguintes arquivos:
 
 1. **Verifique se o MySQL está rodando:**
    ```bash
-   # Linux/Mac
+   # Linux
    sudo systemctl status mysql
-   # ou
-   brew services list | grep mysql
+   sudo systemctl start mysql  # Se não estiver rodando
    
-   # Iniciar se necessário
-   sudo systemctl start mysql
-   # ou
-   brew services start mysql
+   # macOS
+   brew services list | grep mysql
+   brew services start mysql  # Se não estiver rodando
+   
+   # Windows
+   # Abra Serviços (services.msc) e inicie o serviço MySQL
    ```
 
 2. **Teste a conexão manualmente:**
