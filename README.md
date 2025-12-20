@@ -12,6 +12,7 @@ Não é manipulação — é comunicação profissional.
 
 ## 📋 Índice
 
+- [⚡ Guia Rápido (5 min)](#-guia-rápido-5-min) - Para quem tem pressa!
 - [🚀 Início Rápido para Iniciantes](#-início-rápido-para-iniciantes)
 - [Visão Geral](#visão-geral)
 - [Funcionalidades](#funcionalidades)
@@ -22,14 +23,47 @@ Não é manipulação — é comunicação profissional.
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [API Reference](#api-reference)
 - [Deploy](#deploy)
+- [Troubleshooting](#-troubleshooting)
 - [Contribuição](#contribuição)
 - [Guias para Iniciantes](#guias-para-iniciantes)
+
+---
+
+## ⚡ Guia Rápido (5 min)
+
+**Quer começar AGORA?** 
+
+```bash
+# 1. Clone e instale
+git clone https://github.com/Carine01/Elevador.Lucr-sia.git
+cd Elevador.Lucr-sia
+pnpm install
+
+# 2. Configure banco
+mysql -u root -p
+CREATE DATABASE elevare_db;
+exit;
+
+# 3. Configure .env (copie .env.example e preencha)
+cp .env.example .env
+# Edite .env com suas credenciais
+
+# 4. Rode!
+pnpm db:push
+pnpm dev
+```
+
+🎯 **Acesse:** http://localhost:3000
+
+📖 **Detalhes completos:** [QUICK_START.md](QUICK_START.md)
 
 ---
 
 ## 🚀 Início Rápido para Iniciantes
 
 **Novo no desenvolvimento? Comece aqui!** Este guia vai te levar do zero até ter o Elevare rodando no seu computador em ~15 minutos.
+
+**⚡ Super Rápido?** Veja [QUICK_START.md](QUICK_START.md) para um resumo de 5 minutos!
 
 ### ✅ Pré-requisitos Mínimos
 
@@ -164,6 +198,7 @@ Agora que está rodando:
 
 ### 🆘 Precisa de Ajuda?
 
+- ⚡ **Guia Super Rápido:** [QUICK_START.md](QUICK_START.md)
 - 📖 **Guia de Configuração .env:** [ENV_GUIDE.md](ENV_GUIDE.md)
 - 🎯 **Primeiro PR:** [FIRST_PR_GUIDE.md](FIRST_PR_GUIDE.md)
 - 🚀 **Deploy em Produção:** [DEPLOY.md](DEPLOY.md)
@@ -479,6 +514,13 @@ pnpm db:push
 ## 📚 Guias para Iniciantes
 
 Documentação adicional para facilitar sua jornada:
+
+### ⚡ Guia Rápido (5 min)
+- **[QUICK_START.md](QUICK_START.md)** - Setup mínimo em 5 minutos
+  - Comandos essenciais
+  - Cola de comandos úteis
+  - Troubleshooting rápido
+  - Checklist de início
 
 ### 🔐 Configuração de Ambiente
 - **[ENV_GUIDE.md](ENV_GUIDE.md)** - Guia completo de configuração do arquivo .env
