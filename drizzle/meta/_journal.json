@@ -22,6 +22,13 @@
       "when": 1763130493912,
       "tag": "0002_handy_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1766320978849,
+      "tag": "0003_gigantic_mentallo",
+      "breakpoints": true
     }
   ]
 }
