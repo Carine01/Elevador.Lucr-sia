@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, Zap, Sparkles, Crown } from "lucide-react";
+import { Check, Sparkles, Crown } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -26,16 +26,11 @@ export default function Pricing() {
       return;
     }
 
-    if (planId === "free") {
-      toast.info("Você já está no plano gratuito");
-      return;
-    }
-
     setLoadingPlan(planId);
 
     try {
       const result = await createCheckout.mutateAsync({
-        plan: planId as "pro" | "pro_plus",
+        plan: planId as "essencial" | "profissional",
         successUrl: `${window.location.origin}/dashboard?checkout=success`,
         cancelUrl: `${window.location.origin}/pricing?checkout=cancelled`,
       });
@@ -53,25 +48,21 @@ export default function Pricing() {
 
   const getPlanIcon = (planId: string) => {
     switch (planId) {
-      case "free":
-        return Zap;
-      case "pro":
+      case "essencial":
         return Sparkles;
-      case "pro_plus":
+      case "profissional":
         return Crown;
       default:
-        return Zap;
+        return Sparkles;
     }
   };
 
   const getPlanColor = (planId: string) => {
     switch (planId) {
-      case "free":
-        return "from-slate-500 to-slate-600";
-      case "pro":
+      case "essencial":
+        return "from-purple-500 to-violet-500";
+      case "profissional":
         return "from-amber-500 to-orange-500";
-      case "pro_plus":
-        return "from-purple-500 to-pink-500";
       default:
         return "from-slate-500 to-slate-600";
     }
@@ -90,38 +81,29 @@ export default function Pricing() {
             Escolha Seu Plano
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Comece grátis e evolua conforme sua clínica cresce. Cancele quando
-            quiser.
+            Invista no crescimento do seu negócio. Cancele quando quiser.
           </p>
         </div>
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {plans?.map((plan) => {
             const Icon = getPlanIcon(plan.id);
-            const isPopular = plan.id === "pro";
-            const isPremium = plan.id === "pro_plus";
+            const isProfissional = plan.id === "profissional";
             const isCurrent = isCurrentPlan(plan.id);
 
             return (
               <Card
                 key={plan.id}
                 className={`relative bg-slate-800/50 border-slate-700 p-8 hover:border-slate-600 transition-all ${
-                  isPopular || isPremium ? "scale-105 shadow-2xl" : ""
+                  isProfissional ? "scale-105 shadow-2xl border-amber-500/50" : ""
                 }`}
               >
                 {/* Badge */}
-                {isPopular && (
+                {isProfissional && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                     <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                      Mais Popular
-                    </span>
-                  </div>
-                )}
-                {isPremium && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                      Premium
+                      MAIS POPULAR
                     </span>
                   </div>
                 )}
@@ -146,18 +128,15 @@ export default function Pricing() {
                     <span className="text-5xl font-bold text-white">
                       R$ {plan.price}
                     </span>
-                    {plan.price > 0 && (
-                      <span className="text-slate-400">/mês</span>
-                    )}
+                    <span className="text-slate-400">/mês</span>
                   </div>
-                  {plan.id === "pro_plus" && plan.credits === -1 && (
-                    <p className="text-sm text-purple-400 mt-2">
-                      Créditos Ilimitados
+                  {plan.credits === -1 ? (
+                    <p className="text-sm text-amber-400 mt-2 font-semibold">
+                      ⚡ Créditos Ilimitados
                     </p>
-                  )}
-                  {plan.id !== "pro_plus" && (
+                  ) : (
                     <p className="text-sm text-slate-400 mt-2">
-                      {plan.credits} crédito{plan.credits > 1 ? "s" : ""}/mês
+                      {plan.credits} créditos/mês
                     </p>
                   )}
                 </div>
@@ -175,28 +154,31 @@ export default function Pricing() {
                 {/* CTA Button */}
                 <Button
                   onClick={() => handleSelectPlan(plan.id)}
-                  disabled={
-                    loadingPlan === plan.id || isCurrent || !user
-                  }
+                  disabled={loadingPlan === plan.id || isCurrent}
                   className={`w-full ${
-                    isPopular || isPremium
-                      ? `bg-gradient-to-r ${getPlanColor(
-                          plan.id
-                        )} hover:opacity-90`
-                      : "bg-slate-700 hover:bg-slate-600"
+                    isProfissional
+                      ? `bg-gradient-to-r ${getPlanColor(plan.id)} hover:opacity-90`
+                      : "bg-purple-600 hover:bg-purple-700"
                   } text-white font-semibold py-6 rounded-lg text-lg`}
                 >
                   {loadingPlan === plan.id
                     ? "Processando..."
                     : isCurrent
                     ? "Plano Atual"
-                    : plan.price === 0
-                    ? "Começar Grátis"
-                    : "Assinar Agora"}
+                    : isProfissional
+                    ? "Quero esse"
+                    : "Assinar agora"}
                 </Button>
               </Card>
             );
           })}
+        </div>
+
+        {/* Guarantee */}
+        <div className="mt-12 text-center">
+          <p className="text-slate-400 text-sm">
+            🔒 Pagamento 100% seguro via Stripe • Cancele quando quiser
+          </p>
         </div>
 
         {/* FAQ Section */}
@@ -225,28 +207,26 @@ export default function Pricing() {
             </Card>
             <Card className="bg-slate-800/50 border-slate-700 p-6">
               <h3 className="text-lg font-semibold text-white mb-2">
-                Posso fazer upgrade/downgrade?
+                Posso fazer upgrade?
               </h3>
               <p className="text-slate-400">
-                Sim! Você pode mudar de plano a qualquer momento. O valor será
-                ajustado proporcionalmente.
+                Sim! Você pode mudar para o Plano Profissional a qualquer momento 
+                e aproveitar os créditos ilimitados.
               </p>
             </Card>
           </div>
         </div>
 
-        {/* Back to Dashboard */}
-        {user && (
-          <div className="text-center mt-12">
-            <Button
-              onClick={() => navigate("/dashboard")}
-              variant="outline"
-              className="border-slate-600 text-slate-300 hover:bg-slate-800"
-            >
-              Voltar ao Dashboard
-            </Button>
-          </div>
-        )}
+        {/* Back to Home */}
+        <div className="text-center mt-12">
+          <Button
+            onClick={() => navigate("/")}
+            variant="outline"
+            className="border-slate-600 text-slate-300 hover:bg-slate-800"
+          >
+            Voltar para Início
+          </Button>
+        </div>
       </div>
     </div>
   );

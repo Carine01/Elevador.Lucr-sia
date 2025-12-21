@@ -33,7 +33,7 @@ export default function Home() {
     };
   }, []);
   
-  const handleSubscribe = async (plan: 'pro' | 'pro_plus') => {
+  const handleSubscribe = async (plan: 'essencial' | 'profissional') => {
     setIsLoading(plan);
     navigate('/pricing');
   };

@@ -11,47 +11,35 @@ const stripe = new Stripe(env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2025-10-29.clover",
 });
 
-// Definição dos planos
+// Definição dos planos - Atualizado 21/12/2024
 export const PLANS = {
-  free: {
-    id: "free",
-    name: "Grátis",
-    price: 0,
-    priceId: null,
-    credits: 1,
+  essencial: {
+    id: "essencial",
+    name: "Plano Essencial",
+    price: 57,
+    priceId: env.STRIPE_ESSENCIAL_PRICE_ID || "",
+    credits: 5,
     features: [
-      "1 diagnóstico/mês",
-      "Radar de Bio básico",
-      "Suporte por email",
+      "Acesso ao Radar de Bio",
+      "5 créditos por mês",
+      "Gerador de Prompts",
+      "Suporte por e-mail",
     ],
   },
-  pro: {
-    id: "pro",
-    name: "PRO",
-    price: 29,
-    priceId: env.STRIPE_PRO_PRICE_ID || "",
-    credits: 10,
-    features: [
-      "10 diagnósticos/mês",
-      "Gerador de E-books",
-      "Biblioteca de Prompts",
-      "Gerador de Anúncios",
-      "Suporte prioritário",
-    ],
-  },
-  pro_plus: {
-    id: "pro_plus",
-    name: "PRO+",
-    price: 79,
-    priceId: env.STRIPE_PRO_PLUS_PRICE_ID || "",
+  profissional: {
+    id: "profissional",
+    name: "Plano Profissional",
+    price: 97,
+    priceId: env.STRIPE_PROFISSIONAL_PRICE_ID || "",
     credits: -1, // Ilimitado
     features: [
-      "Diagnósticos ilimitados",
-      "Todos os módulos premium",
-      "Automação de Blogs",
-      "RobôChat assistente",
-      "Geração de audiobooks",
-      "Suporte VIP 24/7",
+      "Créditos ilimitados",
+      "Tudo do Plano Essencial",
+      "Gerador de E-books",
+      "Gerador de Anúncios",
+      "Automação de Blogs (SEO)",
+      "Área de Membros Exclusiva",
+      "Suporte VIP prioritário",
     ],
   },
 } as const;
@@ -99,7 +87,7 @@ export const subscriptionRouter = router({
   createCheckout: protectedProcedure
     .input(
       z.object({
-        plan: z.enum(["pro", "pro_plus"]),
+        plan: z.enum(["essencial", "profissional"]),
         successUrl: z.string(),
         cancelUrl: z.string(),
       })
