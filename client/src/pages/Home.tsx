@@ -41,7 +41,7 @@ export default function Home() {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
-  const landingPageStyles = \`
+  const landingPageStyles = `
     :root{
       --lavanda:#A36BFF;
       --lavanda-200:#EDE8FF;
@@ -54,8 +54,8 @@ export default function Home() {
     .btn-ghost{border:2px solid rgba(163,107,255,0.14);color:var(--lavanda)}
     .video-wrap{position:relative;overflow:hidden;border-radius:16px}
     .video-wrap video{width:100%;height:100%;object-fit:cover;display:block}
-    .video-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,6,20,0.25),rgba(10,6,20,0.35));display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;padding:2rem}
-  \`;
+    .video-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(163,107,255,0.18));backdrop-filter:blur(2px);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;padding:2rem}
+  `;
 
   return (
     <>
@@ -99,10 +99,18 @@ export default function Home() {
       <main className="pt-24 isolate">
         <section id="home" className="hero-gradient scroll-mt-28">
           <div className="max-w-6xl mx-auto px-6 py-20 text-center">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-[#5f3fb2] leading-tight">Elevare AI NeuroVendas</h1>
-            <p className="mt-4 text-xl font-medium text-gray-700">Ecossistema Completo de Automação de Conteúdo com IA para Esteticistas</p>
-            <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-              Transforme-se em uma produtora de conteúdo estratégico. Gere posts, e-books, anúncios e automatize seu blog em minutos, não horas.
+            <h1 className="text-4xl md:text-5xl font-extrabold text-[#5f3fb2] leading-tight max-w-4xl mx-auto">
+              Transforme seu Instagram em uma máquina de clientes — sem perder horas criando conteúdo
+            </h1>
+
+            <p className="mt-5 text-xl font-medium text-gray-700 max-w-3xl mx-auto">
+              A Elevare AI usa NeuroVendas e automação inteligente para esteticistas que querem vender mais,
+              aparecer com autoridade e recuperar o tempo perdido.
+            </p>
+
+            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+              Crie posts, anúncios, e-books e conteúdos estratégicos em minutos.
+              Enquanto você atende, a IA trabalha por você.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
               <button onClick={() => navigate('/dashboard')} className="px-6 py-3 rounded-full btn-primary shadow-lg hover:shadow-xl transition-all">Começar Teste Grátis</button>
@@ -112,6 +120,30 @@ export default function Home() {
                 <a href="#planos" className="text-sm font-semibold text-[#5f3fb2] hover:underline hover:opacity-80 transition-opacity">
                     Assinar Pro
                 </a>
+            </div>
+          </div>
+        </section>
+
+        {/* PROVA SOCIAL - Logo após Hero para gerar confiança imediata */}
+        <section className="py-10 bg-white">
+          <div className="max-w-6xl mx-auto px-6">
+            <p className="text-center text-sm font-medium text-gray-500 uppercase tracking-wider mb-6">Resultados de quem já usa</p>
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-[var(--bg)] p-5 rounded-xl text-center">
+                <img src="/sherlayne-galvane.jpg" alt="Sherlayne" className="w-14 h-14 rounded-full mx-auto mb-3 object-cover border-2 border-[var(--lavanda)]" />
+                <p className="text-sm text-gray-700 italic">"Comecei a receber leads qualificados na mesma semana."</p>
+                <p className="text-xs text-gray-500 mt-2">— Sherlayne Galvane</p>
+              </div>
+              <div className="bg-[var(--bg)] p-5 rounded-xl text-center">
+                <img src="/marta-amorin.jpg" alt="Marta" className="w-14 h-14 rounded-full mx-auto mb-3 object-cover border-2 border-[var(--lavanda)]" />
+                <p className="text-sm text-gray-700 italic">"Virei autoridade na minha cidade sem escrever uma linha."</p>
+                <p className="text-xs text-gray-500 mt-2">— Marta Amorin</p>
+              </div>
+              <div className="bg-[var(--bg)] p-5 rounded-xl text-center">
+                <img src="/geisy-dias.jpg" alt="Geisy" className="w-14 h-14 rounded-full mx-auto mb-3 object-cover border-2 border-[var(--lavanda)]" />
+                <p className="text-sm text-gray-700 italic">"Minha lista de clientes explodiu com os e-books."</p>
+                <p className="text-xs text-gray-500 mt-2">— Geisy Dias</p>
+              </div>
             </div>
           </div>
         </section>
@@ -136,8 +168,8 @@ export default function Home() {
                 Seu navegador não suporta vídeo.
               </video>
               <div className="video-overlay">
-                <h3 className="text-2xl font-semibold">Tecnologia NeuroVendas</h3>
-                <p className="mt-2 text-sm max-w-md text-center">Veja a IA criando anúncios e e-books em tempo real.</p>
+                <h3 className="text-2xl font-semibold text-[#5f3fb2] drop-shadow-sm">Tecnologia NeuroVendas</h3>
+                <p className="mt-2 text-sm max-w-md text-center text-[#6b2fa8]">Veja a IA criando anúncios e e-books em tempo real.</p>
                 <div className="mt-4 flex gap-3">
                   <button onClick={() => videoRef.current?.play()} className="px-4 py-2 rounded-full bg-white text-[var(--lavanda)] font-semibold hover:bg-gray-100 transition-colors">Assistir</button>
                 </div>
@@ -218,54 +250,50 @@ export default function Home() {
         </section>
 
         <section id="planos" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24 bg-gray-50 rounded-3xl">
-          <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Modelo de Monetização</h3>
-          <p className="text-center text-gray-600 mt-2">Planos escaláveis para cada fase do seu negócio.</p>
-          <div className="mt-8 grid md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-xl transition-all">
-              <h4 className="font-semibold">Starter (Free)</h4>
-              <p className="text-2xl font-extrabold mt-4">R$0</p>
+          <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Escolha seu plano</h3>
+          <p className="text-center text-gray-600 mt-2">Invista no crescimento do seu negócio.</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-6">
+            
+            {/* Plano Essencial */}
+            <div className="bg-white rounded-xl p-8 card-shadow hover:shadow-xl transition-all w-[300px]">
+              <h4 className="font-semibold text-gray-800 text-lg">Plano Essencial</h4>
+              <p className="text-3xl font-extrabold mt-4 text-[#6b2fa8]">R$ 57<span className="text-base font-normal text-gray-500">/mês</span></p>
+              <p className="mt-4 text-sm text-gray-600">Automação básica e agendamentos</p>
               <ul className="mt-4 text-sm text-gray-700 space-y-2">
-                <li>• Acesso ao <strong>Radar de Bio</strong></li>
-                <li>• 1 crédito por mês</li>
-                <li>• Acesso limitado ao Dashboard</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Acesso ao Radar de Bio</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 5 créditos por mês</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Gerador de Prompts</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte por e-mail</li>
               </ul>
               <div className="mt-6">
-                <button onClick={() => navigate('/dashboard')} className="w-full px-4 py-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors">Começar Grátis</button>
-              </div>
-            </div>
-            <div className="relative border-2 border-[var(--dourado)] rounded-xl p-6 hover:shadow-xl transition-all scale-105 z-10 bg-white">
-              <div className="absolute top-2 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-semibold bg-[var(--dourado)] shadow-sm">MAIS POPULAR</div>
-              <h4 className="font-semibold text-orange-700">PRO</h4>
-              <p className="text-2xl font-extrabold mt-4">R$29/mês</p>
-              <ul className="mt-4 text-sm text-gray-700 space-y-2">
-                <li>• <strong>10 créditos por mês</strong></li>
-                <li>• Gerador de E-books</li>
-                <li>• Gerador de Prompts</li>
-                <li>• Gerador de Anúncios</li>
-                <li>• Suporte prioritário</li>
-              </ul>
-              <div className="mt-6">
-                 <button onClick={() => navigate('/pricing')} className="w-full px-6 py-3 rounded-full font-bold shadow-md hover:shadow-lg transition-all" style={{background: 'var(--lavanda)', color: 'white'}}>
-                    Assinar PRO
+                <button onClick={() => navigate('/pricing')} className="w-full px-6 py-3 rounded-full border-2 border-[var(--lavanda)] text-[var(--lavanda)] font-semibold hover:bg-purple-50 transition-colors">
+                  Assinar agora
                 </button>
               </div>
             </div>
-            <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-xl transition-all">
-              <h4 className="font-semibold">PRO+</h4>
-              <p className="text-2xl font-extrabold mt-4">R$79/mês</p>
+
+            {/* Plano Profissional - Destacado */}
+            <div className="relative bg-[#eef2ff] border-2 border-[var(--dourado)] rounded-xl p-8 hover:shadow-2xl transition-all w-[320px] scale-105 z-10">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-bold bg-[var(--dourado)] text-white shadow-md">MAIS POPULAR</div>
+              <h4 className="font-semibold text-[#6b2fa8] text-lg mt-2">Plano Profissional</h4>
+              <p className="text-3xl font-extrabold mt-4 text-[#6b2fa8]">R$ 97<span className="text-base font-normal text-gray-500">/mês</span></p>
+              <p className="mt-4 text-sm text-gray-600">Automação completa + vendas no WhatsApp</p>
               <ul className="mt-4 text-sm text-gray-700 space-y-2">
-                <li>• <strong>Créditos ilimitados</strong></li>
-                <li>• Tudo do plano PRO</li>
-                <li>• Automação de Blogs (SEO)</li>
-                <li>• Área de Membros Exclusiva</li>
-                <li>• Suporte VIP</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> <strong>Créditos ilimitados</strong></li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Tudo do Plano Essencial</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Gerador de E-books</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Gerador de Anúncios</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Automação de Blogs (SEO)</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Área de Membros Exclusiva</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte VIP prioritário</li>
               </ul>
               <div className="mt-6">
-                <button onClick={() => navigate('/pricing')} className="w-full px-6 py-3 rounded-full btn-ghost hover:bg-purple-50 transition-colors">
-                    Virar PRO+
+                <button onClick={() => navigate('/pricing')} className="w-full px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-xl transition-all" style={{background: 'var(--lavanda)', color: 'white'}}>
+                  Quero esse
                 </button>
               </div>
             </div>
+
           </div>
         </section>
 

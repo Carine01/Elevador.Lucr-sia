@@ -32,7 +32,7 @@ function Router() {
   return (
     <Switch>
       {/* Public Routes */}
-      <Route path={"/{"}  component={Home} />
+      <Route path="/" component={Home} />
       <Route path="/pricing" component={Pricing} />      
       {/* Protected Routes */}
       {isAuthenticated && (
