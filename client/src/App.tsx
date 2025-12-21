@@ -11,6 +11,8 @@ import RadarBio from "./pages/RadarBio";
 import Pricing from "./pages/Pricing";
 import EbookGenerator from "./pages/EbookGenerator";
 import RoboProdutor from "./pages/RoboProdutor";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 function Router() {
@@ -33,7 +35,10 @@ function Router() {
     <Switch>
       {/* Public Routes */}
       <Route path="/" component={Home} />
-      <Route path="/pricing" component={Pricing} />      
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
+      
       {/* Protected Routes */}
       {isAuthenticated && (
         <>
@@ -60,8 +65,8 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider
-        defaultTheme="dark"
-        // switchable
+        defaultTheme="light"
+        storageKey="elevare-theme"
       >
         <TooltipProvider>
           <Toaster />

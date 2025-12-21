@@ -78,10 +78,10 @@ export default function Pricing() {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-white mb-4">
-            Escolha Seu Plano
+            Entre no Sistema Elevare
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Invista no crescimento do seu negócio. Cancele quando quiser.
+            Você não está comprando aulas. Está entrando em um sistema de crescimento.
           </p>
         </div>
 
@@ -103,7 +103,7 @@ export default function Pricing() {
                 {isProfissional && (
                   <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                     <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                      MAIS POPULAR
+                      RECOMENDADO
                     </span>
                   </div>
                 )}
@@ -164,18 +164,28 @@ export default function Pricing() {
                   {loadingPlan === plan.id
                     ? "Processando..."
                     : isCurrent
-                    ? "Plano Atual"
-                    : isProfissional
-                    ? "Quero esse"
-                    : "Assinar agora"}
+                    ? "Acesso Atual"
+                    : "Fazer Parte do Elevare"}
                 </Button>
+                
+                <p className="mt-4 text-xs text-center text-slate-500">
+                  Você não está comprando aulas.<br/>Está entrando em um sistema de crescimento.
+                </p>
               </Card>
             );
           })}
         </div>
 
+        {/* Filtro psicológico */}
+        <div className="mt-12 text-center max-w-xl mx-auto">
+          <p className="text-slate-500 text-sm leading-relaxed border-t border-slate-700 pt-6">
+            Se você procura teste grátis, o Elevare não é pra você.<br/>
+            <span className="text-amber-400 font-medium">Se você procura direção, estrutura e resultado — seja bem-vinda.</span>
+          </p>
+        </div>
+
         {/* Guarantee */}
-        <div className="mt-12 text-center">
+        <div className="mt-8 text-center">
           <p className="text-slate-400 text-sm">
             🔒 Pagamento 100% seguro via Stripe • Cancele quando quiser
           </p>

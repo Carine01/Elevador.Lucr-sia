@@ -36,12 +36,12 @@ export default function ElevareDashboardLayout({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 mb-4">
             <Sparkles className="w-8 h-8 text-white animate-pulse" />
           </div>
-          <p className="text-slate-400 font-medium">Carregando Elevare...</p>
+          <p className="text-slate-600 font-medium">Carregando Elevare...</p>
         </div>
       </div>
     );
@@ -86,18 +86,18 @@ export default function ElevareDashboardLayout({
   };
 
   return (
-    <div className="flex h-screen bg-slate-950">
+    <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
       <aside
         className={`${
           sidebarOpen ? "w-64" : "w-20"
-        } bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800 transition-all duration-300 flex flex-col`}
+        } bg-white border-r border-gray-200 shadow-sm transition-all duration-300 flex flex-col`}
       >
         {/* Logo */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
           {sidebarOpen && (
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center">
                 <img
                   src={APP_LOGO}
                   alt={APP_TITLE}
@@ -105,16 +105,16 @@ export default function ElevareDashboardLayout({
                 />
               </div>
               <div>
-                <h1 className="text-sm font-bold text-white">Elevare</h1>
-                <p className="text-xs text-slate-400">NeuroVendas</p>
+                <h1 className="text-sm font-bold text-slate-800">Elevare</h1>
+                <p className="text-xs text-slate-500">NeuroVendas</p>
               </div>
             </div>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="p-1 hover:bg-slate-800 rounded-lg transition-colors"
+            className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <Menu className="w-5 h-5 text-slate-400" />
+            <Menu className="w-5 h-5 text-slate-600" />
           </button>
         </div>
 
@@ -126,7 +126,7 @@ export default function ElevareDashboardLayout({
               <button
                 key={item.href}
                 onClick={() => navigate(item.href)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800 transition-colors text-slate-300 hover:text-white group relative"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-purple-50 transition-colors text-slate-600 hover:text-purple-700 group relative"
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 {sidebarOpen && (
@@ -135,7 +135,7 @@ export default function ElevareDashboardLayout({
                       {item.label}
                     </span>
                     {item.badge && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-amber-500/20 text-amber-400">
+                      <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-600">
                         {item.badge}
                       </span>
                     )}
@@ -147,20 +147,20 @@ export default function ElevareDashboardLayout({
         </nav>
 
         {/* User Profile */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-gray-200">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800 transition-colors">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
                   {user?.name?.charAt(0).toUpperCase() || "U"}
                 </div>
                 {sidebarOpen && (
                   <>
                     <div className="flex-1 text-left min-w-0">
-                      <p className="text-xs font-medium text-white truncate">
+                      <p className="text-xs font-medium text-slate-800 truncate">
                         {user?.name || "Usuário"}
                       </p>
-                      <p className="text-xs text-slate-400 truncate">
+                      <p className="text-xs text-slate-500 truncate">
                         {user?.email}
                       </p>
                     </div>
@@ -193,20 +193,20 @@ export default function ElevareDashboardLayout({
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top Bar */}
-        <div className="bg-slate-900 border-b border-slate-800 px-8 py-4 flex items-center justify-between">
+        <div className="bg-white border-b border-gray-200 px-8 py-4 flex items-center justify-between shadow-sm">
           <div>
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-slate-800">
               Bem-vindo, {user?.name?.split(" ")[0]}! 👋
             </h2>
-            <p className="text-sm text-slate-400 mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               Transforme sua estética em um negócio lucrativo com IA
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <Card className="bg-slate-800 border-slate-700 px-4 py-2">
+            <Card className="bg-purple-50 border-purple-200 px-4 py-2">
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-500" />
-                <span className="text-sm font-medium text-white">
+                <Zap className="w-4 h-4 text-purple-600" />
+                <span className="text-sm font-medium text-purple-700">
                   100 créditos
                 </span>
               </div>
@@ -215,7 +215,7 @@ export default function ElevareDashboardLayout({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-auto bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <div className="flex-1 overflow-auto bg-gray-50">
           <div className="p-8">{children}</div>
         </div>
       </main>
