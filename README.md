@@ -58,7 +58,7 @@ Tempo estimado:
 /client -> frontend React
 /server -> backend Node.js
 /drizzle -> schema de banco de dados
-/docs -> documentação (se existir)
+*.md -> documentação na raiz do projeto
 ```
 
 ---

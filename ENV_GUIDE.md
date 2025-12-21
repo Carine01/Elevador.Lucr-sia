@@ -102,8 +102,9 @@ Depois você acessa o sistema em: `http://localhost:3000`
 
 **Formato:**
 ```
-mysql://usuário:senha@servidor:porta/nome_do_banco
+mysql://username:password@host:port/database_name
 ```
+*(Nota: use termos em inglês conforme o formato padrão)*
 
 **Exemplo para desenvolvimento local:**
 ```env
