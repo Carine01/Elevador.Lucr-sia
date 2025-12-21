@@ -1,0 +1,22 @@
+# Dependências
+node_modules/** linguist-generated
+pnpm-lock.yaml linguist-generated
+
+# Build / dist
+dist/** linguist-generated
+build/** linguist-generated
+.out/** linguist-generated
+
+# Assets gerados
+**/*.min.css linguist-generated
+**/*.min.js linguist-generated
+**/*.map linguist-generated
+
+# Drizzle / migrations geradas
+drizzle/** linguist-generated
+
+# Logs
+**/*.log linguist-generated
+
+# Cache
+.cache/** linguist-generated
