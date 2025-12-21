@@ -210,12 +210,12 @@ export const subscriptionRouter = router({
         throw new Error("Assinatura não encontrada");
       }
 
-      // Se for PRO+, créditos são ilimitados
-      if (userSubscription.plan === "pro_plus") {
+      // Se for Profissional, créditos são ilimitados
+      if (userSubscription.plan === "profissional") {
         return {
           success: true,
           creditsRemaining: -1,
-          message: "Plano PRO+ tem créditos ilimitados",
+          message: "Plano Profissional tem créditos ilimitados",
         };
       }
 
@@ -264,8 +264,8 @@ export const subscriptionRouter = router({
         };
       }
 
-      // PRO+ tem créditos ilimitados
-      if (userSubscription.plan === "pro_plus") {
+      // Profissional tem créditos ilimitados
+      if (userSubscription.plan === "profissional") {
         return {
           hasCredits: true,
           creditsRemaining: -1,

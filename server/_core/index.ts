@@ -53,7 +53,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   const userId = parseInt(session.metadata?.userId || '0');
-  const plan = session.metadata?.plan as 'pro' | 'pro_plus';
+  const plan = session.metadata?.plan as 'essencial' | 'profissional';
   
   if (!userId || !plan) {
     logger.error('Missing userId or plan in checkout session', { session });

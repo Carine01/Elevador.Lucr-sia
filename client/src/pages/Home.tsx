@@ -48,7 +48,12 @@ export default function Home() {
       --dourado:#F6C86A;
       --bg:#F6F9FB;
     }
-    .hero-gradient{background:linear-gradient(180deg, rgba(163,107,255,0.06) 0%, rgba(227,220,255,0.04) 100%);}    
+    .hero-gradient{background:linear-gradient(180deg, rgba(16
+    
+    
+    
+    
+    3,107,255,0.06) 0%, rgba(227,220,255,0.04) 100%);}    
     .card-shadow{box-shadow: 0 6px 18px rgba(12,18,30,0.06);}    
     .btn-primary{background:var(--lavanda);color:white}
     .btn-ghost{border:2px solid rgba(163,107,255,0.14);color:var(--lavanda)}
