@@ -7,6 +7,23 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [, navigate] = useLocation();
+  
+  // Contador de urgência - expira em 47 minutos a partir do carregamento
+  const [timeLeft, setTimeLeft] = useState({ minutes: 46, seconds: 59 });
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev.seconds > 0) {
+          return { ...prev, seconds: prev.seconds - 1 };
+        } else if (prev.minutes > 0) {
+          return { minutes: prev.minutes - 1, seconds: 59 };
+        }
+        return { minutes: 0, seconds: 0 };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const videoElement = videoRef.current;
@@ -106,9 +123,19 @@ export default function Home() {
       <main className="pt-24 isolate">
         <section id="home" className="hero-gradient scroll-mt-28">
           <div className="max-w-6xl mx-auto px-6 py-20 text-center">
-            {/* Badge de urgência */}
-            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
-              <span className="animate-pulse">🔥</span> Vagas limitadas para dezembro
+            {/* Badge de posicionamento */}
+            <div className="mb-4">
+              <span className="inline-block bg-[#6b2fa8] text-white px-4 py-2 rounded-full text-sm font-semibold">
+                🧠 Venda como ciência, não como esperança.
+              </span>
+            </div>
+            
+            {/* Contador de urgência */}
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-3 rounded-full text-sm font-bold mb-6 shadow-lg animate-pulse">
+              <span>🔥 PROMOÇÃO DE LANÇAMENTO EXPIRA EM:</span>
+              <span className="bg-white/20 px-3 py-1 rounded-lg font-mono text-lg">
+                {String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+              </span>
             </div>
             
             <h1 className="text-4xl md:text-5xl font-extrabold text-[#5f3fb2] leading-tight max-w-4xl mx-auto">
