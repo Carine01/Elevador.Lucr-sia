@@ -149,6 +149,60 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Seção de Custo de Oportunidade - PRIMEIRO ITEM APÓS HERO */}
+        <section className="bg-gradient-to-b from-red-50 to-white py-12 border-y border-red-100">
+          <div className="max-w-5xl mx-auto px-6">
+            <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2">
+              Quanto custa um perfil amador?
+            </h2>
+            <p className="text-center text-gray-500 mb-8">O preço de NÃO ter a Elevare:</p>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Card 1 - Perda de pacientes */}
+              <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-400 hover:shadow-xl transition-all">
+                <div className="text-4xl mb-3">📉</div>
+                <h3 className="font-bold text-red-600 text-lg mb-2">Pacientes perdidos</h3>
+                <p className="text-gray-600 text-sm">
+                  Perda de <strong className="text-red-600">3 a 5 pacientes por semana</strong> por falta de desejo visual no seu perfil.
+                </p>
+                <p className="mt-3 text-xs text-gray-400">≈ R$ 1.500/semana perdidos</p>
+              </div>
+              
+              {/* Card 2 - Gasto com agências */}
+              <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-amber-400 hover:shadow-xl transition-all">
+                <div className="text-4xl mb-3">💸</div>
+                <h3 className="font-bold text-amber-600 text-lg mb-2">Agências genéricas</h3>
+                <p className="text-gray-600 text-sm">
+                  Gasto médio de <strong className="text-amber-600">R$ 2.000/mês</strong> com agências que não entendem estética.
+                </p>
+                <p className="mt-3 text-xs text-gray-400">Posts bonitos que não vendem</p>
+              </div>
+              
+              {/* Card 3 - Tempo perdido */}
+              <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-purple-400 hover:shadow-xl transition-all">
+                <div className="text-4xl mb-3">⌛</div>
+                <h3 className="font-bold text-purple-600 text-lg mb-2">Seu tempo vale ouro</h3>
+                <p className="text-gray-600 text-sm">
+                  Sua hora clínica vale <strong>R$ 150</strong>. Gasta 4h criando posts? <strong className="text-purple-600">R$ 600 perdidos.</strong>
+                </p>
+                <p className="mt-3 text-xs text-gray-400">Tempo que deveria estar atendendo</p>
+              </div>
+            </div>
+            
+            <div className="mt-8 text-center">
+              <p className="text-lg font-semibold text-gray-700">
+                💡 Com a Elevare: <span className="text-[#6b2fa8]">R$ 97/mês</span> e você recupera tudo isso.
+              </p>
+              <button
+                onClick={() => navigate('/register')}
+                className="mt-4 px-8 py-3 rounded-full btn-primary font-bold hover:scale-105 transition-all"
+              >
+                Parar de Perder Dinheiro →
+              </button>
+            </div>
+          </div>
+        </section>
+
         <section className="max-w-6xl mx-auto px-6 py-12">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
