@@ -1,35 +1,33 @@
 # Dependencies
-node_modules/
-.pnpm-store/
+node_modules
+.pnpm-store
 
 # Build outputs
-dist/
-build/
+dist
+build
 *.dist
 
-# Generated files
-*.tsbuildinfo
-coverage/
+# Environment files
+.env
+.env.*
 
-# Package files
-package-lock.json
-pnpm-lock.yaml
+# Logs
+*.log
 
 # Database
 *.db
 *.sqlite
 *.sqlite3
 
-# Logs
-*.log
+# Coverage
+coverage
 
-# Environment files
-.env*
+# Cache
+.cache
+.parcel-cache
 
-# IDE files
-.vscode/
-.idea/
-
-# OS files
-.DS_Store
-Thumbs.db
+# Generated files
+drizzle/migrations
+generated-ebooks
+generated-covers
+pdf-exports
