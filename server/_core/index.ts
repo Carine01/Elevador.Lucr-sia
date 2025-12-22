@@ -17,10 +17,12 @@ import { subscription as subscriptionTable } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { PLANS } from "../routers/subscription";
 
-// Inicializar Stripe
-const stripe = new Stripe(ENV.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-10-29.clover",
-});
+// Inicializar Stripe apenas se a chave estiver configurada
+const stripe = ENV.STRIPE_SECRET_KEY 
+  ? new Stripe(ENV.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-10-29.clover",
+    })
+  : null;
 
 // Verificar disponibilidade de porta
 function isPortAvailable(port: number): Promise<boolean> {
@@ -119,10 +121,18 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   const db = await getDb();
   if (!db) return;
 
+  // Type assertion needed because Stripe types are complex
+  const subscriptionId = (invoice as any).subscription as string | null;
+
+  if (!subscriptionId) {
+    logger.warn('No subscription ID in invoice', { invoiceId: invoice.id });
+    return;
+  }
+
   const [userSub] = await db
     .select()
     .from(subscriptionTable)
-    .where(eq(subscriptionTable.stripeSubscriptionId, invoice.subscription as string))
+    .where(eq(subscriptionTable.stripeSubscriptionId, subscriptionId))
     .limit(1);
 
   if (!userSub) {
@@ -130,7 +140,12 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     return;
   }
 
-  const planConfig = PLANS[userSub.plan];
+  const planConfig = PLANS[userSub.plan as keyof typeof PLANS];
+  if (!planConfig) {
+    logger.warn('Unknown plan type', { plan: userSub.plan });
+    return;
+  }
+
   const renewalDate = new Date();
   renewalDate.setMonth(renewalDate.getMonth() + 1);
 
@@ -169,7 +184,7 @@ async function startServer() {
   ];
 
   app.use(cors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       // Permitir requisições sem origin (mobile apps, postman, etc)
       if (!origin) return callback(null, true);
       
@@ -214,6 +229,11 @@ async function startServer() {
     '/api/stripe/webhook',
     express.raw({ type: 'application/json' }),
     async (req, res) => {
+      if (!stripe) {
+        logger.warn('Stripe webhook called but Stripe is not configured');
+        return res.status(503).send('Stripe not configured');
+      }
+
       const sig = req.headers['stripe-signature'];
       
       if (!sig || !ENV.STRIPE_WEBHOOK_SECRET) {

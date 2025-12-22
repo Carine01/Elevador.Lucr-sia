@@ -6,13 +6,26 @@ import { eq, and } from "drizzle-orm";
 import Stripe from "stripe";
 import { env } from "../_core/env";
 
-// Inicializar Stripe
-const stripe = new Stripe(env.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-10-29.clover",
-});
+// Inicializar Stripe apenas se a chave estiver configurada
+const stripe = env.STRIPE_SECRET_KEY 
+  ? new Stripe(env.STRIPE_SECRET_KEY, {
+      apiVersion: "2025-10-29.clover",
+    })
+  : null;
 
 // Definição dos planos - Atualizado 21/12/2024
 export const PLANS = {
+  free: {
+    id: "free",
+    name: "Plano Gratuito",
+    price: 0,
+    priceId: "",
+    credits: 1,
+    features: [
+      "1 análise de bio por mês",
+      "Acesso limitado ao Radar de Bio",
+    ],
+  },
   essencial: {
     id: "essencial",
     name: "Plano Essencial",
@@ -93,6 +106,10 @@ export const subscriptionRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      if (!stripe) {
+        throw new Error("Stripe não está configurado. Configure STRIPE_SECRET_KEY no arquivo .env");
+      }
+
       const planConfig = PLANS[input.plan];
 
       if (!planConfig.priceId) {
@@ -173,6 +190,9 @@ export const subscriptionRouter = router({
 
     // Cancelar no Stripe
     if (userSubscription.stripeSubscriptionId) {
+      if (!stripe) {
+        throw new Error("Stripe não está configurado. Configure STRIPE_SECRET_KEY no arquivo .env");
+      }
       await stripe.subscriptions.cancel(userSubscription.stripeSubscriptionId);
     }
 
@@ -298,6 +318,10 @@ export const subscriptionRouter = router({
 
       if (!userSubscription?.stripeCustomerId) {
         throw new Error("Customer ID não encontrado");
+      }
+
+      if (!stripe) {
+        throw new Error("Stripe não está configurado. Configure STRIPE_SECRET_KEY no arquivo .env");
       }
 
       const session = await stripe.billingPortal.sessions.create({

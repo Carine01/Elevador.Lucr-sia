@@ -94,7 +94,7 @@ export type InsertBioRadarDiagnosis = typeof bioRadarDiagnosis.$inferInsert & { 
 export const subscription = mysqlTable("subscription", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
-  plan: mysqlEnum("plan", ["free", "pro", "pro_plus"]).default("free").notNull(),
+  plan: mysqlEnum("plan", ["free", "essencial", "profissional"]).default("free").notNull(),
   status: mysqlEnum("status", ["active", "inactive", "cancelled"]).default("active").notNull(),
   stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
   stripeSubscriptionId: varchar("stripeSubscriptionId", { length: 255 }),
