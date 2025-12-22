@@ -43,9 +43,8 @@ export const ENV = {
     : getOptionalEnv('STRIPE_SECRET_KEY'),
   STRIPE_ESSENCIAL_PRICE_ID: getOptionalEnv('STRIPE_ESSENCIAL_PRICE_ID'),
   STRIPE_PROFISSIONAL_PRICE_ID: getOptionalEnv('STRIPE_PROFISSIONAL_PRICE_ID'),
-  STRIPE_WEBHOOK_SECRET: isProduction
-    ? getRequiredEnv('STRIPE_WEBHOOK_SECRET')
-    : getOptionalEnv('STRIPE_WEBHOOK_SECRET'),
+  // Webhook secret é opcional até configurar o endpoint
+  STRIPE_WEBHOOK_SECRET: getOptionalEnv('STRIPE_WEBHOOK_SECRET'),
   
   isProduction,
 };
