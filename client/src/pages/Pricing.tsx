@@ -157,19 +157,19 @@ export default function Pricing() {
                   disabled={loadingPlan === plan.id || isCurrent}
                   className={`w-full ${
                     isProfissional
-                      ? `bg-gradient-to-r ${getPlanColor(plan.id)} hover:opacity-90`
+                      ? `bg-gradient-to-r ${getPlanColor(plan.id)} hover:opacity-90 hover:scale-105`
                       : "bg-purple-600 hover:bg-purple-700"
-                  } text-white font-semibold py-6 rounded-lg text-lg`}
+                  } text-white font-semibold py-6 rounded-lg text-lg transition-all`}
                 >
                   {loadingPlan === plan.id
                     ? "Processando..."
                     : isCurrent
-                    ? "Acesso Atual"
-                    : "Fazer Parte do Elevare"}
+                    ? "✓ Acesso Ativo"
+                    : "Começar Agora →"}
                 </Button>
                 
-                <p className="mt-4 text-xs text-center text-slate-500">
-                  Você não está comprando aulas.<br/>Está entrando em um sistema de crescimento.
+                <p className="mt-3 text-xs text-center text-slate-400">
+                  🔒 Acesso imediato • Cancele quando quiser
                 </p>
               </Card>
             );

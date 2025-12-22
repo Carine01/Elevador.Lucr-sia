@@ -106,42 +106,46 @@ export default function Home() {
       <main className="pt-24 isolate">
         <section id="home" className="hero-gradient scroll-mt-28">
           <div className="max-w-6xl mx-auto px-6 py-20 text-center">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-[#5f3fb2] leading-tight max-w-4xl mx-auto">
-              Transforme seu Instagram em uma máquina de clientes — sem perder horas criando conteúdo
-            </h1>
-
-            <p className="mt-5 text-xl font-medium text-gray-700 max-w-3xl mx-auto">
-              A Elevare AI usa NeuroVendas e automação inteligente para esteticistas que querem vender mais,
-              aparecer com autoridade e recuperar o tempo perdido.
-            </p>
-
-            <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-              Crie posts, anúncios, e-books e conteúdos estratégicos em minutos.
-              Enquanto você atende, a IA trabalha por você.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-              <button
-                onClick={() => navigate('/register')}
-                className="px-8 py-4 rounded-full btn-primary shadow-lg text-lg font-bold hover:shadow-xl transition-all"
-              >
-                Entrar no Método Elevare
-              </button>
-              <a
-                href="#planos"
-                className="px-8 py-4 rounded-full btn-ghost text-lg font-semibold hover:bg-purple-50 transition-colors"
-              >
-                Quero Automatizar Minha Clínica
-              </a>
+            {/* Badge de urgência */}
+            <div className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <span className="animate-pulse">🔥</span> Vagas limitadas para dezembro
             </div>
             
-            {/* Texto de posicionamento */}
-            <div className="mt-8 max-w-xl mx-auto">
-              <p className="text-sm text-gray-500 leading-relaxed">
-                <strong className="text-[#6b2fa8]">Acesso imediato à Plataforma Elevare.</strong><br/>
-                Sem teste gratuito. Sem promessas vazias.<br/>
-                Método validado para clínicas que querem crescer de verdade.
+            <h1 className="text-4xl md:text-5xl font-extrabold text-[#5f3fb2] leading-tight max-w-4xl mx-auto">
+              Crie 30 dias de conteúdo em 30 minutos
+            </h1>
+
+            <p className="mt-5 text-xl font-medium text-gray-700 max-w-2xl mx-auto">
+              IA que gera posts, anúncios e e-books para esteticistas.<br/>
+              Enquanto você atende, a Elevare vende por você.
+            </p>
+
+            <div className="mt-8 flex justify-center">
+              <button
+                onClick={() => navigate('/register')}
+                className="px-10 py-5 rounded-full btn-primary shadow-xl text-xl font-bold hover:shadow-2xl hover:scale-105 transition-all animate-pulse"
+              >
+                Começar Agora →
+              </button>
+            </div>
+            
+            {/* Prova social rápida */}
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <div className="flex -space-x-2">
+                <div className="w-8 h-8 rounded-full bg-purple-300 border-2 border-white"></div>
+                <div className="w-8 h-8 rounded-full bg-pink-300 border-2 border-white"></div>
+                <div className="w-8 h-8 rounded-full bg-amber-300 border-2 border-white"></div>
+                <div className="w-8 h-8 rounded-full bg-green-300 border-2 border-white"></div>
+              </div>
+              <p className="text-sm text-gray-500">
+                <strong className="text-[#6b2fa8]">+120 esteticistas</strong> já usam a Elevare
               </p>
             </div>
+            
+            {/* Garantia */}
+            <p className="mt-4 text-xs text-gray-400">
+              🔒 Pagamento seguro • Cancele quando quiser • Acesso imediato
+            </p>
           </div>
         </section>
 
@@ -155,8 +159,8 @@ export default function Home() {
                  <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Automatize em múltiplos canais (Insta, Blog)</li>
                  <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Aumente vendas com copy estratégica</li>
               </ul>
-              <div className="mt-6 flex gap-3">
-                <button onClick={() => navigate('/dashboard')} className="px-5 py-3 rounded-full btn-primary">Ativar minha conta</button>
+              <div className="mt-6">
+                <button onClick={() => navigate('/register')} className="px-6 py-3 rounded-full btn-primary font-bold">Começar Agora →</button>
               </div>
             </div>
             <div className="video-wrap h-72 md:h-96">
@@ -263,9 +267,10 @@ export default function Home() {
                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte por e-mail</li>
               </ul>
               <div className="mt-6">
-                <button onClick={() => navigate('/pricing')} className="w-full px-6 py-4 rounded-full font-bold btn-primary shadow-lg hover:shadow-xl transition-all">
-                  Fazer Parte do Elevare
+                <button onClick={() => navigate('/register')} className="w-full px-6 py-4 rounded-full font-bold btn-primary shadow-lg hover:shadow-xl transition-all">
+                  Começar Agora →
                 </button>
+                <p className="mt-2 text-xs text-center text-gray-400">Acesso imediato</p>
               </div>
             </div>
 
@@ -285,9 +290,10 @@ export default function Home() {
                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte VIP prioritário</li>
               </ul>
               <div className="mt-6">
-                <button onClick={() => navigate('/pricing')} className="w-full px-6 py-4 rounded-full font-bold shadow-lg hover:shadow-xl transition-all" style={{background: 'var(--lavanda)', color: 'white'}}>
-                  Fazer Parte do Elevare
+                <button onClick={() => navigate('/register')} className="w-full px-6 py-4 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all animate-pulse" style={{background: 'linear-gradient(135deg, #F6C86A 0%, #f59e0b 100%)', color: 'white'}}>
+                  Começar Agora →
                 </button>
+                <p className="mt-2 text-xs text-center text-amber-600 font-semibold">⚡ Mais escolhido</p>
               </div>
               <p className="mt-4 text-xs text-center text-gray-500 italic">Você não está comprando aulas.<br/>Está entrando em um sistema de crescimento.</p>
             </div>
