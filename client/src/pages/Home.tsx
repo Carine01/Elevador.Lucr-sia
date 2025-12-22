@@ -293,14 +293,6 @@ export default function Home() {
             </div>
 
           </div>
-          
-          {/* Texto de filtro */}
-          <div className="mt-10 text-center max-w-xl mx-auto">
-            <p className="text-sm text-gray-500 leading-relaxed border-t border-gray-200 pt-6">
-              Se você procura teste grátis, o Elevare não é pra você.<br/>
-              <strong className="text-[#6b2fa8]">Se você procura direção, estrutura e resultado — seja bem-vinda.</strong>
-            </p>
-          </div>
         </section>
 
         <section className="py-12 bg-[var(--bg)]">

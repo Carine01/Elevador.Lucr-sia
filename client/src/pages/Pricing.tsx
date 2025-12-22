@@ -176,14 +176,6 @@ export default function Pricing() {
           })}
         </div>
 
-        {/* Filtro psicológico */}
-        <div className="mt-12 text-center max-w-xl mx-auto">
-          <p className="text-slate-500 text-sm leading-relaxed border-t border-slate-700 pt-6">
-            Se você procura teste grátis, o Elevare não é pra você.<br/>
-            <span className="text-amber-400 font-medium">Se você procura direção, estrutura e resultado — seja bem-vinda.</span>
-          </p>
-        </div>
-
         {/* Guarantee */}
         <div className="mt-8 text-center">
           <p className="text-slate-400 text-sm">
