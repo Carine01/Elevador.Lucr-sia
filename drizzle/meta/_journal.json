@@ -29,6 +29,13 @@
       "when": 1766322267425,
       "tag": "0003_condemned_clea",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1766409894425,
+      "tag": "0004_good_sunfire",
+      "breakpoints": true
     }
   ]
 }
