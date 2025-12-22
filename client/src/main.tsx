@@ -8,6 +8,9 @@ import App from "./App";
 import { getLoginUrl } from "./const";
 import "./index.css";
 
+// Debug: Log para verificar se o script está executando
+console.log('[Elevare] Iniciando aplicação...');
+
 const queryClient = new QueryClient();
 
 const redirectToLoginIfUnauthorized = (error: unknown) => {
@@ -52,10 +55,22 @@ const trpcClient = trpc.createClient({
   ],
 });
 
-createRoot(document.getElementById("root")!).render(
-  <trpc.Provider client={trpcClient} queryClient={queryClient}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </trpc.Provider>
-);
+console.log('[Elevare] Renderizando React...');
+
+try {
+  const rootElement = document.getElementById("root");
+  if (!rootElement) {
+    console.error('[Elevare] Elemento #root não encontrado!');
+  } else {
+    createRoot(rootElement).render(
+      <trpc.Provider client={trpcClient} queryClient={queryClient}>
+        <QueryClientProvider client={queryClient}>
+          <App />
+        </QueryClientProvider>
+      </trpc.Provider>
+    );
+    console.log('[Elevare] React renderizado com sucesso!');
+  }
+} catch (error) {
+  console.error('[Elevare] Erro ao renderizar:', error);
+}
