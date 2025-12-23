@@ -123,7 +123,7 @@ export default function Dashboard() {
     {
       label: "Créditos Disponíveis",
       value:
-        subscription?.plan === "pro_plus"
+        subscription?.plan === "profissional"
           ? "∞"
           : subscription?.creditsRemaining?.toString() || "0",
       icon: Zap,
@@ -133,9 +133,9 @@ export default function Dashboard() {
       value:
         subscription?.plan === "free"
           ? "Grátis"
-          : subscription?.plan === "pro"
-          ? "PRO"
-          : "PRO+",
+          : subscription?.plan === "essencial"
+          ? "Essencial"
+          : "Profissional",
       icon: Target,
     },
   ];

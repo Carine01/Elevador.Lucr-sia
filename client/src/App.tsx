@@ -80,7 +80,6 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider
         defaultTheme="light"
-        storageKey="elevare-theme"
       >
         <TooltipProvider>
           <Toaster />

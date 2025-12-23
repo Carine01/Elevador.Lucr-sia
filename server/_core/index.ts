@@ -119,10 +119,27 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   const db = await getDb();
   if (!db) return;
 
+  // Extract subscription ID from invoice
+  // Note: The Stripe Invoice type may not include subscription in all versions
+  // We use type assertion here as the property exists at runtime
+  interface InvoiceWithSubscription extends Stripe.Invoice {
+    subscription?: string | Stripe.Subscription;
+  }
+  
+  const invoiceWithSub = invoice as InvoiceWithSubscription;
+  const subscriptionId = typeof invoiceWithSub.subscription === 'string' 
+    ? invoiceWithSub.subscription 
+    : invoiceWithSub.subscription?.id;
+
+  if (!subscriptionId) {
+    logger.warn('Invalid subscription in invoice', { invoiceId: invoice.id });
+    return;
+  }
+
   const [userSub] = await db
     .select()
     .from(subscriptionTable)
-    .where(eq(subscriptionTable.stripeSubscriptionId, invoice.subscription as string))
+    .where(eq(subscriptionTable.stripeSubscriptionId, subscriptionId))
     .limit(1);
 
   if (!userSub) {
@@ -130,7 +147,14 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     return;
   }
 
-  const planConfig = PLANS[userSub.plan];
+  // Check if plan exists in PLANS
+  const planKey = userSub.plan as keyof typeof PLANS;
+  if (!(planKey in PLANS)) {
+    logger.error('Invalid plan in subscription', { plan: userSub.plan });
+    return;
+  }
+
+  const planConfig = PLANS[planKey];
   const renewalDate = new Date();
   renewalDate.setMonth(renewalDate.getMonth() + 1);
 
@@ -169,7 +193,7 @@ async function startServer() {
   ];
 
   app.use(cors({
-    origin: (origin, callback) => {
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
       // Permitir requisições sem origin (mobile apps, postman, etc)
       if (!origin) return callback(null, true);
       
