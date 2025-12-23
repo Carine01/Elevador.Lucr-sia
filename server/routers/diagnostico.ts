@@ -138,7 +138,6 @@ export const diagnosticoRouter = router({
             { role: "user", content: prompt },
           ],
           temperature: 0.7,
-          max_tokens: 800,
         });
 
         const content = response.choices[0]?.message?.content;
@@ -221,7 +220,6 @@ Máximo 350 palavras.`;
             { role: "user", content: prompt },
           ],
           temperature: 0.7,
-          max_tokens: 1000,
         });
 
         const content = response.choices[0]?.message?.content;
