@@ -19,8 +19,25 @@ export async function getDb() {
   return _db;
 }
 
-// Synchronous db instance for routers (will throw if DB not available)
-export const db = drizzle(process.env.DATABASE_URL || "");
+// Lazy synchronous db instance for routers
+// Returns null if DATABASE_URL is not set (won't crash on startup)
+export function getDbSync() {
+  if (!_db && process.env.DATABASE_URL) {
+    try {
+      _db = drizzle(process.env.DATABASE_URL);
+    } catch (error) {
+      console.error("[DB] Failed to connect:", error);
+      return null;
+    }
+  }
+  return _db;
+}
+
+// Deprecated: Use getDb() or getDbSync() instead
+// This can throw if DATABASE_URL is not set
+export const db = process.env.DATABASE_URL 
+  ? drizzle(process.env.DATABASE_URL) 
+  : null as any;
 
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {
