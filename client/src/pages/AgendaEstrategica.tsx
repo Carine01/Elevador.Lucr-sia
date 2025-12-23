@@ -18,27 +18,32 @@ import {
   Clock,
   User,
   Trash2,
-  Edit,
   TrendingUp,
   Target,
   CheckCircle,
-  XCircle,
   ChevronLeft,
   ChevronRight,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
-interface Agendamento {
-  id: string;
+type Agendamento = {
+  id: number;
+  userId: number;
+  leadId: number | null;
   clienteNome: string;
   procedimento: string;
   valor: number;
   data: string;
   horario: string;
   status: "confirmado" | "pendente" | "realizado" | "cancelado" | "remarcado";
-  observacoes?: string;
-}
+  observacoes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 const statusConfig = {
   confirmado: { color: "bg-green-500/20 text-green-400 border-green-500/30", label: "Confirmado ✓" },
@@ -48,78 +53,59 @@ const statusConfig = {
   remarcado: { color: "bg-purple-500/20 text-purple-400 border-purple-500/30", label: "Remarcado" },
 };
 
-// Dados de exemplo
-const mockAgendamentos: Agendamento[] = [
-  {
-    id: "1",
-    clienteNome: "Maria Silva",
-    procedimento: "Harmonização Facial",
-    valor: 2500,
-    data: "2024-12-23",
-    horario: "09:00",
-    status: "confirmado",
-  },
-  {
-    id: "2",
-    clienteNome: "Ana Costa",
-    procedimento: "Limpeza de Pele",
-    valor: 180,
-    data: "2024-12-23",
-    horario: "10:30",
-    status: "confirmado",
-  },
-  {
-    id: "3",
-    clienteNome: "Carla Santos",
-    procedimento: "Peeling",
-    valor: 350,
-    data: "2024-12-23",
-    horario: "14:00",
-    status: "pendente",
-  },
-  {
-    id: "4",
-    clienteNome: "Fernanda Lima",
-    procedimento: "Botox",
-    valor: 1200,
-    data: "2024-12-24",
-    horario: "09:00",
-    status: "confirmado",
-  },
-  {
-    id: "5",
-    clienteNome: "Julia Oliveira",
-    procedimento: "Preenchimento Labial",
-    valor: 800,
-    data: "2024-12-24",
-    horario: "11:00",
-    status: "pendente",
-  },
-  {
-    id: "6",
-    clienteNome: "Patrícia Almeida",
-    procedimento: "Harmonização Facial",
-    valor: 2500,
-    data: "2024-12-20",
-    horario: "09:00",
-    status: "realizado",
-  },
-  {
-    id: "7",
-    clienteNome: "Renata Souza",
-    procedimento: "Bioestimulador",
-    valor: 3500,
-    data: "2024-12-19",
-    horario: "14:00",
-    status: "realizado",
-  },
-];
+export default function AgendaEstrategica() {
+  // ========== TRPC QUERIES & MUTATIONS ==========
+  const utils = trpc.useUtils();
+  
+  const { data: agendamentosData, isLoading, refetch } = trpc.crm.getAgendamentos.useQuery({
+    limit: 100,
+  });
+  
+  const { data: statsData } = trpc.crm.getCrmStats.useQuery();
 
-export default function AgendaSmart() {
-  const [agendamentos, setAgendamentos] = useState<Agendamento[]>(mockAgendamentos);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const createAgendamentoMutation = trpc.crm.createAgendamento.useMutation({
+    onSuccess: () => {
+      toast.success("Agendamento criado!");
+      utils.crm.getAgendamentos.invalidate();
+      utils.crm.getCrmStats.invalidate();
+      setShowForm(false);
+      resetForm();
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  const updateAgendamentoMutation = trpc.crm.updateAgendamento.useMutation({
+    onSuccess: (_, variables) => {
+      if (variables.status === "realizado") {
+        toast.success("Procedimento marcado como realizado! 💰");
+      } else {
+        toast.success("Status atualizado!");
+      }
+      utils.crm.getAgendamentos.invalidate();
+      utils.crm.getCrmStats.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  const deleteAgendamentoMutation = trpc.crm.deleteAgendamento.useMutation({
+    onSuccess: () => {
+      toast.success("Agendamento removido");
+      utils.crm.getAgendamentos.invalidate();
+      utils.crm.getCrmStats.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  // ========== LOCAL STATE ==========
+  const hoje = new Date().toISOString().split('T')[0];
+  const [selectedDate, setSelectedDate] = useState(hoje);
   const [showForm, setShowForm] = useState(false);
-  const [viewMode, setViewMode] = useState<"dia" | "semana" | "mes">("semana");
   const [metaMensal, setMetaMensal] = useState(25000);
 
   // Form state
@@ -132,8 +118,10 @@ export default function AgendaSmart() {
     observacoes: "",
   });
 
+  const agendamentos = agendamentosData?.agendamentos || [];
+  const stats = statsData?.stats;
+
   // Cálculos financeiros
-  const hoje = new Date().toISOString().split('T')[0];
   const mesAtual = new Date().getMonth();
   const anoAtual = new Date().getFullYear();
 
@@ -151,7 +139,7 @@ export default function AgendaSmart() {
     .reduce((acc, a) => acc + a.valor, 0);
 
   const faturamentoTotal = faturamentoRealizado + faturamentoPrevisto;
-  const progressoMeta = Math.min((faturamentoTotal / metaMensal) * 100, 100);
+  const progressoMeta = Math.min((faturamentoTotal / (metaMensal * 100)) * 100, 100);
 
   const agendamentosDoDia = agendamentos
     .filter(a => a.data === selectedDate)
@@ -177,26 +165,7 @@ export default function AgendaSmart() {
 
   const weekDays = getWeekDays(new Date(selectedDate));
 
-  const handleSubmit = () => {
-    if (!formData.clienteNome || !formData.procedimento || !formData.valor) {
-      toast.error("Preencha todos os campos obrigatórios");
-      return;
-    }
-
-    const newAgendamento: Agendamento = {
-      id: Date.now().toString(),
-      clienteNome: formData.clienteNome,
-      procedimento: formData.procedimento,
-      valor: parseFloat(formData.valor),
-      data: formData.data,
-      horario: formData.horario,
-      status: "pendente",
-      observacoes: formData.observacoes,
-    };
-
-    setAgendamentos([...agendamentos, newAgendamento]);
-    toast.success("Agendamento criado!");
-    setShowForm(false);
+  const resetForm = () => {
     setFormData({
       clienteNome: "",
       procedimento: "",
@@ -207,18 +176,30 @@ export default function AgendaSmart() {
     });
   };
 
-  const handleStatusChange = (id: string, newStatus: Agendamento["status"]) => {
-    setAgendamentos(agendamentos.map(a => a.id === id ? { ...a, status: newStatus } : a));
-    if (newStatus === "realizado") {
-      toast.success("Procedimento marcado como realizado! 💰");
-    } else {
-      toast.success("Status atualizado!");
+  const handleSubmit = () => {
+    if (!formData.clienteNome || !formData.procedimento || !formData.valor) {
+      toast.error("Preencha todos os campos obrigatórios");
+      return;
     }
+
+    createAgendamentoMutation.mutate({
+      clienteNome: formData.clienteNome,
+      procedimento: formData.procedimento,
+      valor: Math.round(parseFloat(formData.valor) * 100), // Converter para centavos
+      data: formData.data,
+      horario: formData.horario,
+      observacoes: formData.observacoes || undefined,
+    });
   };
 
-  const handleDelete = (id: string) => {
-    setAgendamentos(agendamentos.filter(a => a.id !== id));
-    toast.success("Agendamento removido");
+  const handleStatusChange = (id: number, newStatus: Agendamento["status"]) => {
+    updateAgendamentoMutation.mutate({ id, status: newStatus });
+  };
+
+  const handleDelete = (id: number) => {
+    if (confirm("Tem certeza que deseja remover este agendamento?")) {
+      deleteAgendamentoMutation.mutate({ id });
+    }
   };
 
   const navigateWeek = (direction: "prev" | "next") => {
@@ -228,13 +209,20 @@ export default function AgendaSmart() {
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+    // Valor vem em centavos, converter para reais
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value / 100);
   };
 
-  const formatDate = (dateStr: string) => {
-    const d = new Date(dateStr + 'T00:00:00');
-    return d.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' });
-  };
+  if (isLoading) {
+    return (
+      <ElevareDashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          <span className="ml-3 text-slate-400">Carregando agenda...</span>
+        </div>
+      </ElevareDashboardLayout>
+    );
+  }
 
   return (
     <ElevareDashboardLayout>
@@ -251,16 +239,29 @@ export default function AgendaSmart() {
                 <span className="text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full font-semibold">PRO</span>
               </div>
             </div>
-            <Button
-              onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Novo Agendamento
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => refetch()}
+                className="border-slate-600"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={() => {
+                  setFormData({ ...formData, data: selectedDate });
+                  setShowForm(true);
+                }}
+                className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Agendamento
+              </Button>
+            </div>
           </div>
           <p className="text-slate-400 mt-2">
             Organize sua agenda para vender mais, reduzir faltas e priorizar procedimentos de maior ticket.
+            <span className="text-emerald-400 ml-2">✓ Dados salvos no banco</span>
           </p>
         </div>
 
@@ -285,7 +286,7 @@ export default function AgendaSmart() {
               <Target className="w-4 h-4 text-violet-400" />
               <p className="text-slate-400 text-sm">Meta Mensal</p>
             </div>
-            <p className="text-2xl font-bold text-violet-400">{formatCurrency(metaMensal)}</p>
+            <p className="text-2xl font-bold text-violet-400">{formatCurrency(metaMensal * 100)}</p>
           </Card>
           <Card className="bg-gradient-to-br from-violet-500/20 to-purple-500/20 border-violet-500/30 p-4">
             <div className="flex items-center gap-2 mb-2">
@@ -452,8 +453,13 @@ export default function AgendaSmart() {
                       variant="outline"
                       className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                       onClick={() => handleDelete(agendamento.id)}
+                      disabled={deleteAgendamentoMutation.isPending}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      {deleteAgendamentoMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -509,7 +515,7 @@ export default function AgendaSmart() {
                       <SelectContent>
                         {Array.from({ length: 11 }, (_, i) => {
                           const hour = 8 + i;
-                          return [`${hour}:00`, `${hour}:30`];
+                          return [`${hour.toString().padStart(2, '0')}:00`, `${hour.toString().padStart(2, '0')}:30`];
                         }).flat().map(time => (
                           <SelectItem key={time} value={time}>{time}</SelectItem>
                         ))}
@@ -533,7 +539,14 @@ export default function AgendaSmart() {
                 <Button variant="outline" onClick={() => setShowForm(false)} className="border-slate-600">
                   Cancelar
                 </Button>
-                <Button onClick={handleSubmit} className="bg-violet-500 hover:bg-violet-600">
+                <Button 
+                  onClick={handleSubmit} 
+                  className="bg-violet-500 hover:bg-violet-600"
+                  disabled={createAgendamentoMutation.isPending}
+                >
+                  {createAgendamentoMutation.isPending && (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  )}
                   Adicionar
                 </Button>
               </div>

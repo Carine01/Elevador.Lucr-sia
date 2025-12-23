@@ -2,6 +2,16 @@ import ElevareDashboardLayout from "@/components/ElevareDashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   CalendarDays,
   ChevronLeft,
@@ -11,22 +21,34 @@ import {
   Target,
   Heart,
   MessageCircle,
-  TrendingUp,
   Crown,
+  Plus,
+  Trash2,
+  Loader2,
+  RefreshCw,
+  Check,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
-interface PostSugestao {
-  id: string;
-  data: string;
-  tipo: "autoridade" | "desejo" | "fechamento" | "conexao";
+type Post = {
+  id: number;
+  userId: number;
+  contentId: number | null;
   titulo: string;
-  descricao: string;
-  legenda: string;
-  hashtags: string;
-  melhorHorario: string;
-}
+  tipo: "autoridade" | "desejo" | "fechamento" | "conexao";
+  plataforma: string;
+  dataAgendada: string;
+  horario: string;
+  legenda: string | null;
+  hashtags: string | null;
+  status: "pendente" | "publicado" | "cancelado";
+  engajamento: string | null;
+  publicadoEm: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 const tipoConfig = {
   autoridade: { 
@@ -55,106 +77,102 @@ const tipoConfig = {
   },
 };
 
-// Calendário com sugestões pré-definidas
-const gerarSugestoesSemana = (startDate: Date): PostSugestao[] => {
-  const sugestoes: PostSugestao[] = [];
-  const conteudos = [
-    {
-      tipo: "autoridade" as const,
-      titulo: "Antes e Depois com Explicação Técnica",
-      descricao: "Mostre um resultado real e explique o que foi feito tecnicamente. Isso posiciona você como especialista.",
-      legenda: "Resultado de [PROCEDIMENTO] após [X] sessões.\n\nO que fizemos:\n✅ [Técnica 1]\n✅ [Técnica 2]\n✅ [Técnica 3]\n\nCada pele é única e merece um protocolo personalizado.\n\n📲 Quer saber qual o ideal para você? Me chama no direct.",
-      hashtags: "#esteticaavancada #resultadosreais #harmonizacaofacial #esteticista",
-      melhorHorario: "19:00"
-    },
-    {
-      tipo: "desejo" as const,
-      titulo: "Transformação Emocional",
-      descricao: "Mostre o impacto emocional do procedimento. O que a cliente sentiu, como se viu diferente.",
-      legenda: "Ela chegou insegura.\nSaiu se sentindo linda.\n\nIsso não é só estética.\nÉ autoestima. É confiança. É se olhar no espelho e gostar do que vê.\n\n✨ Você também merece se sentir assim.\n\n📲 Vem conversar comigo.",
-      hashtags: "#transformacao #autoestima #estetica #beleza",
-      melhorHorario: "12:00"
-    },
-    {
-      tipo: "fechamento" as const,
-      titulo: "Oferta com Escassez Real",
-      descricao: "Última vaga, condição especial, prazo limitado. Use escassez REAL.",
-      legenda: "🚨 ÚLTIMA VAGA DESSA SEMANA\n\nSó consegui encaixar mais 1 horário para [PROCEDIMENTO].\n\n📅 [DIA] às [HORÁRIO]\n\n💰 Condição especial: [VALOR ou BENEFÍCIO]\n\nQuem garantir primeiro, leva.\n\n📲 Comenta \"EU QUERO\" ou me chama no direct.",
-      hashtags: "#ultimavaga #agendaaberta #estetica",
-      melhorHorario: "10:00"
-    },
-    {
-      tipo: "conexao" as const,
-      titulo: "Bastidores do Dia a Dia",
-      descricao: "Mostre sua rotina, sua preparação, seu espaço. Humanize sua marca.",
-      legenda: "Um dia normal aqui na clínica:\n\n☕ Café antes de tudo\n📋 Revisão das fichas do dia\n✨ Cada detalhe pensado para você\n\nNão é só atender.\nÉ cuidar de cada cliente como única.\n\n💜 Assim é o meu dia a dia.",
-      hashtags: "#rotina #esteticista #bastidores #diadeclínica",
-      melhorHorario: "08:00"
-    },
-    {
-      tipo: "autoridade" as const,
-      titulo: "Mito vs Verdade",
-      descricao: "Desmistifique algo comum. Posicione-se como quem sabe do que fala.",
-      legenda: "❌ MITO: \"[Crença comum errada]\"\n\n✅ VERDADE: [Explicação correta]\n\nMuita gente ainda acredita nisso e acaba [consequência negativa].\n\nNa minha clínica, faço diferente porque [seu diferencial].\n\n📲 Tem dúvidas? Me pergunta aqui.",
-      hashtags: "#mitoeverdade #esteticaconsciente #educacao",
-      melhorHorario: "20:00"
-    },
-    {
-      tipo: "desejo" as const,
-      titulo: "Depoimento de Cliente",
-      descricao: "Print de mensagem real ou vídeo curto de cliente satisfeita.",
-      legenda: "Mensagens assim que fazem meu dia valer a pena 🥹\n\n[Inserir print ou citação]\n\nVer minha cliente feliz é o maior pagamento que existe.\n\n✨ Quer ter um resultado assim também?\n\n📲 Vem conversar comigo.",
-      hashtags: "#depoimento #resultados #clientesatisfeita",
-      melhorHorario: "18:00"
-    },
-    {
-      tipo: "fechamento" as const,
-      titulo: "CTA Direto - Agenda da Semana",
-      descricao: "Post direto para preencher agenda. Sem rodeios.",
-      legenda: "📅 AGENDA DA SEMANA ABERTA\n\nHorários disponíveis para [PROCEDIMENTO]:\n\n🗓 Segunda: [horário]\n🗓 Terça: [horário]\n🗓 Quarta: [horário]\n\n💜 Escolhe o seu e me chama.\n\nNão deixa pra depois. Agenda lota rápido.",
-      hashtags: "#agendaaberta #horariodisponivel #estetica",
-      melhorHorario: "09:00"
-    },
-  ];
-
-  const diasDaSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-  
-  for (let i = 0; i < 7; i++) {
-    const data = new Date(startDate);
-    data.setDate(data.getDate() + i);
-    const conteudo = conteudos[i % conteudos.length];
-    
-    sugestoes.push({
-      id: `${data.toISOString()}-${i}`,
-      data: data.toISOString().split('T')[0],
-      ...conteudo,
-    });
-  }
-  
-  return sugestoes;
-};
-
 export default function CalendarioEstrategico() {
+  // ========== TRPC QUERIES & MUTATIONS ==========
+  const utils = trpc.useUtils();
+
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date();
     const day = today.getDay();
     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(today.setDate(diff));
+    const monday = new Date(today.setDate(diff));
+    return monday.toISOString().split('T')[0];
   });
-  
-  const [sugestoes] = useState<PostSugestao[]>(() => gerarSugestoesSemana(currentWeekStart));
-  const [selectedPost, setSelectedPost] = useState<PostSugestao | null>(null);
+
+  const { data: postsData, isLoading, refetch } = trpc.calendar.getWeekPosts.useQuery({
+    weekStart: currentWeekStart,
+  });
+
+  const createPostMutation = trpc.calendar.createPost.useMutation({
+    onSuccess: () => {
+      toast.success("Post agendado!");
+      utils.calendar.getWeekPosts.invalidate();
+      setShowForm(false);
+      resetForm();
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  const updatePostMutation = trpc.calendar.updatePost.useMutation({
+    onSuccess: () => {
+      toast.success("Post atualizado!");
+      utils.calendar.getWeekPosts.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  const markPublishedMutation = trpc.calendar.markAsPublished.useMutation({
+    onSuccess: () => {
+      toast.success("Post marcado como publicado! 🎉");
+      utils.calendar.getWeekPosts.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  const deletePostMutation = trpc.calendar.deletePost.useMutation({
+    onSuccess: () => {
+      toast.success("Post removido!");
+      utils.calendar.getWeekPosts.invalidate();
+      setSelectedPost(null);
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  const generateSuggestionsMutation = trpc.calendar.generateWeekSuggestions.useMutation({
+    onSuccess: () => {
+      toast.success("Sugestões geradas com IA! 🤖");
+      utils.calendar.getWeekPosts.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Erro ao gerar: ${error.message}`);
+    },
+  });
+
+  // ========== LOCAL STATE ==========
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState({
+    titulo: "",
+    tipo: "conexao" as Post["tipo"],
+    dataAgendada: "",
+    horario: "19:00",
+    legenda: "",
+    hashtags: "",
+  });
+
+  const posts = postsData?.posts || [];
+  const postsByDay = postsData?.postsByDay || {};
 
   const navigateWeek = (direction: "prev" | "next") => {
     const newDate = new Date(currentWeekStart);
     newDate.setDate(newDate.getDate() + (direction === "next" ? 7 : -7));
-    setCurrentWeekStart(newDate);
+    setCurrentWeekStart(newDate.toISOString().split('T')[0]);
+    setSelectedPost(null);
   };
 
   const getWeekDays = () => {
     const days = [];
+    const start = new Date(currentWeekStart);
     for (let i = 0; i < 7; i++) {
-      const d = new Date(currentWeekStart);
+      const d = new Date(start);
       d.setDate(d.getDate() + i);
       days.push(d);
     }
@@ -164,10 +182,56 @@ export default function CalendarioEstrategico() {
   const weekDays = getWeekDays();
   const hoje = new Date().toISOString().split('T')[0];
 
+  const resetForm = () => {
+    setFormData({
+      titulo: "",
+      tipo: "conexao",
+      dataAgendada: "",
+      horario: "19:00",
+      legenda: "",
+      hashtags: "",
+    });
+  };
+
+  const handleSubmit = () => {
+    if (!formData.titulo || !formData.dataAgendada) {
+      toast.error("Título e data são obrigatórios");
+      return;
+    }
+
+    createPostMutation.mutate({
+      titulo: formData.titulo,
+      tipo: formData.tipo,
+      dataAgendada: formData.dataAgendada,
+      horario: formData.horario,
+      legenda: formData.legenda || undefined,
+      hashtags: formData.hashtags || undefined,
+    });
+  };
+
   const copiarLegenda = (legenda: string, hashtags: string) => {
     navigator.clipboard.writeText(`${legenda}\n\n${hashtags}`);
     toast.success("Legenda copiada! Cole no Instagram.");
   };
+
+  const handleGenerateSuggestions = () => {
+    generateSuggestionsMutation.mutate({
+      weekStart: currentWeekStart,
+      nicho: "estética",
+      tom: "profissional",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <ElevareDashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          <span className="ml-3 text-slate-400">Carregando calendário...</span>
+        </div>
+      </ElevareDashboardLayout>
+    );
+  }
 
   return (
     <ElevareDashboardLayout>
@@ -184,9 +248,42 @@ export default function CalendarioEstrategico() {
                 <span className="text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full font-semibold">PRO</span>
               </div>
             </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => refetch()}
+                className="border-slate-600"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleGenerateSuggestions}
+                disabled={generateSuggestionsMutation.isPending}
+                className="border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+              >
+                {generateSuggestionsMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                Gerar com IA
+              </Button>
+              <Button
+                onClick={() => {
+                  setFormData({ ...formData, dataAgendada: hoje });
+                  setShowForm(true);
+                }}
+                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Novo Post
+              </Button>
+            </div>
           </div>
           <p className="text-slate-400 mt-2">
-            Sugestões prontas do que postar, quando postar e com que intenção. Sem depender de criatividade diária.
+            Sugestões prontas do que postar, quando postar e com que intenção. 
+            <span className="text-emerald-400 ml-2">✓ Dados salvos no banco</span>
           </p>
         </div>
 
@@ -223,21 +320,19 @@ export default function CalendarioEstrategico() {
 
         {/* Grade Semanal */}
         <div className="grid grid-cols-7 gap-3 mb-8">
-          {weekDays.map((day, idx) => {
+          {weekDays.map((day) => {
             const dateStr = day.toISOString().split('T')[0];
-            const sugestao = sugestoes[idx];
-            const TipoIcon = tipoConfig[sugestao?.tipo]?.icon || Sparkles;
+            const dayPosts = postsByDay[dateStr] || [];
             const isToday = dateStr === hoje;
             
             return (
               <Card 
                 key={dateStr}
-                className={`cursor-pointer transition-all p-4 ${
+                className={`cursor-pointer transition-all p-4 min-h-[160px] ${
                   isToday 
                     ? 'bg-pink-500/10 border-pink-500' 
                     : 'bg-slate-800/50 border-slate-700 hover:border-slate-500'
                 }`}
-                onClick={() => setSelectedPost(sugestao)}
               >
                 <div className="text-center mb-3">
                   <p className={`text-xs ${isToday ? 'text-pink-400' : 'text-slate-500'}`}>
@@ -248,14 +343,32 @@ export default function CalendarioEstrategico() {
                   </p>
                 </div>
                 
-                {sugestao && (
-                  <div className={`p-2 rounded-lg ${tipoConfig[sugestao.tipo].color} border`}>
-                    <div className="flex items-center gap-1 mb-1">
-                      <TipoIcon className="w-3 h-3" />
-                      <span className="text-xs font-semibold">{tipoConfig[sugestao.tipo].label}</span>
-                    </div>
-                    <p className="text-xs line-clamp-2">{sugestao.titulo}</p>
-                    <p className="text-xs opacity-70 mt-1">⏰ {sugestao.melhorHorario}</p>
+                {dayPosts.length === 0 ? (
+                  <div className="text-center text-slate-500 text-xs">
+                    Sem posts
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {dayPosts.map((post) => {
+                      const TipoIcon = tipoConfig[post.tipo]?.icon || Sparkles;
+                      return (
+                        <div 
+                          key={post.id}
+                          onClick={() => setSelectedPost(post)}
+                          className={`p-2 rounded-lg ${tipoConfig[post.tipo].color} border cursor-pointer hover:opacity-80 transition-opacity`}
+                        >
+                          <div className="flex items-center gap-1 mb-1">
+                            <TipoIcon className="w-3 h-3" />
+                            <span className="text-xs font-semibold">{tipoConfig[post.tipo].label}</span>
+                            {post.status === "publicado" && (
+                              <Check className="w-3 h-3 ml-auto" />
+                            )}
+                          </div>
+                          <p className="text-xs line-clamp-2">{post.titulo}</p>
+                          <p className="text-xs opacity-70 mt-1">⏰ {post.horario}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </Card>
@@ -272,33 +385,76 @@ export default function CalendarioEstrategico() {
                   {tipoConfig[selectedPost.tipo].label}
                 </Badge>
                 <h2 className="text-xl font-bold text-white mt-2">{selectedPost.titulo}</h2>
-                <p className="text-slate-400 mt-1">{selectedPost.descricao}</p>
+                <p className="text-slate-400 mt-1">{tipoConfig[selectedPost.tipo].descricao}</p>
+                {selectedPost.status === "publicado" && (
+                  <Badge className="bg-green-500/20 text-green-400 mt-2">✓ Publicado</Badge>
+                )}
               </div>
               <div className="text-right">
                 <p className="text-sm text-slate-500">Melhor horário</p>
-                <p className="text-lg font-bold text-pink-400">{selectedPost.melhorHorario}</p>
+                <p className="text-lg font-bold text-pink-400">{selectedPost.horario}</p>
               </div>
             </div>
             
-            <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700 mb-4">
-              <p className="text-sm text-slate-500 mb-2 font-semibold">📝 LEGENDA PRONTA:</p>
-              <p className="text-white whitespace-pre-line text-sm leading-relaxed">
-                {selectedPost.legenda}
-              </p>
-              <p className="text-blue-400 text-xs mt-4">
-                {selectedPost.hashtags}
-              </p>
-            </div>
+            {selectedPost.legenda && (
+              <div className="bg-slate-900/50 rounded-lg p-4 border border-slate-700 mb-4">
+                <p className="text-sm text-slate-500 mb-2 font-semibold">📝 LEGENDA PRONTA:</p>
+                <p className="text-white whitespace-pre-line text-sm leading-relaxed">
+                  {selectedPost.legenda}
+                </p>
+                {selectedPost.hashtags && (
+                  <p className="text-blue-400 text-xs mt-4">
+                    {selectedPost.hashtags}
+                  </p>
+                )}
+              </div>
+            )}
             
             <div className="flex gap-3">
+              {selectedPost.legenda && (
+                <Button
+                  onClick={() => copiarLegenda(selectedPost.legenda || "", selectedPost.hashtags || "")}
+                  className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+                >
+                  <Copy className="w-4 h-4 mr-2" />
+                  Copiar Legenda
+                </Button>
+              )}
+              
+              {selectedPost.status === "pendente" && (
+                <Button 
+                  variant="outline" 
+                  className="border-green-500/30 text-green-400 hover:bg-green-500/10"
+                  onClick={() => markPublishedMutation.mutate({ id: selectedPost.id })}
+                  disabled={markPublishedMutation.isPending}
+                >
+                  {markPublishedMutation.isPending ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Check className="w-4 h-4 mr-2" />
+                  )}
+                  Marcar Publicado
+                </Button>
+              )}
+              
               <Button
-                onClick={() => copiarLegenda(selectedPost.legenda, selectedPost.hashtags)}
-                className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+                variant="outline"
+                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                onClick={() => {
+                  if (confirm("Remover este post?")) {
+                    deletePostMutation.mutate({ id: selectedPost.id });
+                  }
+                }}
+                disabled={deletePostMutation.isPending}
               >
-                <Copy className="w-4 h-4 mr-2" />
-                Copiar Legenda Completa
+                {deletePostMutation.isPending ? (
+                  <Loader2 className="w-4 h-4" />
+                ) : (
+                  <Trash2 className="w-4 h-4" />
+                )}
               </Button>
-              <Button variant="outline" className="border-slate-600" onClick={() => setSelectedPost(null)}>
+              
+              <Button variant="outline" className="border-slate-600 ml-auto" onClick={() => setSelectedPost(null)}>
                 Fechar
               </Button>
             </div>
@@ -318,6 +474,107 @@ export default function CalendarioEstrategico() {
             </div>
           </div>
         </Card>
+
+        {/* Add Post Modal */}
+        {showForm && (
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <Card className="bg-slate-800 border-slate-700 p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+              <h2 className="text-xl font-semibold text-white mb-4">Novo Post</h2>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-white">Título *</Label>
+                  <Input
+                    value={formData.titulo}
+                    onChange={(e) => setFormData({...formData, titulo: e.target.value})}
+                    className="bg-slate-700 border-slate-600 text-white"
+                    placeholder="Ex: Antes e Depois com Explicação"
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-white">Tipo de Post</Label>
+                    <Select value={formData.tipo} onValueChange={(v) => setFormData({...formData, tipo: v as Post["tipo"]})}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="autoridade">👑 Autoridade</SelectItem>
+                        <SelectItem value="desejo">💖 Desejo</SelectItem>
+                        <SelectItem value="fechamento">🎯 Fechamento</SelectItem>
+                        <SelectItem value="conexao">💬 Conexão</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label className="text-white">Horário</Label>
+                    <Select value={formData.horario} onValueChange={(v) => setFormData({...formData, horario: v})}>
+                      <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="08:00">08:00</SelectItem>
+                        <SelectItem value="09:00">09:00</SelectItem>
+                        <SelectItem value="10:00">10:00</SelectItem>
+                        <SelectItem value="12:00">12:00</SelectItem>
+                        <SelectItem value="18:00">18:00</SelectItem>
+                        <SelectItem value="19:00">19:00</SelectItem>
+                        <SelectItem value="20:00">20:00</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-white">Data *</Label>
+                  <Input
+                    type="date"
+                    value={formData.dataAgendada}
+                    onChange={(e) => setFormData({...formData, dataAgendada: e.target.value})}
+                    className="bg-slate-700 border-slate-600 text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white">Legenda</Label>
+                  <Textarea
+                    value={formData.legenda}
+                    onChange={(e) => setFormData({...formData, legenda: e.target.value})}
+                    className="bg-slate-700 border-slate-600 text-white min-h-[120px]"
+                    placeholder="Escreva a legenda do post..."
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-white">Hashtags</Label>
+                  <Input
+                    value={formData.hashtags}
+                    onChange={(e) => setFormData({...formData, hashtags: e.target.value})}
+                    className="bg-slate-700 border-slate-600 text-white"
+                    placeholder="#estetica #beleza #harmonizacao"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <Button variant="outline" onClick={() => setShowForm(false)} className="border-slate-600">
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={handleSubmit} 
+                  className="bg-pink-500 hover:bg-pink-600"
+                  disabled={createPostMutation.isPending}
+                >
+                  {createPostMutation.isPending && (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  )}
+                  Agendar Post
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
     </ElevareDashboardLayout>
   );

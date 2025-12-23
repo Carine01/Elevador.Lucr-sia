@@ -26,27 +26,31 @@ import {
   Flame,
   Copy,
   Send,
-  User,
   Calendar,
-  DollarSign,
   Filter,
   Search,
+  RefreshCw,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
-interface Lead {
-  id: string;
+// Types from backend
+type Lead = {
+  id: number;
+  userId: number;
   nome: string;
-  telefone: string;
-  email: string;
-  procedimento: string;
-  origem: string;
+  telefone: string | null;
+  email: string | null;
+  procedimento: string | null;
+  origem: string | null;
   temperatura: "frio" | "morno" | "quente";
-  ultimoContato: string;
-  observacoes: string;
+  ultimoContato: Date | null;
+  observacoes: string | null;
   status: "novo" | "contatado" | "agendado" | "convertido" | "perdido";
-}
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 const temperaturaBadge = {
   frio: { color: "bg-blue-500/20 text-blue-400 border-blue-500/30", icon: ThermometerSnowflake, label: "Frio" },
@@ -92,52 +96,54 @@ Quer que eu reserve um horário para você? ⏰`,
 Alguma dúvida antes do procedimento? Estou à disposição! 💜`,
 };
 
-export default function LeadsPipeline() {
-  const [leads, setLeads] = useState<Lead[]>([
-    {
-      id: "1",
-      nome: "Maria Silva",
-      telefone: "(27) 99999-1234",
-      email: "maria@email.com",
-      procedimento: "Harmonização Facial",
-      origem: "Instagram",
-      temperatura: "quente",
-      ultimoContato: "2024-12-20",
-      observacoes: "Muito interessada, pediu valores",
-      status: "contatado",
+export default function FluxoClientes() {
+  // ========== TRPC QUERIES & MUTATIONS ==========
+  const utils = trpc.useUtils();
+  
+  const { data: leadsData, isLoading, refetch } = trpc.crm.getLeads.useQuery({});
+  const { data: statsData } = trpc.crm.getCrmStats.useQuery();
+  
+  const createLeadMutation = trpc.crm.createLead.useMutation({
+    onSuccess: () => {
+      toast.success("Lead adicionado!");
+      utils.crm.getLeads.invalidate();
+      utils.crm.getCrmStats.invalidate();
+      resetForm();
     },
-    {
-      id: "2",
-      nome: "Ana Costa",
-      telefone: "(27) 99888-5678",
-      email: "ana@email.com",
-      procedimento: "Limpeza de Pele",
-      origem: "Indicação",
-      temperatura: "morno",
-      ultimoContato: "2024-12-18",
-      observacoes: "Vai pensar e retornar",
-      status: "contatado",
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
     },
-    {
-      id: "3",
-      nome: "Carla Santos",
-      telefone: "(27) 99777-9012",
-      email: "carla@email.com",
-      procedimento: "Peeling",
-      origem: "Google Ads",
-      temperatura: "frio",
-      ultimoContato: "2024-12-15",
-      observacoes: "Só pediu informações",
-      status: "novo",
-    },
-  ]);
+  });
 
+  const updateLeadMutation = trpc.crm.updateLead.useMutation({
+    onSuccess: () => {
+      toast.success("Lead atualizado!");
+      utils.crm.getLeads.invalidate();
+      utils.crm.getCrmStats.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  const deleteLeadMutation = trpc.crm.deleteLead.useMutation({
+    onSuccess: () => {
+      toast.success("Lead removido!");
+      utils.crm.getLeads.invalidate();
+      utils.crm.getCrmStats.invalidate();
+    },
+    onError: (error) => {
+      toast.error(`Erro: ${error.message}`);
+    },
+  });
+
+  // ========== LOCAL STATE ==========
   const [showForm, setShowForm] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [filtroTemperatura, setFiltroTemperatura] = useState<string>("todos");
   const [filtroStatus, setFiltroStatus] = useState<string>("todos");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedScript, setSelectedScript] = useState<string>("");
+  const [selectedScript, setSelectedScript] = useState<string>("primeiro_contato");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
 
   // Form state
@@ -150,6 +156,13 @@ export default function LeadsPipeline() {
     temperatura: "morno" as "frio" | "morno" | "quente",
     observacoes: "",
   });
+
+  const leads = leadsData?.leads || [];
+  const stats = statsData?.stats || {
+    totalLeads: 0,
+    leadsPorStatus: { novo: 0, contatado: 0, agendado: 0, convertido: 0, perdido: 0 },
+    leadsPorTemperatura: { frio: 0, morno: 0, quente: 0 },
+  };
 
   const resetForm = () => {
     setFormData({
@@ -172,67 +185,62 @@ export default function LeadsPipeline() {
     }
 
     if (editingLead) {
-      setLeads(leads.map(l => 
-        l.id === editingLead.id 
-          ? { ...l, ...formData, ultimoContato: new Date().toISOString().split('T')[0] }
-          : l
-      ));
-      toast.success("Lead atualizado!");
-    } else {
-      const newLead: Lead = {
+      updateLeadMutation.mutate({
+        id: editingLead.id,
         ...formData,
-        id: Date.now().toString(),
-        ultimoContato: new Date().toISOString().split('T')[0],
-        status: "novo",
-      };
-      setLeads([newLead, ...leads]);
-      toast.success("Lead adicionado!");
+        ultimoContato: new Date().toISOString(),
+      });
+    } else {
+      createLeadMutation.mutate(formData);
     }
-    resetForm();
   };
 
-  const handleDelete = (id: string) => {
-    setLeads(leads.filter(l => l.id !== id));
-    toast.success("Lead removido");
+  const handleDelete = (id: number) => {
+    if (confirm("Tem certeza que deseja remover este lead?")) {
+      deleteLeadMutation.mutate({ id });
+    }
   };
 
-  const handleStatusChange = (id: string, newStatus: Lead["status"]) => {
-    setLeads(leads.map(l => l.id === id ? { ...l, status: newStatus } : l));
-    toast.success("Status atualizado!");
+  const handleStatusChange = (id: number, newStatus: Lead["status"]) => {
+    updateLeadMutation.mutate({ id, status: newStatus });
   };
 
-  const handleTemperaturaChange = (id: string, newTemp: Lead["temperatura"]) => {
-    setLeads(leads.map(l => l.id === id ? { ...l, temperatura: newTemp } : l));
+  const handleTemperaturaChange = (id: number, newTemp: Lead["temperatura"]) => {
+    updateLeadMutation.mutate({ id, temperatura: newTemp });
   };
 
   const getScriptForLead = (lead: Lead, scriptKey: string) => {
     const script = whatsappScripts[scriptKey as keyof typeof whatsappScripts];
     return script
       .replace("{nome}", lead.nome.split(" ")[0])
-      .replace("{procedimento}", lead.procedimento);
+      .replace("{procedimento}", lead.procedimento || "[Procedimento]");
   };
 
   const openWhatsApp = (lead: Lead, message: string) => {
-    const phone = lead.telefone.replace(/\D/g, "");
+    const phone = (lead.telefone || "").replace(/\D/g, "");
     const url = `https://wa.me/55${phone}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   };
 
-  const filteredLeads = leads.filter(lead => {
+  // Filtrar leads localmente
+  const filteredLeads = leads.filter((lead) => {
     const matchTemp = filtroTemperatura === "todos" || lead.temperatura === filtroTemperatura;
     const matchStatus = filtroStatus === "todos" || lead.status === filtroStatus;
     const matchSearch = lead.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       lead.procedimento.toLowerCase().includes(searchTerm.toLowerCase());
+                       (lead.procedimento || "").toLowerCase().includes(searchTerm.toLowerCase());
     return matchTemp && matchStatus && matchSearch;
   });
 
-  // Stats
-  const stats = {
-    total: leads.length,
-    quentes: leads.filter(l => l.temperatura === "quente").length,
-    agendados: leads.filter(l => l.status === "agendado").length,
-    convertidos: leads.filter(l => l.status === "convertido").length,
-  };
+  if (isLoading) {
+    return (
+      <ElevareDashboardLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+          <span className="ml-3 text-slate-400">Carregando leads...</span>
+        </div>
+      </ElevareDashboardLayout>
+    );
+  }
 
   return (
     <ElevareDashboardLayout>
@@ -249,17 +257,26 @@ export default function LeadsPipeline() {
                 <span className="text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full font-semibold">PRO</span>
               </div>
             </div>
-            <Button
-              onClick={() => setShowForm(true)}
-              className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nova Cliente
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => refetch()}
+                className="border-slate-600"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+              <Button
+                onClick={() => setShowForm(true)}
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Nova Cliente
+              </Button>
+            </div>
           </div>
           <p className="text-slate-400 mt-2">
             Organiza cada cliente do primeiro contato ao fechamento. Nunca mais perca uma venda.
-            Organize seus leads com termômetro neural. Saiba quem está pronta para comprar.
+            <span className="text-emerald-400 ml-2">✓ Dados salvos no banco</span>
           </p>
         </div>
 
@@ -267,19 +284,19 @@ export default function LeadsPipeline() {
         <div className="grid grid-cols-4 gap-4 mb-8">
           <Card className="bg-slate-800/50 border-slate-700 p-4">
             <p className="text-slate-400 text-sm">Total de Leads</p>
-            <p className="text-3xl font-bold text-white">{stats.total}</p>
+            <p className="text-3xl font-bold text-white">{stats.totalLeads}</p>
           </Card>
           <Card className="bg-slate-800/50 border-slate-700 p-4">
             <p className="text-slate-400 text-sm">Leads Quentes 🔥</p>
-            <p className="text-3xl font-bold text-red-400">{stats.quentes}</p>
+            <p className="text-3xl font-bold text-red-400">{stats.leadsPorTemperatura.quente}</p>
           </Card>
           <Card className="bg-slate-800/50 border-slate-700 p-4">
             <p className="text-slate-400 text-sm">Agendados</p>
-            <p className="text-3xl font-bold text-green-400">{stats.agendados}</p>
+            <p className="text-3xl font-bold text-green-400">{stats.leadsPorStatus.agendado}</p>
           </Card>
           <Card className="bg-slate-800/50 border-slate-700 p-4">
             <p className="text-slate-400 text-sm">Convertidos</p>
-            <p className="text-3xl font-bold text-emerald-400">{stats.convertidos}</p>
+            <p className="text-3xl font-bold text-emerald-400">{stats.leadsPorStatus.convertido}</p>
           </Card>
         </div>
 
@@ -328,7 +345,7 @@ export default function LeadsPipeline() {
             <Card className="bg-slate-800/30 border-slate-700 border-dashed p-12 text-center">
               <Users className="w-16 h-16 text-slate-600 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-slate-400 mb-2">Nenhum lead encontrado</h3>
-              <p className="text-slate-500">Adicione seu primeiro lead ou ajuste os filtros</p>
+              <p className="text-slate-500">Adicione seu primeiro lead clicando em "Nova Cliente"</p>
             </Card>
           ) : (
             filteredLeads.map((lead) => {
@@ -347,19 +364,23 @@ export default function LeadsPipeline() {
                             {statusBadge[lead.status].label}
                           </Badge>
                         </div>
-                        <p className="text-slate-400 text-sm">{lead.procedimento}</p>
+                        <p className="text-slate-400 text-sm">{lead.procedimento || "Sem procedimento definido"}</p>
                         <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
-                          <span className="flex items-center gap-1">
-                            <Phone className="w-3 h-3" />
-                            {lead.telefone}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Mail className="w-3 h-3" />
-                            {lead.email}
-                          </span>
+                          {lead.telefone && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="w-3 h-3" />
+                              {lead.telefone}
+                            </span>
+                          )}
+                          {lead.email && (
+                            <span className="flex items-center gap-1">
+                              <Mail className="w-3 h-3" />
+                              {lead.email}
+                            </span>
+                          )}
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
-                            Último contato: {lead.ultimoContato}
+                            Criado: {new Date(lead.createdAt).toLocaleDateString('pt-BR')}
                           </span>
                         </div>
                         {lead.observacoes && (
@@ -420,8 +441,13 @@ export default function LeadsPipeline() {
                         variant="outline"
                         className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                         onClick={() => handleDelete(lead.id)}
+                        disabled={deleteLeadMutation.isPending}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        {deleteLeadMutation.isPending ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -527,7 +553,14 @@ export default function LeadsPipeline() {
                 <Button variant="outline" onClick={resetForm} className="border-slate-600">
                   Cancelar
                 </Button>
-                <Button onClick={handleSubmit} className="bg-emerald-500 hover:bg-emerald-600">
+                <Button 
+                  onClick={handleSubmit} 
+                  className="bg-emerald-500 hover:bg-emerald-600"
+                  disabled={createLeadMutation.isPending || updateLeadMutation.isPending}
+                >
+                  {(createLeadMutation.isPending || updateLeadMutation.isPending) && (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  )}
                   {editingLead ? "Salvar" : "Adicionar"}
                 </Button>
               </div>
@@ -585,6 +618,11 @@ export default function LeadsPipeline() {
                     <Button
                       onClick={() => {
                         openWhatsApp(selectedLead, getScriptForLead(selectedLead, selectedScript));
+                        // Atualizar último contato
+                        updateLeadMutation.mutate({
+                          id: selectedLead.id,
+                          status: "contatado",
+                        });
                         setSelectedLead(null);
                       }}
                       className="bg-green-500 hover:bg-green-600"
