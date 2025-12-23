@@ -5,6 +5,8 @@ import { publicProcedure, router } from "./_core/trpc";
 import { subscriptionRouter } from "./routers/subscription";
 import { bioRadarRouter } from "./routers/bioRadar";
 import { contentRouter } from "./routers/content";
+import { crmRouter } from "./routers/crm";
+import { calendarRouter } from "./routers/calendar";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -24,6 +26,10 @@ export const appRouter = router({
   subscription: subscriptionRouter,
   bioRadar: bioRadarRouter,
   content: contentRouter,
+  
+  // 🚀 NOVOS ROUTERS - Backend Real
+  crm: crmRouter,
+  calendar: calendarRouter,
 });
 
 export type AppRouter = typeof appRouter;

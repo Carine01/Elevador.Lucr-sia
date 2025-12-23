@@ -114,3 +114,93 @@ export const subscription = mysqlTable("subscription", {
 
 export type Subscription = typeof subscription.$inferSelect;
 export type InsertSubscription = typeof subscription.$inferInsert;
+
+// ============================================
+// 🚀 NOVAS TABELAS - BACKEND REAL LUCRESIA
+// ============================================
+
+/**
+ * 👥 LEADS - Fluxo Inteligente de Clientes
+ * Persiste leads do CRM com temperatura e pipeline
+ */
+export const leads = mysqlTable("leads", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  nome: varchar("nome", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }),
+  telefone: varchar("telefone", { length: 20 }),
+  procedimento: varchar("procedimento", { length: 255 }),
+  origem: varchar("origem", { length: 100 }), // instagram, google, indicação
+  temperatura: mysqlEnum("temperatura", ["frio", "morno", "quente"]).default("frio").notNull(),
+  status: mysqlEnum("status", ["novo", "contatado", "agendado", "convertido", "perdido"]).default("novo").notNull(),
+  valorEstimado: int("valorEstimado"), // em centavos
+  observacoes: text("observacoes"),
+  ultimoContato: timestamp("ultimoContato"),
+  proximoContato: timestamp("proximoContato"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("leads_user_id_idx").on(table.userId),
+  statusIdx: index("leads_status_idx").on(table.status),
+  temperaturaIdx: index("leads_temperatura_idx").on(table.temperatura),
+}));
+
+export type Lead = typeof leads.$inferSelect;
+export type InsertLead = typeof leads.$inferInsert;
+
+/**
+ * 📅 AGENDAMENTOS - Agenda Estratégica de Faturamento
+ * Compromissos com clientes, procedimentos e valores
+ */
+export const agendamentos = mysqlTable("agendamentos", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  leadId: int("leadId").references(() => leads.id, { onDelete: "set null" }),
+  clienteNome: varchar("clienteNome", { length: 255 }).notNull(),
+  procedimento: varchar("procedimento", { length: 255 }).notNull(),
+  valor: int("valor").notNull(), // em centavos
+  data: varchar("data", { length: 10 }).notNull(), // YYYY-MM-DD
+  horario: varchar("horario", { length: 5 }).notNull(), // HH:MM
+  status: mysqlEnum("status", ["confirmado", "pendente", "realizado", "cancelado", "remarcado"]).default("pendente").notNull(),
+  observacoes: text("observacoes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("agendamentos_user_id_idx").on(table.userId),
+  leadIdIdx: index("agendamentos_lead_id_idx").on(table.leadId),
+  dataIdx: index("agendamentos_data_idx").on(table.data),
+  statusIdx: index("agendamentos_status_idx").on(table.status),
+}));
+
+export type Agendamento = typeof agendamentos.$inferSelect;
+export type InsertAgendamento = typeof agendamentos.$inferInsert;
+
+/**
+ * 📆 CALENDARIO_POSTS - Calendário de Conteúdo e Vendas
+ * Posts agendados com sugestões de conteúdo estratégico
+ */
+export const calendarioPosts = mysqlTable("calendarioPosts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  contentId: int("contentId").references(() => contentGeneration.id, { onDelete: "set null" }),
+  titulo: varchar("titulo", { length: 255 }).notNull(),
+  tipo: mysqlEnum("tipo", ["autoridade", "desejo", "fechamento", "conexao"]).default("conexao").notNull(),
+  plataforma: varchar("plataforma", { length: 50 }).default("instagram").notNull(),
+  dataAgendada: varchar("dataAgendada", { length: 10 }).notNull(), // YYYY-MM-DD
+  horario: varchar("horario", { length: 5 }).default("19:00").notNull(),
+  legenda: text("legenda"),
+  hashtags: text("hashtags"),
+  status: mysqlEnum("status", ["pendente", "publicado", "cancelado"]).default("pendente").notNull(),
+  engajamento: text("engajamento"), // JSON: {likes, comentarios, salvos}
+  publicadoEm: timestamp("publicadoEm"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("calendario_user_id_idx").on(table.userId),
+  dataIdx: index("calendario_data_idx").on(table.dataAgendada),
+  statusIdx: index("calendario_status_idx").on(table.status),
+  tipoIdx: index("calendario_tipo_idx").on(table.tipo),
+}));
+
+export type CalendarioPost = typeof calendarioPosts.$inferSelect;
+export type InsertCalendarioPost = typeof calendarioPosts.$inferInsert;

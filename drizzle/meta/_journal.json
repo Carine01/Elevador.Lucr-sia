@@ -29,6 +29,13 @@
       "when": 1766322267425,
       "tag": "0003_condemned_clea",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1766459284427,
+      "tag": "0004_familiar_goblin_queen",
+      "breakpoints": true
     }
   ]
 }
