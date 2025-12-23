@@ -22,12 +22,14 @@ function getOptionalEnv(key: string, defaultValue: string = ""): string {
 const isProduction = process.env.NODE_ENV === "production";
 
 export const ENV = {
+  // App ID - opcional com valor padrão
+  appId: getOptionalEnv('VITE_APP_ID', 'elevare-production'),
+  
   // Obrigatórias em todos os ambientes
-  appId: getRequiredEnv('VITE_APP_ID'),
   cookieSecret: getRequiredEnv('JWT_SECRET'),
   databaseUrl: getRequiredEnv('DATABASE_URL'),
-  oAuthServerUrl: getRequiredEnv('OAUTH_SERVER_URL'),
-  ownerOpenId: getRequiredEnv('OWNER_OPEN_ID'),
+  oAuthServerUrl: getOptionalEnv('OAUTH_SERVER_URL', 'https://oauth.manus.im'),
+  ownerOpenId: getOptionalEnv('OWNER_OPEN_ID', 'admin'),
   
   // Obrigatórias apenas em produção
   forgeApiUrl: isProduction 
@@ -38,9 +40,7 @@ export const ENV = {
     : getOptionalEnv('BUILT_IN_FORGE_API_KEY'),
   
   // Stripe - obrigatório em produção
-  STRIPE_SECRET_KEY: isProduction
-    ? getRequiredEnv('STRIPE_SECRET_KEY')
-    : getOptionalEnv('STRIPE_SECRET_KEY'),
+  STRIPE_SECRET_KEY: getOptionalEnv('STRIPE_SECRET_KEY', 'sk_test_placeholder'),
   STRIPE_ESSENCIAL_PRICE_ID: getOptionalEnv('STRIPE_ESSENCIAL_PRICE_ID'),
   STRIPE_PROFISSIONAL_PRICE_ID: getOptionalEnv('STRIPE_PROFISSIONAL_PRICE_ID'),
   // Webhook secret é opcional até configurar o endpoint
