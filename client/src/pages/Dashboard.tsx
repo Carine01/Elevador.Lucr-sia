@@ -10,6 +10,11 @@ import {
   Target,
   Sparkles,
   CreditCard,
+  Video,
+  Users,
+  Calendar,
+  Bot,
+  Lock,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -24,37 +29,79 @@ export default function Dashboard() {
   });
 
   const features = [
+    // PLANO START
     {
-      title: "Radar de Bio",
-      description: "Descubra por que seu Instagram não converte",
+      title: "📡 Radar de Bio",
+      description: "Descubra por que seu Instagram não converte e receba diagnóstico personalizado",
       icon: Target,
       color: "from-amber-500 to-orange-500",
       href: "/dashboard/radar-bio",
-      badge: "Grátis",
+      badge: "START",
+      plan: "start",
     },
     {
-      title: "Robô Produtor",
-      description: "Crie anúncios e conteúdos que vendem sozinhos",
-      icon: Sparkles,
+      title: "🤖 Robô de Post",
+      description: "Crie posts e anúncios que vendem sozinhos com IA especializada em estética",
+      icon: Bot,
       color: "from-purple-500 to-pink-500",
       href: "/dashboard/robo-produtor",
-      badge: subscription?.plan === "free" ? "PRO" : null,
+      badge: "START",
+      plan: "start",
     },
     {
-      title: "Gerador de E-books",
-      description: "Isca digital que gera leads todos os dias",
+      title: "📖 IA de E-books",
+      description: "Isca digital profissional que gera leads todos os dias automaticamente",
       icon: BookOpen,
       color: "from-blue-500 to-cyan-500",
       href: "/dashboard/ebooks",
-      badge: subscription?.plan === "free" ? "PRO" : null,
+      badge: "START",
+      plan: "start",
+    },
+    // PLANO PRO
+    {
+      title: "🎥 Veo Cinema",
+      description: "Roteiros cinematográficos para Reels que viralizam e vendem",
+      icon: Video,
+      color: "from-rose-500 to-pink-500",
+      href: "/dashboard/veo-cinema",
+      badge: "PRO",
+      plan: "pro",
     },
     {
-      title: "Upgrade de Plano",
-      description: "Desbloqueie crescimento e automação total",
-      icon: CreditCard,
+      title: "🎯 Ads Manager",
+      description: "Plano estratégico de campanhas + anúncios persuasivos prontos",
+      icon: Target,
       color: "from-green-500 to-emerald-500",
+      href: "/dashboard/ads-manager",
+      badge: "PRO",
+      plan: "pro",
+    },
+    {
+      title: "💎 Leads Pipeline",
+      description: "CRM com termômetro neural: saiba quem está pronta para comprar",
+      icon: Users,
+      color: "from-teal-500 to-cyan-500",
+      href: "/dashboard/leads-pipeline",
+      badge: "PRO",
+      plan: "pro",
+    },
+    {
+      title: "📅 Agenda Smart",
+      description: "Visualize seu faturamento diário, semanal e mensal em tempo real",
+      icon: Calendar,
+      color: "from-violet-500 to-purple-500",
+      href: "/dashboard/agenda-smart",
+      badge: "PRO",
+      plan: "pro",
+    },
+    {
+      title: "💳 Upgrade de Plano",
+      description: "Desbloqueie o poder completo da LucresIA",
+      icon: CreditCard,
+      color: "from-slate-600 to-slate-700",
       href: "/pricing",
       badge: subscription?.plan === "free" ? "Upgrade" : "Ativo",
+      plan: "all",
     },
   ];
 
@@ -96,19 +143,21 @@ export default function Dashboard() {
   return (
     <ElevareDashboardLayout>
       {/* Welcome Banner */}
-      <Card className="bg-gradient-to-r from-purple-100 to-amber-100 border-purple-200 p-6 mb-8">
+      <Card className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 border-amber-500/30 p-6 mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">
-              Bem-vindo, {user?.name?.split(" ")[0] || "Usuário"}! 👋
+            <h2 className="text-2xl font-bold text-white mb-2">
+              Olá, {user?.name?.split(" ")[0] || "Usuário"}! 👋
             </h2>
-            <p className="text-slate-700">
-              <strong>Venda como ciência, não como esperança.</strong>
+            <p className="text-amber-400 font-semibold">
+              Bem-vinda ao seu Centro de Comando da Clínica Lucrativa
             </p>
-            <p className="text-slate-500 text-sm mt-1">
-              Elevare Inteligência de Vendas - O pilar que une neurovendas,
-              comportamento e engenharia de conversão.
+            <p className="text-slate-400 text-sm mt-1">
+              LucresIA - Estética Lucrativa • A IA que transforma clínicas em máquinas previsíveis de faturamento
             </p>
+          </div>
+          <div className="hidden md:block">
+            <span className="text-4xl">L$</span>
           </div>
         </div>
       </Card>
@@ -138,51 +187,55 @@ export default function Dashboard() {
 
       {/* Features Grid */}
       <div className="mb-8">
-        <h3 className="text-xl font-bold text-slate-800 mb-6">
-          Funcionalidades Principais
+        <h3 className="text-xl font-bold text-slate-800 mb-2">
+          Seus Módulos Inteligentes
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <p className="text-slate-500 text-sm mb-6">
+          Ferramentas que trabalham 24h para você faturar mais
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {features.map((feature) => {
             const Icon = feature.icon;
             const isPro = feature.badge === "PRO";
+            const isStart = feature.badge === "START";
             return (
               <Card
                 key={feature.title}
-                className="bg-white border-gray-200 p-6 hover:border-purple-300 transition-all hover:shadow-lg cursor-pointer group"
+                className={`bg-white border-gray-200 p-5 hover:border-amber-300 transition-all hover:shadow-lg cursor-pointer group ${
+                  isPro ? 'border-amber-500/20' : ''
+                }`}
                 onClick={() => navigate(feature.href)}
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start justify-between mb-3">
                   <div
-                    className={`p-3 bg-gradient-to-r ${feature.color} rounded-lg`}
+                    className={`p-2.5 bg-gradient-to-r ${feature.color} rounded-lg`}
                   >
-                    <Icon className="w-6 h-6 text-white" />
+                    <Icon className="w-5 h-5 text-white" />
                   </div>
                   {feature.badge && (
-                    <span className={`text-xs px-2 py-1 rounded-full ${
+                    <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
                       isPro 
-                        ? "bg-red-100 text-red-600 font-bold" 
+                        ? "bg-amber-500/20 text-amber-600 border border-amber-500/30" 
+                        : isStart
+                        ? "bg-green-100 text-green-600"
                         : feature.badge === "Upgrade"
-                        ? "bg-green-100 text-green-600 font-bold"
-                        : "bg-amber-100 text-amber-600"
+                        ? "bg-slate-100 text-slate-600"
+                        : "bg-emerald-100 text-emerald-600"
                     }`}>
+                      {isPro && <Lock className="w-3 h-3 inline mr-1" />}
                       {feature.badge}
                     </span>
                   )}
                 </div>
-                <h4 className="text-lg font-semibold text-slate-800 mb-2">
+                <h4 className="text-base font-semibold text-slate-800 mb-1.5">
                   {feature.title}
                 </h4>
-                <p className="text-sm text-slate-500 mb-4">
+                <p className="text-xs text-slate-500 mb-3 line-clamp-2">
                   {feature.description}
                 </p>
-                {isPro && (
-                  <p className="text-xs font-bold text-red-500 mb-3">
-                    🔒 Disponível no PRO
-                  </p>
-                )}
-                <div className="flex items-center text-purple-600 group-hover:translate-x-1 transition-transform">
-                  <span className="text-sm font-medium">{isPro ? "Ver planos" : "Acessar"}</span>
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                <div className="flex items-center text-amber-600 group-hover:translate-x-1 transition-transform">
+                  <span className="text-xs font-medium">{isPro ? "Ver PRO" : "Acessar"}</span>
+                  <ArrowRight className="w-3 h-3 ml-1" />
                 </div>
               </Card>
             );
@@ -191,48 +244,47 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Start Section */}
-      <Card className="bg-gradient-to-r from-purple-100 to-amber-100 border-purple-200 p-8">
+      <Card className="bg-gradient-to-r from-amber-500 to-orange-500 border-0 p-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">
+            <h3 className="text-xl font-bold text-white mb-2">
               Comece Agora! 🚀
             </h3>
-            <p className="text-slate-600">
+            <p className="text-white/90">
               Faça seu primeiro diagnóstico com o Radar de Bio e descubra como
-              melhorar sua presença no Instagram
+              transformar seu Instagram em uma máquina de agendamentos
             </p>
           </div>
           <Button
             onClick={() => navigate("/dashboard/radar-bio")}
-            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-semibold px-8 py-6 rounded-lg text-lg whitespace-nowrap"
+            className="bg-white text-amber-600 hover:bg-amber-50 font-semibold px-8 py-6 rounded-lg text-lg whitespace-nowrap shadow-lg"
           >
-            Começar Agora
+            Ativar Radar
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
       </Card>
 
-      {/* Manifesto */}
+      {/* Manifesto LucresIA */}
       <Card className="bg-white border-gray-200 p-8 mt-8 shadow-sm">
-        <h3 className="text-xl font-bold text-slate-800 mb-4">Manifesto Elevare</h3>
+        <h3 className="text-xl font-bold text-slate-800 mb-4">A Filosofia LucresIA</h3>
         <div className="space-y-3 text-slate-700">
           <p>
-            <strong>Vender é traduzir valor, não baixar preço.</strong>
+            <strong>Clínica lucrativa não depende de sorte.</strong>
           </p>
           <p>
-            <strong>É conduzir, não pressionar.</strong>
+            <strong>Depende de sistema, previsibilidade e posicionamento premium.</strong>
           </p>
           <p>
             <strong>
-              É mostrar o caminho da transformação que a cliente já deseja.
+              A LucresIA é o centro de comando que trabalha 24h para você.
             </strong>
           </p>
         </div>
-        <div className="mt-6 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg">
+        <div className="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg">
           <p className="text-slate-600 italic">
-            "A cliente não compra o procedimento — compra a promessa. Elevare
-            Inteligência de Vendas ensina você a entregar exatamente essa
-            promessa."
+            "A cliente não compra o procedimento — compra a promessa de transformação. 
+            A LucresIA te ajuda a entregar exatamente essa promessa, todo dia."
           </p>
         </div>
       </Card>
