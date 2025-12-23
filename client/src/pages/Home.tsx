@@ -1,3 +1,4 @@
+// Landing Page LucresIA Premium - v2.0 - 23/12/2025
 import React, { useState } from 'react';
 import { useLocation } from "wouter";
 
