@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
 import QuizBio from "@/components/diagnostico/QuizBio";
 import ResultadoBio from "@/components/diagnostico/ResultadoBio";
 import QuizConsciencia from "@/components/diagnostico/QuizConsciencia";
 import QuizFinanceiro from "@/components/diagnostico/QuizFinanceiro";
+import { UnlockModal, ProgressBar } from "@/components/UnlockModal";
 import { trpc } from "@/lib/trpc";
 import { Loader2 } from "lucide-react";
 
@@ -25,11 +26,19 @@ interface Scores {
 
 export default function DiagnosticoElevare() {
   const [, navigate] = useLocation();
+  const searchString = useSearch();
   const [etapa, setEtapa] = useState<Etapa>("intro");
   const [scores, setScores] = useState<Scores>({ bio: 0, consciencia: 0, financeiro: 0 });
   const [diagnosticoIA, setDiagnosticoIA] = useState<string>("");
   const [isLoadingIA, setIsLoadingIA] = useState(false);
   const [erroIA, setErroIA] = useState<string | null>(null);
+  
+  // Modal de desbloqueio (gamificação)
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [diagnosticoId, setDiagnosticoId] = useState<number | undefined>();
+  
+  // Referral tracking
+  const [referralCode, setReferralCode] = useState<string | null>(null);
   
   // Lead capture
   const [email, setEmail] = useState("");
@@ -38,6 +47,21 @@ export default function DiagnosticoElevare() {
 
   // Mutation para gerar diagnóstico com IA
   const gerarDiagnosticoMutation = trpc.diagnostico.gerarDiagnostico.useMutation();
+  
+  // Mutation para rastrear clique em referral
+  const trackReferralClick = trpc.gamification.trackReferralClick.useMutation();
+  const trackReferralConversion = trpc.gamification.trackReferralConversion.useMutation();
+
+  // Capturar referral code da URL
+  useEffect(() => {
+    const params = new URLSearchParams(searchString);
+    const ref = params.get('ref');
+    if (ref) {
+      setReferralCode(ref);
+      // Registrar clique
+      trackReferralClick.mutate({ referralCode: ref });
+    }
+  }, [searchString]);
 
   // Calcular nível da bio
   const getNivelBio = (score: number) => {
@@ -383,10 +407,10 @@ O Elevare foi pensado para clínicas no seu estágio: ferramentas de IA para con
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => navigate("/register")}
+                  onClick={() => setShowUnlockModal(true)}
                   className="px-8 py-4 rounded-xl font-medium bg-white text-gray-900 hover:bg-gray-100 transition-all"
                 >
-                  Começar Trial de 30 dias
+                  Desbloquear 30 dias grátis
                 </button>
                 <button
                   onClick={() => setEtapa("captura-lead")}
@@ -458,16 +482,23 @@ O Elevare foi pensado para clínicas no seu estágio: ferramentas de IA para con
                   Você receberá seu diagnóstico completo em instantes.
                 </p>
                 <button
-                  onClick={() => navigate("/register")}
+                  onClick={() => setShowUnlockModal(true)}
                   className="px-8 py-4 rounded-xl font-semibold text-white bg-purple-600 hover:bg-purple-700 transition-all"
                 >
-                  Criar conta no Elevare
+                  Desbloquear 30 dias grátis
                 </button>
               </div>
             )}
           </div>
         )}
       </main>
+
+      {/* Modal de Gamificação */}
+      <UnlockModal 
+        isOpen={showUnlockModal} 
+        onClose={() => setShowUnlockModal(false)}
+        diagnosticoId={diagnosticoId}
+      />
     </div>
   );
 }

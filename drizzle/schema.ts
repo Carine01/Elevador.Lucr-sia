@@ -204,3 +204,127 @@ export const calendarioPosts = mysqlTable("calendarioPosts", {
 
 export type CalendarioPost = typeof calendarioPosts.$inferSelect;
 export type InsertCalendarioPost = typeof calendarioPosts.$inferInsert;
+
+// ============================================
+// 🎯 GAMIFICAÇÃO - SISTEMA DE TRIAL & REFERRAL
+// ============================================
+
+/**
+ * 📊 DIAGNOSTICOS COMPLETOS - Resultado do diagnóstico Elevare
+ * Armazena análise completa de Bio, Consciência e Financeiro
+ */
+export const diagnosticos = mysqlTable("diagnosticos", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").references(() => users.id, { onDelete: "cascade" }),
+  // Dados do visitante (caso não logado)
+  visitorId: varchar("visitorId", { length: 64 }),
+  visitorEmail: varchar("visitorEmail", { length: 320 }),
+  visitorNome: varchar("visitorNome", { length: 255 }),
+  // Análises
+  bioAnalysis: text("bioAnalysis"), // JSON
+  conscienciaAnalysis: text("conscienciaAnalysis"), // JSON
+  financeiroAnalysis: text("financeiroAnalysis"), // JSON
+  // Scores
+  bioScore: int("bioScore"),
+  conscienciaScore: int("conscienciaScore"),
+  financeiroScore: int("financeiroScore"),
+  // Níveis determinados
+  bioNivel: varchar("bioNivel", { length: 50 }), // 'invisivel', 'estetica', 'magnetica'
+  conscienciaNivel: varchar("conscienciaNivel", { length: 50 }), // 'desbravadora', 'estrategista', 'rainha'
+  financeiroNivel: varchar("financeiroNivel", { length: 50 }), // 'tecnica', 'transicao', 'ceo'
+  // Plano gerado pela IA
+  planoCorrecao: text("planoCorrecao"), // JSON com calendário e recomendações
+  // Referral tracking
+  referredBy: int("referredBy").references(() => users.id),
+  referralCode: varchar("referralCode", { length: 64 }),
+  // Status
+  completedAt: timestamp("completedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("diagnosticos_user_id_idx").on(table.userId),
+  visitorIdIdx: index("diagnosticos_visitor_id_idx").on(table.visitorId),
+  referralCodeIdx: index("diagnosticos_referral_code_idx").on(table.referralCode),
+}));
+
+export type Diagnostico = typeof diagnosticos.$inferSelect;
+export type InsertDiagnostico = typeof diagnosticos.$inferInsert;
+
+/**
+ * ⭐ FEEDBACK - Avaliações internas
+ * Avaliação do diagnóstico (1-5 estrelas)
+ */
+export const feedback = mysqlTable("feedback", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").references(() => users.id, { onDelete: "cascade" }),
+  diagnosticoId: int("diagnosticoId").references(() => diagnosticos.id, { onDelete: "cascade" }),
+  rating: int("rating").notNull(), // 1-5
+  comment: text("comment"),
+  trialActivated: int("trialActivated").default(0).notNull(), // boolean
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("feedback_user_id_idx").on(table.userId),
+  diagnosticoIdIdx: index("feedback_diagnostico_id_idx").on(table.diagnosticoId),
+}));
+
+export type Feedback = typeof feedback.$inferSelect;
+export type InsertFeedback = typeof feedback.$inferInsert;
+
+/**
+ * 🔗 REFERRALS - Sistema de indicação
+ * Rastreia compartilhamentos e conversões
+ */
+export const referrals = mysqlTable("referrals", {
+  id: int("id").autoincrement().primaryKey(),
+  referrerId: int("referrerId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  referredEmail: varchar("referredEmail", { length: 320 }),
+  referredUserId: int("referredUserId").references(() => users.id),
+  referralCode: varchar("referralCode", { length: 64 }).notNull().unique(),
+  clicked: int("clicked").default(0).notNull(), // boolean - link foi clicado
+  converted: int("converted").default(0).notNull(), // boolean - diagnóstico concluído
+  shareMethod: varchar("shareMethod", { length: 50 }), // 'whatsapp', 'copy', 'email'
+  trialActivated: int("trialActivated").default(0).notNull(), // boolean - trial dado ao referrer
+  clickedAt: timestamp("clickedAt"),
+  convertedAt: timestamp("convertedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  referrerIdIdx: index("referrals_referrer_id_idx").on(table.referrerId),
+  referralCodeIdx: index("referrals_code_idx").on(table.referralCode),
+}));
+
+export type Referral = typeof referrals.$inferSelect;
+export type InsertReferral = typeof referrals.$inferInsert;
+
+/**
+ * 🌟 GOOGLE REVIEW INTENTS - Rastreia intenção de avaliar no Google
+ */
+export const googleReviewIntents = mysqlTable("googleReviewIntents", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").references(() => users.id, { onDelete: "cascade" }),
+  diagnosticoId: int("diagnosticoId").references(() => diagnosticos.id, { onDelete: "cascade" }),
+  clickedAt: timestamp("clickedAt").defaultNow().notNull(),
+  trialActivated: int("trialActivated").default(0).notNull(), // boolean
+}, (table) => ({
+  userIdIdx: index("google_review_user_id_idx").on(table.userId),
+}));
+
+export type GoogleReviewIntent = typeof googleReviewIntents.$inferSelect;
+export type InsertGoogleReviewIntent = typeof googleReviewIntents.$inferInsert;
+
+/**
+ * 🎁 FREE TRIALS - Controle de trials ativados
+ * Centraliza todas as ativações de período grátis
+ */
+export const freeTrials = mysqlTable("freeTrials", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  activationMethod: varchar("activationMethod", { length: 50 }).notNull(), // 'feedback', 'referral', 'google_review'
+  activatedAt: timestamp("activatedAt").defaultNow().notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  isActive: int("isActive").default(1).notNull(), // boolean
+}, (table) => ({
+  userIdIdx: index("free_trials_user_id_idx").on(table.userId),
+  expiresAtIdx: index("free_trials_expires_idx").on(table.expiresAt),
+}));
+
+export type FreeTrial = typeof freeTrials.$inferSelect;
+export type InsertFreeTrial = typeof freeTrials.$inferInsert;
