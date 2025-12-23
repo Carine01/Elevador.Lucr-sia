@@ -130,14 +130,6 @@ export default function Home() {
               </span>
             </div>
             
-            {/* Contador de urgência */}
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-3 rounded-full text-sm font-bold mb-6 shadow-lg animate-pulse">
-              <span>🔥 PROMOÇÃO DE LANÇAMENTO EXPIRA EM:</span>
-              <span className="bg-white/20 px-3 py-1 rounded-lg font-mono text-lg">
-                {String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
-              </span>
-            </div>
-            
             <h1 className="text-4xl md:text-5xl font-extrabold text-[#5f3fb2] leading-tight max-w-4xl mx-auto">
               Crie 30 dias de conteúdo em 30 minutos
             </h1>
@@ -147,15 +139,6 @@ export default function Home() {
               Enquanto você atende, a Elevare vende por você.
             </p>
 
-            <div className="mt-8 flex justify-center">
-              <button
-                onClick={() => navigate('/register')}
-                className="px-10 py-5 rounded-full btn-primary shadow-xl text-xl font-bold hover:shadow-2xl hover:scale-105 transition-all animate-pulse"
-              >
-                Começar Agora →
-              </button>
-            </div>
-            
             {/* Prova social rápida */}
             <div className="mt-6 flex flex-col items-center gap-2">
               <div className="flex -space-x-2">
@@ -260,28 +243,64 @@ export default function Home() {
           </div>
         </section>
         
-        <section className="bg-[var(--bg)] py-12">
-          <div className="max-w-6xl mx-auto px-6">
-            <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Sua Transformação Digital</h3>
-            <div className="mt-8 grid md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-xl card-shadow hover:-translate-y-1 transition-transform duration-300">
-                <h4 className="font-semibold mb-4 text-gray-500">Sem Elevare AI</h4>
-                <ul className="text-gray-700 space-y-3">
-                  <li className="flex items-start gap-2"><span className="text-red-400">✖</span> Horas gastas criando um único post</li>
-                  <li className="flex items-start gap-2"><span className="text-red-400">✖</span> Gasto alto com agências de marketing</li>
-                  <li className="flex items-start gap-2"><span className="text-red-400">✖</span> Posts bonitos que não vendem</li>
-                  <li className="flex items-start gap-2"><span className="text-red-400">✖</span> Instabilidade e falta de previsibilidade</li>
-                </ul>
-              </div>
-              <div className="bg-white p-6 rounded-xl border-2 border-[var(--lavanda-200)] hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden">
-                <div className="absolute top-0 right-0 bg-[var(--lavanda)] text-white text-xs px-3 py-1 rounded-bl-lg">Com NeuroVendas</div>
-                <h4 className="font-semibold text-[#6b2fa8] mb-4">Com Elevare AI</h4>
-                <ul className="text-gray-700 space-y-3">
-                  <li className="flex items-start gap-2"><span className="text-green-500">✔</span> Conteúdo pronto em minutos (não horas)</li>
-                  <li className="flex items-start gap-2"><span className="text-green-500">✔</span> Economia real de dinheiro</li>
-                  <li className="flex items-start gap-2"><span className="text-green-500">✔</span> Copywriting estratégico que converte</li>
-                  <li className="flex items-start gap-2"><span className="text-green-500">✔</span> Crescimento consistente do negócio</li>
-                </ul>
+        <section className="bg-gradient-to-b from-[#f5f3ff] to-white py-12">
+          <div className="max-w-5xl mx-auto px-6">
+            <h3 className="text-2xl text-center font-semibold text-[#6b2fa8] mb-2">Sua Transformação Digital</h3>
+            <p className="text-center text-gray-500 text-sm mb-8">Veja a diferença entre fazer sozinha e ter a Elevare ao seu lado</p>
+            
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-purple-100">
+              <div className="grid md:grid-cols-2">
+                {/* Lado ANTES - Sem Elevare */}
+                <div className="p-6 bg-gray-50 border-r border-gray-200">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-2xl">😰</span>
+                    <h4 className="font-bold text-gray-600">Sem Elevare AI</h4>
+                  </div>
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex items-start gap-3 text-gray-600">
+                      <span className="text-red-400 text-lg">✖</span>
+                      <span>Horas gastas criando um único post</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-600">
+                      <span className="text-red-400 text-lg">✖</span>
+                      <span>Gasto alto com agências de marketing</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-600">
+                      <span className="text-red-400 text-lg">✖</span>
+                      <span>Posts bonitos que não vendem</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-600">
+                      <span className="text-red-400 text-lg">✖</span>
+                      <span>Instabilidade e falta de previsibilidade</span>
+                    </li>
+                  </ul>
+                </div>
+                
+                {/* Lado DEPOIS - Com Elevare */}
+                <div className="p-6 bg-gradient-to-br from-purple-50 to-white">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-2xl">🚀</span>
+                    <h4 className="font-bold text-[#6b2fa8]">Com Elevare AI</h4>
+                  </div>
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex items-start gap-3 text-gray-700">
+                      <span className="text-green-500 text-lg">✔</span>
+                      <span><strong>Conteúdo pronto em minutos</strong> (não horas)</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-700">
+                      <span className="text-green-500 text-lg">✔</span>
+                      <span><strong>Economia real</strong> de dinheiro</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-700">
+                      <span className="text-green-500 text-lg">✔</span>
+                      <span><strong>Copywriting estratégico</strong> que converte</span>
+                    </li>
+                    <li className="flex items-start gap-3 text-gray-700">
+                      <span className="text-green-500 text-lg">✔</span>
+                      <span><strong>Crescimento consistente</strong> do negócio</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -334,6 +353,21 @@ export default function Home() {
         <section id="planos" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24 bg-gray-50 rounded-3xl">
           <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Entre no Sistema Elevare</h3>
           <p className="text-center text-gray-600 mt-2">Você não está comprando aulas. Está entrando em um sistema de crescimento.</p>
+          
+          {/* Contador discreto */}
+          <div className="mt-4 flex justify-center">
+            <span className="text-xs text-gray-400 border border-gray-200 px-3 py-1 rounded-full">
+              🔥 Oferta expira em {String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+            </span>
+          </div>
+          
+          {/* Opção Comece Grátis */}
+          <div className="mt-6 text-center">
+            <button onClick={() => navigate('/register')} className="text-[#6b2fa8] hover:underline text-sm font-medium">
+              ✨ Comece Grátis com o Radar de Bio →
+            </button>
+          </div>
+          
           <div className="mt-8 flex flex-wrap justify-center gap-6">
             
             {/* Acesso Essencial */}
@@ -348,8 +382,8 @@ export default function Home() {
                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte por e-mail</li>
               </ul>
               <div className="mt-6">
-                <button onClick={() => navigate('/register')} className="w-full px-6 py-4 rounded-full font-bold btn-primary shadow-lg hover:shadow-xl transition-all">
-                  Começar Agora →
+                <button onClick={() => navigate('/register')} className="w-full px-6 py-3 rounded-full font-semibold btn-ghost hover:bg-purple-50 transition-all">
+                  Assinar Essencial
                 </button>
                 <p className="mt-2 text-xs text-center text-gray-400">Acesso imediato</p>
               </div>
@@ -371,8 +405,8 @@ export default function Home() {
                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte VIP prioritário</li>
               </ul>
               <div className="mt-6">
-                <button onClick={() => navigate('/register')} className="w-full px-6 py-4 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all animate-pulse" style={{background: 'linear-gradient(135deg, #F6C86A 0%, #f59e0b 100%)', color: 'white'}}>
-                  Começar Agora →
+                <button onClick={() => navigate('/register')} className="w-full px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all" style={{background: 'linear-gradient(135deg, #F6C86A 0%, #f59e0b 100%)', color: 'white'}}>
+                  Assinar Profissional
                 </button>
                 <p className="mt-2 text-xs text-center text-amber-600 font-semibold">⚡ Mais escolhido</p>
               </div>
