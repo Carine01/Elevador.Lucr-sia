@@ -128,20 +128,26 @@ fi
 echo ""
 log_info "🔍 Verifying database connection..."
 
-# Create a simple test script
-cat > /tmp/db_test.js << 'EOF'
-import { getDb } from './server/db.js';
+# Create a simple test script using CommonJS
+cat > /tmp/db_test.cjs << 'EOF'
+const { createPool } = require('mysql2/promise');
 
 async function testConnection() {
   try {
-    const db = await getDb();
-    if (db) {
-      console.log('✓ Database connection successful');
-      process.exit(0);
-    } else {
-      console.error('✗ Failed to get database instance');
+    // Load DATABASE_URL from environment
+    const databaseUrl = process.env.DATABASE_URL;
+    
+    if (!databaseUrl) {
+      console.log('✗ DATABASE_URL not set');
       process.exit(1);
     }
+    
+    const pool = createPool(databaseUrl);
+    await pool.query('SELECT 1');
+    await pool.end();
+    
+    console.log('✓ Database connection successful');
+    process.exit(0);
   } catch (error) {
     console.error('✗ Database connection failed:', error.message);
     process.exit(1);
@@ -151,15 +157,15 @@ async function testConnection() {
 testConnection();
 EOF
 
-# Run the test
-if node /tmp/db_test.js 2>/dev/null; then
+# Run the test with environment variables
+if node /tmp/db_test.cjs 2>/dev/null; then
     log_success "Database connection verified"
 else
     log_warning "Could not verify database connection (this might be OK if DB is not running locally)"
 fi
 
 # Clean up
-rm -f /tmp/db_test.js
+rm -f /tmp/db_test.cjs
 
 # ============================================
 # 6. Display Schema Information

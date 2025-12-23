@@ -119,11 +119,19 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   const db = await getDb();
   if (!db) return;
 
-  // Extract subscription ID from invoice - accessing the property directly
-  // The subscription field exists but TypeScript might not recognize it in some versions
-  const subscriptionId = (invoice as any).subscription as string | undefined;
+  // Extract subscription ID from invoice
+  // Note: The Stripe Invoice type may not include subscription in all versions
+  // We use type assertion here as the property exists at runtime
+  interface InvoiceWithSubscription extends Stripe.Invoice {
+    subscription?: string | Stripe.Subscription;
+  }
+  
+  const invoiceWithSub = invoice as InvoiceWithSubscription;
+  const subscriptionId = typeof invoiceWithSub.subscription === 'string' 
+    ? invoiceWithSub.subscription 
+    : invoiceWithSub.subscription?.id;
 
-  if (!subscriptionId || typeof subscriptionId !== 'string') {
+  if (!subscriptionId) {
     logger.warn('Invalid subscription in invoice', { invoiceId: invoice.id });
     return;
   }

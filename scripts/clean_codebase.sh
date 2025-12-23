@@ -158,8 +158,13 @@ echo ""
 log_info "🎨 Formatting code with Prettier..."
 
 if command -v pnpm &> /dev/null; then
-    pnpm format 2>&1 | grep -E "(Checking|files.*changed|success)" || true
-    log_success "Code formatting completed"
+    # Check if format script exists in package.json
+    if grep -q '"format"' package.json 2>/dev/null; then
+        pnpm format 2>&1 | grep -E "(Checking|files.*changed|success)" || true
+        log_success "Code formatting completed"
+    else
+        log_info "No format script found in package.json. Skipping formatting."
+    fi
 else
     log_warning "pnpm not found. Skipping code formatting."
 fi

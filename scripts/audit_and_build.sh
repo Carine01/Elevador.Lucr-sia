@@ -186,11 +186,17 @@ fi
 echo ""
 log_info "🔒 Running security audit..."
 
-if pnpm audit --audit-level=high 2>&1 | tee /tmp/audit.log; then
-    log_success "No high/critical vulnerabilities found"
+# Check if pnpm audit command is available
+if pnpm audit --help &>/dev/null 2>&1; then
+    if pnpm audit --audit-level=high 2>&1 | tee /tmp/audit.log; then
+        log_success "No high/critical vulnerabilities found"
+    else
+        log_warning "Security vulnerabilities detected. Review pnpm audit output."
+        cat /tmp/audit.log | grep -E "(high|critical)" || true
+    fi
+    rm -f /tmp/audit.log
 else
-    log_warning "Security vulnerabilities detected. Review pnpm audit output."
-    cat /tmp/audit.log | grep -E "(high|critical)" || true
+    log_info "pnpm audit not available. Skipping security audit."
 fi
 
 # ============================================
