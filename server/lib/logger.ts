@@ -9,8 +9,7 @@ const baseLogger = pino({
         target: 'pino-pretty',
         options: { 
           ignore: 'pid,hostname', 
-          translateTime: 'SYS:yyyy-mm-dd HH:MM:ss.l o',
-          colorize: true
+          translateTime: 'SYS:yyyy-mm-dd HH:MM:ss.l o' 
         },
       }
     : undefined,
@@ -23,4 +22,11 @@ export function getLogger(serviceName: string, correlationId?: string) {
   return baseLogger.child(bindings);
 }
 
-export default baseLogger;
+// Logger específico para database
+export const dbLogger = getLogger('database');
+
+// Logger específico para API
+export const apiLogger = getLogger('api');
+
+// Logger específico para IA
+export const aiLogger = getLogger('ai-service');
