@@ -1,16 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Check, Sparkles, Crown } from "lucide-react";
+import { Check } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
+import OnboardingPremium from "@/components/OnboardingPremium";
+import { ManifestoLucresia } from "@/lib/lucresia";
 
 export default function Pricing() {
   const { user } = useAuth();
   const [, navigate] = useLocation();
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const { data: plans } = trpc.subscription.getPlans.useQuery();
   const { data: subscription } = trpc.subscription.getSubscription.useQuery(
@@ -31,7 +33,7 @@ export default function Pricing() {
     try {
       const result = await createCheckout.mutateAsync({
         plan: planId as "essencial" | "profissional",
-        successUrl: `${window.location.origin}/dashboard?checkout=success`,
+        successUrl: `${window.location.origin}/dashboard?checkout=success&onboarding=true`,
         cancelUrl: `${window.location.origin}/pricing?checkout=cancelled`,
       });
 
@@ -46,190 +48,212 @@ export default function Pricing() {
     }
   };
 
-  const getPlanIcon = (planId: string) => {
-    switch (planId) {
-      case "essencial":
-        return Sparkles;
-      case "profissional":
-        return Crown;
-      default:
-        return Sparkles;
-    }
-  };
-
-  const getPlanColor = (planId: string) => {
-    switch (planId) {
-      case "essencial":
-        return "from-purple-500 to-violet-500";
-      case "profissional":
-        return "from-amber-500 to-orange-500";
-      default:
-        return "from-slate-500 to-slate-600";
-    }
-  };
-
   const isCurrentPlan = (planId: string) => {
     return subscription?.plan === planId;
   };
 
+  // Check for onboarding trigger
+  const urlParams = new URLSearchParams(window.location.search);
+  const shouldShowOnboarding = urlParams.get('onboarding') === 'true';
+  
+  if (shouldShowOnboarding && !showOnboarding) {
+    setShowOnboarding(true);
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <div className="container mx-auto px-4 py-16">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-white mb-4">
-            Entre no Sistema Elevare
-          </h1>
-          <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Você não está comprando aulas. Está entrando em um sistema de crescimento.
-          </p>
+    <>
+      {/* Onboarding Premium */}
+      <OnboardingPremium 
+        isOpen={showOnboarding} 
+        onComplete={() => {
+          setShowOnboarding(false);
+          navigate("/dashboard");
+        }}
+        userId={user?.id}
+      />
+
+      <div className="min-h-screen bg-[#f8f7f4]">
+        {/* Header minimalista */}
+        <div className="py-6 px-8 flex items-center justify-between border-b border-[#e5e7eb]">
+          <div className="flex items-center gap-2">
+            <span className="text-[20px]">◆</span>
+            <span className="font-serif text-[18px] text-[#1f2933]">Lucresia™</span>
+          </div>
+          <button 
+            onClick={() => navigate("/")}
+            className="text-[13px] text-[#6b7280] hover:text-[#1f2933] transition-colors"
+          >
+            Voltar
+          </button>
         </div>
 
-        {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {plans?.map((plan) => {
-            const Icon = getPlanIcon(plan.id);
-            const isProfissional = plan.id === "profissional";
-            const isCurrent = isCurrentPlan(plan.id);
+        <div className="max-w-4xl mx-auto px-6 py-16">
+          {/* Header */}
+          <div className="text-center mb-16">
+            <p className="text-xs text-[#6b7280] uppercase tracking-wide mb-4">
+              Acesso Estratégico
+            </p>
+            <h1 className="font-serif text-[36px] md:text-[48px] font-medium text-[#1f2933] leading-tight mb-6">
+              Você não está comprando um plano.<br />
+              <span className="text-[#111827]">Está assumindo controle.</span>
+            </h1>
+            <p className="text-[16px] text-[#6b7280] max-w-lg mx-auto">
+              Lucresia acompanha seu negócio e aponta o que você está ignorando.
+              Sem promessa de dinheiro. Só clareza.
+            </p>
+          </div>
 
-            return (
-              <Card
-                key={plan.id}
-                className={`relative bg-slate-800/50 border-slate-700 p-8 hover:border-slate-600 transition-all ${
-                  isProfissional ? "scale-105 shadow-2xl border-amber-500/50" : ""
-                }`}
-              >
-                {/* Badge */}
-                {isProfissional && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                      RECOMENDADO
-                    </span>
-                  </div>
-                )}
+          {/* Plans Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+            {plans?.map((plan) => {
+              const isProfissional = plan.id === "profissional";
+              const isCurrent = isCurrentPlan(plan.id);
 
-                {/* Icon */}
+              return (
                 <div
-                  className={`w-16 h-16 rounded-xl bg-gradient-to-r ${getPlanColor(
-                    plan.id
-                  )} flex items-center justify-center mb-6`}
+                  key={plan.id}
+                  className={`relative bg-white border p-8 transition-all ${
+                    isProfissional 
+                      ? "border-[#111827] shadow-lg" 
+                      : "border-[#e5e7eb] hover:border-[#d1d5db]"
+                  }`}
                 >
-                  <Icon className="w-8 h-8 text-white" />
-                </div>
-
-                {/* Plan Name */}
-                <h3 className="text-2xl font-bold text-white mb-2">
-                  {plan.name}
-                </h3>
-
-                {/* Price */}
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-bold text-white">
-                      R$ {plan.price}
-                    </span>
-                    <span className="text-slate-400">/mês</span>
-                  </div>
-                  {plan.credits === -1 ? (
-                    <p className="text-sm text-amber-400 mt-2 font-semibold">
-                      ⚡ Créditos Ilimitados
-                    </p>
-                  ) : (
-                    <p className="text-sm text-slate-400 mt-2">
-                      {plan.credits} créditos/mês
-                    </p>
+                  {/* Badge */}
+                  {isProfissional && (
+                    <div className="absolute -top-3 left-6">
+                      <span className="bg-[#111827] text-white px-3 py-1 text-[11px] uppercase tracking-wide">
+                        Recomendado
+                      </span>
+                    </div>
                   )}
+
+                  {/* Plan Name */}
+                  <h3 className="font-serif text-[24px] text-[#1f2933] mb-2">
+                    {plan.name}
+                  </h3>
+                  
+                  <p className="text-[13px] text-[#6b7280] mb-6">
+                    {isProfissional 
+                      ? "Acompanhamento estratégico completo"
+                      : "Ferramentas essenciais para começar"
+                    }
+                  </p>
+
+                  {/* Price */}
+                  <div className="mb-8">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-[14px] text-[#6b7280]">R$</span>
+                      <span className="text-[48px] font-medium text-[#1f2933] leading-none">
+                        {plan.price}
+                      </span>
+                      <span className="text-[14px] text-[#6b7280]">/mês</span>
+                    </div>
+                    {plan.credits === -1 ? (
+                      <p className="text-[13px] text-[#111827] mt-2 font-medium">
+                        Créditos ilimitados
+                      </p>
+                    ) : (
+                      <p className="text-[13px] text-[#6b7280] mt-2">
+                        {plan.credits} créditos inclusos
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Features */}
+                  <ul className="space-y-3 mb-8">
+                    {plan.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <Check className="w-4 h-4 text-[#111827] flex-shrink-0 mt-0.5" />
+                        <span className="text-[14px] text-[#374151]">{feature}</span>
+                      </li>
+                    ))}
+                    {isProfissional && (
+                      <>
+                        <li className="flex items-start gap-3">
+                          <Check className="w-4 h-4 text-[#111827] flex-shrink-0 mt-0.5" />
+                          <span className="text-[14px] text-[#374151]">
+                            Diagnósticos da Lucresia
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <Check className="w-4 h-4 text-[#111827] flex-shrink-0 mt-0.5" />
+                          <span className="text-[14px] text-[#374151]">
+                            Comparativo mensal de evolução
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <Check className="w-4 h-4 text-[#111827] flex-shrink-0 mt-0.5" />
+                          <span className="text-[14px] text-[#374151]">
+                            Alertas de zona de risco
+                          </span>
+                        </li>
+                      </>
+                    )}
+                  </ul>
+
+                  {/* CTA Button */}
+                  <button
+                    onClick={() => handleSelectPlan(plan.id)}
+                    disabled={loadingPlan === plan.id || isCurrent}
+                    className={`w-full py-4 text-[15px] transition-all ${
+                      isProfissional
+                        ? "bg-[#111827] text-white hover:opacity-90"
+                        : "border border-[#111827] text-[#111827] hover:bg-[#111827] hover:text-white"
+                    } ${isCurrent ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    {loadingPlan === plan.id
+                      ? "Processando..."
+                      : isCurrent
+                      ? "Acesso ativo"
+                      : isProfissional
+                      ? "Assumir controle"
+                      : "Começar"}
+                  </button>
                 </div>
+              );
+            })}
+          </div>
 
-                {/* Features */}
-                <ul className="space-y-3 mb-8">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-3">
-                      <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                      <span className="text-slate-300 text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
+          {/* Manifesto */}
+          <ManifestoLucresia />
 
-                {/* CTA Button */}
-                <Button
-                  onClick={() => handleSelectPlan(plan.id)}
-                  disabled={loadingPlan === plan.id || isCurrent}
-                  className={`w-full ${
-                    isProfissional
-                      ? `bg-gradient-to-r ${getPlanColor(plan.id)} hover:opacity-90 hover:scale-105`
-                      : "bg-purple-600 hover:bg-purple-700"
-                  } text-white font-semibold py-6 rounded-lg text-lg transition-all`}
-                >
-                  {loadingPlan === plan.id
-                    ? "Processando..."
-                    : isCurrent
-                    ? "✓ Acesso Ativo"
-                    : "Começar Agora →"}
-                </Button>
-                
-                <p className="mt-3 text-xs text-center text-slate-400">
-                  🔒 Acesso imediato • Cancele quando quiser
-                </p>
-              </Card>
-            );
-          })}
-        </div>
+          {/* Posicionamento */}
+          <div className="mt-16 text-center">
+            <p className="text-[14px] text-[#6b7280] mb-4">
+              O que você está adquirindo:
+            </p>
+            <div className="flex flex-wrap justify-center gap-8 text-[13px] text-[#374151]">
+              <span className="flex items-center gap-2">
+                <span className="text-[#9ca3af]">✗</span> Não é IA genérica
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="text-[#9ca3af]">✗</span> Não é curso
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="text-[#9ca3af]">✗</span> Não é CRM comum
+              </span>
+            </div>
+            <p className="mt-6 text-[15px] text-[#1f2933] max-w-md mx-auto">
+              É uma <strong>mentora silenciosa</strong>, baseada em dados reais,
+              que acompanha até você pensar como empresária.
+            </p>
+          </div>
 
-        {/* Guarantee */}
-        <div className="mt-8 text-center">
-          <p className="text-slate-400 text-sm">
-            🔒 Pagamento 100% seguro via Stripe • Cancele quando quiser
-          </p>
-        </div>
-
-        {/* FAQ Section */}
-        <div className="mt-20 max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-white text-center mb-8">
-            Perguntas Frequentes
-          </h2>
-          <div className="space-y-4">
-            <Card className="bg-slate-800/50 border-slate-700 p-6">
-              <h3 className="text-lg font-semibold text-white mb-2">
-                Posso cancelar a qualquer momento?
-              </h3>
-              <p className="text-slate-400">
-                Sim! Você pode cancelar sua assinatura a qualquer momento sem
-                taxas ou multas.
-              </p>
-            </Card>
-            <Card className="bg-slate-800/50 border-slate-700 p-6">
-              <h3 className="text-lg font-semibold text-white mb-2">
-                O que são créditos?
-              </h3>
-              <p className="text-slate-400">
-                Créditos são usados para gerar conteúdo com IA. Cada tipo de
-                conteúdo consome uma quantidade diferente de créditos.
-              </p>
-            </Card>
-            <Card className="bg-slate-800/50 border-slate-700 p-6">
-              <h3 className="text-lg font-semibold text-white mb-2">
-                Posso fazer upgrade?
-              </h3>
-              <p className="text-slate-400">
-                Sim! Você pode mudar para o Plano Profissional a qualquer momento 
-                e aproveitar os créditos ilimitados.
-              </p>
-            </Card>
+          {/* Garantia */}
+          <div className="mt-16 p-6 bg-white border border-[#e5e7eb] text-center">
+            <p className="text-[14px] text-[#374151]">
+              Pagamento seguro via Stripe • Cancele quando quiser • Sem taxa de cancelamento
+            </p>
           </div>
         </div>
 
-        {/* Back to Home */}
-        <div className="text-center mt-12">
-          <Button
-            onClick={() => navigate("/")}
-            variant="outline"
-            className="border-slate-600 text-slate-300 hover:bg-slate-800"
-          >
-            Voltar para Início
-          </Button>
-        </div>
+        {/* Estilos */}
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@500&display=swap');
+          body { font-family: 'Inter', sans-serif; }
+          .font-serif { font-family: 'Playfair Display', serif; }
+        `}</style>
       </div>
-    </div>
+    </>
   );
 }
