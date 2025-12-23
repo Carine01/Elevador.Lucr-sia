@@ -8,7 +8,7 @@ export default function Home() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [, navigate] = useLocation();
   
-  // Contador de urgência - expira em 47 minutos a partir do carregamento
+  // Urgency counter - expires in 47 minutes from loading
   const [timeLeft, setTimeLeft] = useState({ minutes: 46, seconds: 59 });
   
   useEffect(() => {
@@ -123,13 +123,6 @@ export default function Home() {
       <main className="pt-24 isolate">
         <section id="home" className="hero-gradient scroll-mt-28">
           <div className="max-w-6xl mx-auto px-6 py-20 text-center">
-            {/* Badge de posicionamento */}
-            <div className="mb-4">
-              <span className="inline-block bg-[#6b2fa8] text-white px-4 py-2 rounded-full text-sm font-semibold">
-                🧠 LucresIA — Estética Lucrativa
-              </span>
-            </div>
-            
             <h1 className="text-4xl md:text-5xl font-extrabold text-[#5f3fb2] leading-tight max-w-4xl mx-auto">
               Transforme sua clínica em uma máquina previsível de agendamentos premium
             </h1>
@@ -157,15 +150,7 @@ export default function Home() {
               <button onClick={() => navigate('/radar-bio')} className="px-10 py-5 rounded-full btn-primary shadow-xl text-lg font-black hover:scale-105 transition-all">
                 🔍 Fazer Diagnóstico Gratuito
               </button>
-              <p className="mt-3 text-xs text-gray-400">
-                Descubra onde sua clínica está perdendo agendamentos — sem pagar nada
-              </p>
             </div>
-            
-            {/* Garantia */}
-            <p className="mt-4 text-xs text-gray-400">
-              🔒 A LucresIA não substitui sua decisão. Ela elimina o caos e acelera quem está pronta.
-            </p>
           </div>
         </section>
 
@@ -173,9 +158,11 @@ export default function Home() {
         <section className="bg-gradient-to-b from-purple-50 to-white py-12 border-y border-purple-100">
           <div className="max-w-5xl mx-auto px-6">
             <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2">
-              🧪 O Diagnóstico que Abre os Olhos
+              🎯 Diagnóstico Estratégico Gratuito
             </h2>
-            <p className="text-center text-gray-500 mb-8">Antes de qualquer assinatura, você passa por um raio-X completo do seu posicionamento digital.</p>
+            <p className="text-center text-gray-600 mb-2 text-lg">Se sua clínica não agenda como poderia, o problema não é o mercado.</p>
+            <p className="text-center text-[#6b2fa8] font-semibold mb-8">É estratégia mal aplicada.</p>
+            <p className="text-center text-gray-500 mb-8">A LucresIA revela, com dados, onde você está perdendo dinheiro e o que precisa mudar para escalar.</p>
             
             <div className="grid md:grid-cols-4 gap-6">
               <div className="bg-white p-5 rounded-xl shadow-lg border-t-4 border-purple-400 hover:shadow-xl transition-all text-center">
@@ -204,17 +191,12 @@ export default function Home() {
             </div>
             
             <div className="mt-8 text-center">
-              <p className="text-base text-gray-600 mb-4">
-                Muitas clínicas perdem dinheiro todos os dias sem saber onde está o vazamento.<br/>
-                <strong className="text-[#6b2fa8]">Aqui você descobre — sem pagar nada.</strong>
-              </p>
               <button
                 onClick={() => navigate('/radar-bio')}
                 className="mt-2 px-8 py-4 rounded-full btn-primary font-bold hover:scale-105 transition-all shadow-lg"
               >
-                👉 Quero meu diagnóstico gratuito agora
+                👉 Ativar diagnóstico agora
               </button>
-              <p className="mt-3 text-xs text-gray-400">Isso não é isca. É prova de inteligência do sistema.</p>
             </div>
           </div>
         </section>
@@ -457,7 +439,7 @@ export default function Home() {
                 <div className="text-4xl text-gray-300 mb-4">❝</div>
                 <blockquote className="text-gray-700 text-lg leading-relaxed">"O Radar de Bio mudou meu perfil em um dia. Comecei a receber clientes qualificadas na mesma semana."</blockquote>
                 <div className="mt-6 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600"></div>
+                  <img src="/sherlayne-galvane.jpg" alt="Sherlayne Galvane" className="w-12 h-12 rounded-full object-cover" />
                   <div>
                     <p className="font-bold text-gray-900">Sherlayne Galvane</p>
                     <p className="text-sm text-gray-500">Esteticista • Vila Velha, ES</p>
@@ -468,7 +450,7 @@ export default function Home() {
                 <div className="text-4xl text-gray-300 mb-4">❝</div>
                 <blockquote className="text-gray-700 text-lg leading-relaxed">"Com os e-books da IA, virei referência na minha cidade. Clientes chegam já confiando em mim."</blockquote>
                 <div className="mt-6 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500"></div>
+                  <img src="/marta-amorin.jpg" alt="Marta Amorin" className="w-12 h-12 rounded-full object-cover" />
                   <div>
                     <p className="font-bold text-gray-900">Marta Amorin</p>
                     <p className="text-sm text-gray-500">Esteticista • Vitória, ES</p>
@@ -479,7 +461,7 @@ export default function Home() {
                 <div className="text-4xl text-gray-300 mb-4">❝</div>
                 <blockquote className="text-gray-700 text-lg leading-relaxed">"Minha agenda nunca mais ficou vazia. O fluxo de clientes mudou completamente."</blockquote>
                 <div className="mt-6 flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-500"></div>
+                  <img src="/geisy-dias.jpg" alt="Geisy Dias" className="w-12 h-12 rounded-full object-cover" />
                   <div>
                     <p className="font-bold text-gray-900">Geisy Dias</p>
                     <p className="text-sm text-gray-500">Esteticista • Teixeira de Freitas, BA</p>

@@ -43,6 +43,7 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/radar-bio" component={RadarBio} />
       
       {/* Protected Routes */}
       {isAuthenticated && (
