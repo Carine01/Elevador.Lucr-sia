@@ -47,15 +47,22 @@ export default function DiagnosticoElevare() {
   };
 
   const getNivelConsciencia = (score: number) => {
-    if (score <= 6) return "Cliente Curiosa";
-    if (score <= 9) return "Cliente Interessada";
-    return "Cliente Pronta";
+    if (score <= 6) return "Desbravadora";
+    if (score <= 9) return "Estrategista";
+    return "Rainha";
   };
 
   const getNivelFinanceiro = (score: number) => {
-    if (score <= 6) return "Gestão Intuitiva";
-    if (score <= 9) return "Gestão em Construção";
-    return "Gestão Estratégica";
+    if (score <= 6) return "Modo Técnica";
+    if (score <= 9) return "Em Transição";
+    return "Modo CEO";
+  };
+
+  // Fase de maturidade geral
+  const getFaseMaturidade = (total: number) => {
+    if (total <= 15) return "Desbravadora";
+    if (total <= 24) return "Estrategista";
+    return "Rainha";
   };
 
   // Gerar diagnóstico com IA REAL
@@ -189,68 +196,53 @@ O Elevare foi pensado para clínicas no seu estágio: ferramentas de IA para con
 
       {/* Conteúdo */}
       <main className="pt-24 pb-16 px-6">
-        {/* INTRO */}
+        {/* INTRO - Landing Clean */}
         {etapa === "intro" && (
           <div className="max-w-2xl mx-auto text-center">
-            <div className="mb-8">
-              <span className="inline-block px-4 py-2 bg-purple-100 text-purple-700 rounded-full text-sm font-medium mb-6">
-                Diagnóstico Gratuito
-              </span>
+            <div className="mb-12">
+              <p className="text-sm text-gray-400 uppercase tracking-wide mb-4">Diagnóstico Estratégico</p>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight mb-6">
                 Seu Instagram atrai cliente certa ou só curiosa?
               </h1>
-              <p className="text-xl text-gray-600 leading-relaxed">
-                Análise estratégica em 3 níveis para descobrir onde você está perdendo clientes — e o que precisa mudar.
+              <p className="text-xl text-gray-500 leading-relaxed max-w-lg mx-auto">
+                Análise em 3 níveis. Sem achismo. Sem métrica vaidosa.
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8 text-left">
-              <h3 className="font-semibold text-gray-900 mb-4">O que você vai descobrir:</h3>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-purple-600 font-semibold">1</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Diagnóstico da Bio</p>
-                    <p className="text-sm text-gray-500">Se seu perfil gera desejo e conduz ao agendamento</p>
-                  </div>
+            {/* Cards silenciosos */}
+            <div className="space-y-4 mb-10 text-left">
+              <div className="bg-white rounded-xl border border-gray-200 p-5 flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 text-sm font-medium text-gray-600">1</div>
+                <div>
+                  <p className="font-medium text-gray-900">Análise da Bio</p>
+                  <p className="text-sm text-gray-500">Posicionamento, clareza e conversão</p>
                 </div>
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-blue-600 font-semibold">2</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Nível de Consciência</p>
-                    <p className="text-sm text-gray-500">Se suas clientes valorizam ou só perguntam preço</p>
-                  </div>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-5 flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 text-sm font-medium text-gray-600">2</div>
+                <div>
+                  <p className="font-medium text-gray-900">Maturidade Estratégica</p>
+                  <p className="text-sm text-gray-500">Em que fase mental você está operando</p>
                 </div>
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-emerald-600 font-semibold">3</span>
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">Saúde Financeira</p>
-                    <p className="text-sm text-gray-500">Se sua gestão é intuitiva ou estratégica</p>
-                  </div>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-5 flex gap-4 items-start">
+                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 text-sm font-medium text-gray-600">3</div>
+                <div>
+                  <p className="font-medium text-gray-900">Gestão e Escala</p>
+                  <p className="text-sm text-gray-500">Onde o dinheiro está escapando</p>
                 </div>
               </div>
             </div>
 
             <button
               onClick={() => setEtapa("quiz-bio")}
-              className="
-                w-full py-4 px-8 rounded-xl font-semibold text-white text-lg
-                bg-gradient-to-r from-purple-600 to-purple-700
-                hover:from-purple-700 hover:to-purple-800
-                transition-all duration-200 shadow-lg hover:shadow-xl
-              "
+              className="w-full py-4 px-8 rounded-xl font-medium text-white bg-gray-900 hover:bg-gray-800 transition-all duration-200"
             >
               Iniciar Diagnóstico
             </button>
             
-            <p className="mt-4 text-sm text-gray-500">
-              Leva menos de 3 minutos. Sem pegadinha.
+            <p className="mt-4 text-sm text-gray-400">
+              Menos de 3 minutos. Resultado imediato.
             </p>
           </div>
         )}
@@ -287,32 +279,34 @@ O Elevare foi pensado para clínicas no seu estágio: ferramentas de IA para con
         {/* RESULTADO CONSCIÊNCIA */}
         {etapa === "resultado-consciencia" && (
           <div className="py-8 max-w-2xl mx-auto text-center">
-            <div className="mb-8">
-              <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg mb-6">
-                <span className="text-3xl font-bold text-white">{scores.consciencia}</span>
+            <div className="mb-10">
+              <div className="inline-flex items-center justify-center w-24 h-24 rounded-full border-4 border-gray-900 mb-6">
+                <span className="text-3xl font-bold text-gray-900">{scores.consciencia}</span>
               </div>
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
                 {getNivelConsciencia(scores.consciencia)}
               </h2>
               <p className="text-lg text-gray-600">
-                {scores.consciencia <= 6 && "Suas clientes ainda não entendem o valor do que você oferece."}
-                {scores.consciencia > 6 && scores.consciencia <= 9 && "Suas clientes têm interesse, mas precisam ser educadas."}
-                {scores.consciencia > 9 && "Suas clientes confiam em você e valorizam seu trabalho."}
+                {scores.consciencia <= 6 && "Você ainda opera no modo técnica. Falta mentalidade de empresária."}
+                {scores.consciencia > 6 && scores.consciencia <= 9 && "Você está em transição. Já entende, mas ainda não domina."}
+                {scores.consciencia > 9 && "Você pensa como CEO. Agora é escalar sem perder qualidade."}
+              </p>
+            </div>
+
+            {/* Gancho */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-8 text-left">
+              <p className="text-gray-700 leading-relaxed">
+                Agora que você sabe sua fase mental e estratégica, vamos mapear onde o dinheiro está escapando. O próximo diagnóstico é sobre gestão e escala.
               </p>
             </div>
 
             <button
               onClick={() => setEtapa("quiz-financeiro")}
-              className="
-                w-full py-4 px-8 rounded-xl font-semibold text-white
-                bg-gradient-to-r from-emerald-600 to-emerald-700
-                hover:from-emerald-700 hover:to-emerald-800
-                transition-all duration-200 shadow-lg
-              "
+              className="w-full py-4 px-8 rounded-xl font-medium text-white bg-gray-900 hover:bg-gray-800 transition-all duration-200"
             >
-              Avançar para Diagnóstico Financeiro
+              Avançar para Diagnóstico de Gestão
             </button>
-            <p className="mt-4 text-sm text-gray-500">Última etapa</p>
+            <p className="mt-4 text-sm text-gray-400">Última etapa</p>
           </div>
         )}
 
@@ -326,56 +320,54 @@ O Elevare foi pensado para clínicas no seu estágio: ferramentas de IA para con
         {/* RESULTADO FINAL */}
         {etapa === "resultado-final" && (
           <div className="py-8 max-w-3xl mx-auto">
-            {/* Score Geral */}
+            {/* Score Geral - Minimalista */}
             <div className="text-center mb-12">
-              <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-purple-600 to-purple-700 flex items-center justify-center shadow-xl mb-6">
-                <div className="text-center">
-                  <span className="text-4xl font-bold text-white">{porcentagemTotal}%</span>
-                </div>
+              <div className="inline-flex items-center justify-center w-28 h-28 rounded-full border-4 border-gray-900 mb-6">
+                <span className="text-4xl font-bold text-gray-900">{totalScore}</span>
               </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Seu Diagnóstico Estratégico</h1>
-              <p className="text-gray-600">Pontuação total: {totalScore} de 36 pontos</p>
+              <p className="text-sm text-gray-400 uppercase tracking-wide mb-2">Sua Fase</p>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">{getFaseMaturidade(totalScore)}</h1>
+              <p className="text-gray-500">{totalScore} de 36 pontos</p>
             </div>
 
-            {/* Cards dos 3 níveis */}
+            {/* Cards dos 3 níveis - Clean */}
             <div className="grid md:grid-cols-3 gap-4 mb-12">
-              <div className="bg-purple-50 rounded-xl p-6 border border-purple-100">
-                <p className="text-sm text-purple-600 font-medium mb-1">Bio</p>
-                <p className="text-xl font-bold text-gray-900">{getNivelBio(scores.bio)}</p>
-                <p className="text-sm text-gray-500 mt-1">{scores.bio}/12 pontos</p>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Bio</p>
+                <p className="text-lg font-semibold text-gray-900">{getNivelBio(scores.bio)}</p>
+                <p className="text-sm text-gray-500 mt-1">{scores.bio}/12</p>
               </div>
-              <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
-                <p className="text-sm text-blue-600 font-medium mb-1">Consciência</p>
-                <p className="text-xl font-bold text-gray-900">{getNivelConsciencia(scores.consciencia)}</p>
-                <p className="text-sm text-gray-500 mt-1">{scores.consciencia}/12 pontos</p>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Maturidade</p>
+                <p className="text-lg font-semibold text-gray-900">{getNivelConsciencia(scores.consciencia)}</p>
+                <p className="text-sm text-gray-500 mt-1">{scores.consciencia}/12</p>
               </div>
-              <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-100">
-                <p className="text-sm text-emerald-600 font-medium mb-1">Financeiro</p>
-                <p className="text-xl font-bold text-gray-900">{getNivelFinanceiro(scores.financeiro)}</p>
-                <p className="text-sm text-gray-500 mt-1">{scores.financeiro}/12 pontos</p>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Gestão</p>
+                <p className="text-lg font-semibold text-gray-900">{getNivelFinanceiro(scores.financeiro)}</p>
+                <p className="text-sm text-gray-500 mt-1">{scores.financeiro}/12</p>
               </div>
             </div>
 
-            {/* Diagnóstico da IA */}
-            <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-8">
-              <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-                <span className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                  <span className="text-purple-600">✨</span>
-                </span>
-                Análise Personalizada
-              </h3>
+            {/* Diagnóstico da IA - Elegante */}
+            <div className="bg-white rounded-xl border border-gray-200 p-8 mb-10">
+              <p className="text-xs text-gray-400 uppercase tracking-wide mb-4">Análise LucresIA</p>
               
               {isLoadingIA ? (
-                <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
-                  <span className="ml-3 text-gray-600">Gerando seu diagnóstico...</span>
+                <div className="py-12">
+                  <div className="animate-pulse space-y-3">
+                    <div className="h-4 bg-gray-200 rounded w-full"></div>
+                    <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                    <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+                  </div>
+                  <p className="text-gray-400 mt-6 text-sm text-center">Gerando seu diagnóstico personalizado...</p>
                 </div>
               ) : (
                 <div className="prose prose-gray max-w-none">
                   {diagnosticoIA.split('\n\n').map((paragrafo, i) => (
                     <p key={i} className="text-gray-700 leading-relaxed mb-4 whitespace-pre-line">
                       {paragrafo.split('**').map((parte, j) => 
-                        j % 2 === 1 ? <strong key={j}>{parte}</strong> : parte
+                        j % 2 === 1 ? <strong key={j} className="text-gray-900">{parte}</strong> : parte
                       )}
                     </p>
                   ))}
@@ -383,24 +375,24 @@ O Elevare foi pensado para clínicas no seu estágio: ferramentas de IA para con
               )}
             </div>
 
-            {/* CTA */}
-            <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl p-8 text-center text-white">
-              <h3 className="text-2xl font-bold mb-4">Pronta para transformar esse diagnóstico em ação?</h3>
-              <p className="text-purple-100 mb-6 max-w-lg mx-auto">
-                O Elevare foi criado para resolver exatamente os pontos que você viu aqui. IA aplicada à sua estratégia, conteúdo e vendas.
+            {/* CTA - Clean */}
+            <div className="bg-gray-900 rounded-xl p-8 text-center">
+              <h3 className="text-2xl font-bold text-white mb-3">O caminho está claro.</h3>
+              <p className="text-gray-400 mb-8 max-w-lg mx-auto">
+                O Elevare transforma diagnóstico em ação. IA aplicada à estratégia, conteúdo e vendas. Sem depender de agência.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={() => navigate("/register")}
-                  className="px-8 py-4 rounded-xl font-semibold bg-white text-purple-700 hover:bg-gray-100 transition-all"
+                  className="px-8 py-4 rounded-xl font-medium bg-white text-gray-900 hover:bg-gray-100 transition-all"
                 >
-                  Começar com Trial de 30 dias
+                  Começar Trial de 30 dias
                 </button>
                 <button
                   onClick={() => setEtapa("captura-lead")}
-                  className="px-8 py-4 rounded-xl font-semibold border-2 border-white/30 text-white hover:bg-white/10 transition-all"
+                  className="px-8 py-4 rounded-xl font-medium border border-gray-700 text-gray-300 hover:bg-gray-800 transition-all"
                 >
-                  Receber diagnóstico por email
+                  Receber por email
                 </button>
               </div>
             </div>

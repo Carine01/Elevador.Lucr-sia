@@ -2,35 +2,35 @@ import { useState } from "react";
 
 const perguntas = [
   {
-    pergunta: "Suas clientes costumam:",
+    pergunta: "Quando você pensa no valor dos seus serviços:",
     opcoes: [
-      { texto: "Perguntar preço antes de tudo", pontos: 1 },
-      { texto: "Pedir indicação de procedimento", pontos: 2 },
-      { texto: "Confiar na sua recomendação", pontos: 3 }
+      { texto: "Tenho medo de cobrar mais e perder clientes", pontos: 1 },
+      { texto: "Sei que poderia cobrar mais, mas ainda não me sinto segura", pontos: 2 },
+      { texto: "Cobro pelo valor que entrego e não negocio", pontos: 3 }
     ]
   },
   {
-    pergunta: "Quando você indica um tratamento mais completo:",
+    pergunta: "Sobre sua rotina de trabalho:",
     opcoes: [
-      { texto: "Elas acham caro", pontos: 1 },
-      { texto: "Pedem para pensar", pontos: 2 },
-      { texto: "Aceitam porque confiam em você", pontos: 3 }
+      { texto: "Atendo de tudo, a qualquer hora, para não perder ninguém", pontos: 1 },
+      { texto: "Tenho horários definidos, mas faço exceções frequentes", pontos: 2 },
+      { texto: "Minha agenda é estratégica e eu controlo os horários", pontos: 3 }
     ]
   },
   {
-    pergunta: "Suas clientes entendem a diferença entre:",
+    pergunta: "Quando uma cliente pede desconto:",
     opcoes: [
-      { texto: "Nada — só querem desconto", pontos: 1 },
-      { texto: "Procedimentos básicos", pontos: 2 },
-      { texto: "Protocolos e resultados de longo prazo", pontos: 3 }
+      { texto: "Geralmente dou, para não perder a venda", pontos: 1 },
+      { texto: "Nego, mas fico insegura se fiz certo", pontos: 2 },
+      { texto: "Ofereço valor agregado, nunca desconto", pontos: 3 }
     ]
   },
   {
-    pergunta: "Quando você fala sobre valor (não preço):",
+    pergunta: "Sua visão de longo prazo para a clínica:",
     opcoes: [
-      { texto: "Elas ignoram e focam no custo", pontos: 1 },
-      { texto: "Escutam, mas ainda comparam", pontos: 2 },
-      { texto: "Valorizam e pagam sem questionar", pontos: 3 }
+      { texto: "Penso mês a mês, sobrevivendo", pontos: 1 },
+      { texto: "Tenho ideias, mas falta tempo para planejar", pontos: 2 },
+      { texto: "Tenho metas claras e estou construindo para escalar", pontos: 3 }
     ]
   }
 ];
@@ -70,20 +70,20 @@ export default function QuizConsciencia({ onFinish }: QuizConscienciaProps) {
     <div className="w-full max-w-2xl mx-auto">
       {/* Header */}
       <div className="text-center mb-6">
-        <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-          Nível 2 — Consciência
+        <span className="inline-block px-4 py-1.5 bg-gray-100 text-gray-700 rounded-full text-sm font-medium tracking-wide">
+          Nível 2 — Maturidade
         </span>
       </div>
 
       {/* Progress Bar */}
       <div className="mb-8">
-        <div className="flex justify-between text-sm text-gray-500 mb-2">
+        <div className="flex justify-between text-sm text-gray-400 mb-2">
           <span>Pergunta {index + 1} de {perguntas.length}</span>
           <span>{Math.round(progresso)}%</span>
         </div>
-        <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out"
+            className="h-full bg-gray-800 transition-all duration-500 ease-out"
             style={{ width: `${progresso}%` }}
           />
         </div>
@@ -104,10 +104,10 @@ export default function QuizConsciencia({ onFinish }: QuizConscienciaProps) {
             onClick={() => responder(opcao.pontos, i)}
             disabled={selectedOption !== null}
             className={`
-              w-full p-5 text-left rounded-xl border-2 transition-all duration-200
+              w-full p-5 text-left rounded-xl border transition-all duration-200
               ${selectedOption === i 
-                ? 'border-blue-500 bg-blue-50 scale-[0.98]' 
-                : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/50'
+                ? 'border-gray-900 bg-gray-50 scale-[0.98]' 
+                : 'border-gray-200 bg-white hover:border-gray-400'
               }
               ${selectedOption !== null && selectedOption !== i ? 'opacity-50' : ''}
             `}
@@ -116,13 +116,13 @@ export default function QuizConsciencia({ onFinish }: QuizConscienciaProps) {
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
                 ${selectedOption === i 
-                  ? 'bg-blue-500 text-white' 
+                  ? 'bg-gray-900 text-white' 
                   : 'bg-gray-100 text-gray-600'
                 }
               `}>
                 {String.fromCharCode(65 + i)}
               </div>
-              <span className="text-gray-800 font-medium">{opcao.texto}</span>
+              <span className="text-gray-800">{opcao.texto}</span>
             </div>
           </button>
         ))}
