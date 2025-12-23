@@ -29,11 +29,15 @@ export default function DiagnosticoElevare() {
   const [scores, setScores] = useState<Scores>({ bio: 0, consciencia: 0, financeiro: 0 });
   const [diagnosticoIA, setDiagnosticoIA] = useState<string>("");
   const [isLoadingIA, setIsLoadingIA] = useState(false);
+  const [erroIA, setErroIA] = useState<string | null>(null);
   
   // Lead capture
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [leadSaved, setLeadSaved] = useState(false);
+
+  // Mutation para gerar diagnóstico com IA
+  const gerarDiagnosticoMutation = trpc.diagnostico.gerarDiagnostico.useMutation();
 
   // Calcular nível da bio
   const getNivelBio = (score: number) => {
@@ -54,103 +58,85 @@ export default function DiagnosticoElevare() {
     return "Gestão Estratégica";
   };
 
-  // Gerar diagnóstico com IA
+  // Gerar diagnóstico com IA REAL
   const gerarDiagnosticoIA = async (scoresFinais: Scores) => {
     setIsLoadingIA(true);
+    setErroIA(null);
     
     const nivelBio = getNivelBio(scoresFinais.bio);
     const nivelConsciencia = getNivelConsciencia(scoresFinais.consciencia);
     const nivelFinanceiro = getNivelFinanceiro(scoresFinais.financeiro);
-    
-    const prompt = `Você é uma especialista em marketing estético, neurovendas e posicionamento premium.
-
-Gere um diagnóstico claro, direto e respeitoso para uma dona de clínica estética com base nestes resultados:
-
-- Nível de Bio: ${nivelBio} (${scoresFinais.bio}/12 pontos)
-- Nível de Consciência das Clientes: ${nivelConsciencia} (${scoresFinais.consciencia}/12 pontos)  
-- Nível de Gestão Financeira: ${nivelFinanceiro} (${scoresFinais.financeiro}/12 pontos)
-
-Pontuação Total: ${scoresFinais.bio + scoresFinais.consciencia + scoresFinais.financeiro}/36
-
-Estruture o diagnóstico assim:
-
-1. **Visão Geral** (2-3 frases sobre o cenário atual)
-2. **O que está travando seus agendamentos** (seja específica)
-3. **O impacto no faturamento** (sem ser alarmista, mas real)
-4. **Prioridade de correção** (o que atacar primeiro)
-5. **Próximo passo** (convite sutil para aprofundar no Elevare)
-
-Tom:
-- Profissional e elegante
-- Nada agressivo ou genérico
-- Linguagem de estética e autoridade
-- Evite termos técnicos de marketing
-
-Máximo 400 palavras. Direto ao ponto.`;
 
     try {
-      // Simular resposta da IA (em produção, usar o endpoint real)
-      // Por enquanto, gerar um diagnóstico baseado nos scores
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const resultado = await gerarDiagnosticoMutation.mutateAsync({
+        scoreBio: scoresFinais.bio,
+        scoreConsciencia: scoresFinais.consciencia,
+        scoreFinanceiro: scoresFinais.financeiro,
+        nivelBio,
+        nivelConsciencia,
+        nivelFinanceiro,
+      });
       
-      let diagnostico = "";
+      setDiagnosticoIA(resultado.diagnostico);
+    } catch (error: any) {
+      console.error("Erro ao gerar diagnóstico:", error);
+      setErroIA(error?.message || "Não foi possível gerar o diagnóstico. Tente novamente.");
       
+      // Fallback: diagnóstico estático se a IA falhar
       const totalScore = scoresFinais.bio + scoresFinais.consciencia + scoresFinais.financeiro;
+      let diagnosticoFallback = "";
       
       if (totalScore <= 18) {
-        diagnostico = `**Sua clínica está operando abaixo do potencial.**
+        diagnosticoFallback = `**Sua clínica está operando abaixo do potencial.**
 
 Você tem talento e entrega resultados — isso é inegável. Mas seu Instagram não reflete isso. Clientes chegam, olham, e vão embora sem entender por que deveriam escolher você.
 
 **O que está travando seus agendamentos:**
-Sua bio não comunica diferencial. Seus destaques não conduzem à decisão. E suas clientes ainda estão no modo "pesquisa de preço" — o que significa que você compete por valor, não por autoridade.
+Sua bio não comunica diferencial. Seus destaques não conduzem à decisão. E suas clientes ainda estão no modo "pesquisa de preço".
 
 **O impacto no faturamento:**
-Você está deixando dinheiro na mesa todo mês. Não por falta de demanda, mas porque a demanda certa não está chegando até você. Curiosas ocupam seu tempo. Clientes prontas vão para quem se posiciona melhor.
+Você está deixando dinheiro na mesa todo mês. Não por falta de demanda, mas porque a demanda certa não está chegando até você.
 
 **Prioridade de correção:**
-Comece pela bio e pelos destaques. São a porta de entrada. Depois, trabalhe a comunicação para elevar o nível de consciência das suas seguidoras.
+Comece pela bio e pelos destaques. São a porta de entrada.
 
 **Próximo passo:**
-O Elevare foi criado exatamente para isso: transformar sua presença digital em uma máquina de agendamentos qualificados. Sem depender de agência, sem perder tempo com conteúdo que não converte.`;
+O Elevare foi criado exatamente para isso: transformar sua presença digital em uma máquina de agendamentos qualificados.`;
       } else if (totalScore <= 27) {
-        diagnostico = `**Você está no caminho certo, mas falta consistência.**
+        diagnosticoFallback = `**Você está no caminho certo, mas falta consistência.**
 
-Seu perfil tem potencial. Você já entende que não é só sobre postar bonito — é sobre estratégia. O problema é que ainda faltam peças no quebra-cabeça.
+Seu perfil tem potencial. Você já entende que não é só sobre postar bonito — é sobre estratégia.
 
 **O que está travando seus agendamentos:**
-Você atrai interesse, mas não urgência. Suas clientes admiram seu trabalho, mas não sentem que precisam agendar *agora*. Falta um sistema que conduza da descoberta até a decisão.
+Você atrai interesse, mas não urgência. Suas clientes admiram seu trabalho, mas não sentem que precisam agendar *agora*.
 
 **O impacto no faturamento:**
-Você poderia estar faturando 30-50% a mais com a mesma estrutura. O gargalo não é capacidade — é conversão. Leads entram, mas não viram clientes na velocidade que poderiam.
+Você poderia estar faturando 30-50% a mais com a mesma estrutura. O gargalo não é capacidade — é conversão.
 
 **Prioridade de correção:**
-Otimize seu funil de conversão. Bio, destaques e CTAs precisam trabalhar juntos. E suas clientes precisam ser educadas para valorizar protocolos, não procedimentos avulsos.
+Otimize seu funil de conversão. Bio, destaques e CTAs precisam trabalhar juntos.
 
 **Próximo passo:**
-Com o Elevare, você automatiza a parte estratégica e foca no que faz de melhor: atender. A IA cuida do posicionamento, conteúdo e follow-up.`;
+Com o Elevare, você automatiza a parte estratégica e foca no que faz de melhor: atender.`;
       } else {
-        diagnostico = `**Você já domina o básico. Agora é hora de escalar.**
+        diagnosticoFallback = `**Você já domina o básico. Agora é hora de escalar.**
 
-Parabéns — você faz parte de uma minoria. Sua bio comunica, suas clientes confiam, e sua gestão tem estrutura. O desafio agora é diferente: como crescer sem se sobrecarregar?
+Parabéns — você faz parte de uma minoria. Sua bio comunica, suas clientes confiam, e sua gestão tem estrutura.
 
 **O que pode estar limitando sua escala:**
-Você ainda é o centro de tudo. Marketing, atendimento, gestão — tudo passa por você. Isso funciona até certo ponto, mas cria um teto de crescimento.
+Você ainda é o centro de tudo. Marketing, atendimento, gestão — tudo passa por você.
 
 **O impacto no faturamento:**
-Você está próxima do limite do modelo atual. Para faturar mais, precisa de sistemas que multipliquem seu tempo — não de mais horas trabalhadas.
+Você está próxima do limite do modelo atual. Para faturar mais, precisa de sistemas que multipliquem seu tempo.
 
 **Prioridade de correção:**
-Automatize o que pode ser automatizado. Delegue o operacional. Foque em decisões estratégicas e no atendimento de alto valor.
+Automatize o que pode ser automatizado. Delegue o operacional.
 
 **Próximo passo:**
-O Elevare foi pensado para clínicas no seu estágio: ferramentas de IA para conteúdo, CRM para pipeline de vendas, e automações que liberam seu tempo para o que realmente importa.`;
+O Elevare foi pensado para clínicas no seu estágio: ferramentas de IA para conteúdo, CRM para pipeline de vendas, e automações.`;
       }
       
-      setDiagnosticoIA(diagnostico);
-    } catch (error) {
-      console.error("Erro ao gerar diagnóstico:", error);
-      setDiagnosticoIA("Não foi possível gerar o diagnóstico personalizado. Por favor, tente novamente.");
+      setDiagnosticoIA(diagnosticoFallback);
     } finally {
       setIsLoadingIA(false);
     }
