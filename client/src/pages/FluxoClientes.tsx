@@ -242,10 +242,10 @@ export default function LeadsPipeline() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg">
-                <Users className="w-6 h-6 text-white" />
+                <MessageCircle className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">Leads Pipeline</h1>
+                <h1 className="text-3xl font-bold text-white">Fluxo Inteligente de Clientes</h1>
                 <span className="text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full font-semibold">PRO</span>
               </div>
             </div>
@@ -254,10 +254,11 @@ export default function LeadsPipeline() {
               className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
             >
               <Plus className="w-4 h-4 mr-2" />
-              Novo Lead
+              Nova Cliente
             </Button>
           </div>
           <p className="text-slate-400 mt-2">
+            Organiza cada cliente do primeiro contato ao fechamento. Nunca mais perca uma venda.
             Organize seus leads com termômetro neural. Saiba quem está pronta para comprar.
           </p>
         </div>

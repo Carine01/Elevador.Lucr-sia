@@ -13,8 +13,9 @@ import EbookGenerator from "./pages/EbookGenerator";
 import RoboProdutor from "./pages/RoboProdutor";
 import VeoCinema from "./pages/VeoCinema";
 import AdsManager from "./pages/AdsManager";
-import LeadsPipeline from "./pages/LeadsPipeline";
-import AgendaSmart from "./pages/AgendaSmart";
+import FluxoClientes from "./pages/FluxoClientes";
+import AgendaEstrategica from "./pages/AgendaEstrategica";
+import CalendarioEstrategico from "./pages/CalendarioEstrategico";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -52,9 +53,10 @@ function Router() {
           <Route path="/dashboard/robo-produtor" component={RoboProdutor} />
           {/* PRO Routes */}
           <Route path="/dashboard/veo-cinema" component={VeoCinema} />
-          <Route path="/dashboard/ads-manager" component={AdsManager} />
-          <Route path="/dashboard/leads-pipeline" component={LeadsPipeline} />
-          <Route path="/dashboard/agenda-smart" component={AgendaSmart} />
+          <Route path="/dashboard/anuncios" component={AdsManager} />
+          <Route path="/dashboard/fluxo-clientes" component={FluxoClientes} />
+          <Route path="/dashboard/agenda-estrategica" component={AgendaEstrategica} />
+          <Route path="/dashboard/calendario" component={CalendarioEstrategico} />
         </>
       )}
       

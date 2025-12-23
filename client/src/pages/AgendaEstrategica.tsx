@@ -247,7 +247,7 @@ export default function AgendaSmart() {
                 <Calendar className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">Agenda Smart</h1>
+                <h1 className="text-3xl font-bold text-white">Agenda Estratégica de Faturamento</h1>
                 <span className="text-xs bg-amber-500 text-white px-2 py-0.5 rounded-full font-semibold">PRO</span>
               </div>
             </div>
@@ -260,7 +260,7 @@ export default function AgendaSmart() {
             </Button>
           </div>
           <p className="text-slate-400 mt-2">
-            Visualize seu faturamento diário, semanal e mensal. Acompanhe suas metas em tempo real.
+            Organize sua agenda para vender mais, reduzir faltas e priorizar procedimentos de maior ticket.
           </p>
         </div>
 

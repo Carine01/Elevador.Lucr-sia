@@ -344,23 +344,23 @@ export default function Home() {
 
              <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#F6C86A]">
               <div className="text-3xl mb-4">🎥</div>
-              <h5 className="text-xl font-bold text-gray-800">VEO CINEMA</h5>
-              <p className="text-xs text-amber-600 font-semibold mb-2">VISUAL PROFISSIONAL DE ALTO IMPACTO</p>
-              <p className="mt-2 text-sm text-gray-600">Vídeos cinematográficos que elevam o valor percebido do seu trabalho. Quando sua comunicação parece profissional, sua percepção de valor sobe.</p>
+              <h5 className="text-xl font-bold text-gray-800">ROTEIROS DE REELS QUE VENDEM</h5>
+              <p className="text-xs text-amber-600 font-semibold mb-2">VÍDEOS QUE GERAM AGENDAMENTOS</p>
+              <p className="mt-2 text-sm text-gray-600">Roteiros prontos para Reels que viralizam e convertem. Sem precisar pensar no que falar — a IA cria o script completo, você só grava.</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#A36BFF]">
               <div className="text-3xl mb-4">🎯</div>
-              <h5 className="text-xl font-bold text-gray-800">ADS MANAGER</h5>
-              <p className="text-xs text-purple-600 font-semibold mb-2">PLANEJAMENTO DE CAMPANHAS</p>
-              <p className="mt-2 text-sm text-gray-600">Planejamento guiado para investir melhor, não para apostar no escuro. Estratégia focada em pacientes premium, não caçadores de preço.</p>
+              <h5 className="text-xl font-bold text-gray-800">ANÚNCIOS QUE VENDEM</h5>
+              <p className="text-xs text-purple-600 font-semibold mb-2">CAMPANHAS PARA CLIENTES CERTAS</p>
+              <p className="mt-2 text-sm text-gray-600">Anúncios prontos que atraem clientes que pagam bem — não curiosas que só pedem preço. Invista certo, atraia a cliente certa.</p>
             </div>
 
              <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#F6C86A]">
-              <div className="text-3xl mb-4">💎</div>
-              <h5 className="text-xl font-bold text-gray-800">LEADS PIPELINE</h5>
-              <p className="text-xs text-amber-600 font-semibold mb-2">ORGANIZAÇÃO E PRIORIDADE</p>
-              <p className="mt-2 text-sm text-gray-600">CRM com termômetro neural que mostra quem está pronta para comprar e o que dizer no WhatsApp. Organize oportunidades, não perca vendas.</p>
+              <div className="text-3xl mb-4">�</div>
+              <h5 className="text-xl font-bold text-gray-800">FLUXO INTELIGENTE DE CLIENTES</h5>
+              <p className="text-xs text-amber-600 font-semibold mb-2">NUNCA MAIS PERCA UMA VENDA</p>
+              <p className="mt-2 text-sm text-gray-600">Organiza cada cliente do primeiro contato ao fechamento. Cliente sumiu? O sistema lembra. Orçamento enviado? Acompanha automático. Mensagem certa na hora certa.</p>
             </div>
 
           </div>
@@ -413,12 +413,13 @@ export default function Home() {
               <p className="mt-4 text-sm text-gray-600">Para quem quer previsibilidade, agenda cheia e autoridade local.</p>
               <ul className="mt-4 text-sm text-gray-700 space-y-2">
                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> <strong>Tudo do Plano Start +</strong></li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 🎥 Veo Cinema</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 🎯 Ads Manager Inteligente</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 💎 Leads Pipeline com Termômetro</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 📅 Agenda Smart Financeira</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> IA sem limite operacional</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte VIP prioritário</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 🎥 Roteiros de Reels que Vendem</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 🎯 Anúncios que Atraem Cliente Certa</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 💬 Fluxo Inteligente de Clientes</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 📅 Agenda Estratégica de Faturamento</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 📆 Calendário de Conteúdo e Vendas</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 🧠 IA de Neurovendas para Estética</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte prioritário</li>
               </ul>
               <div className="mt-4 p-3 bg-amber-50 rounded-lg">
                 <p className="text-xs text-gray-600"><strong>Resultado prático:</strong></p>
@@ -447,40 +448,43 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-12 bg-[var(--bg)]">
+        <section className="py-16 bg-white">
           <div className="max-w-6xl mx-auto px-6">
-            <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Resultados Reais</h3>
-            <p className="text-center text-gray-600 mt-2">Veja o que nossas alunas estão dizendo</p>
-            <div className="mt-8 grid md:grid-cols-3 gap-6">
-              <div className="bg-white p-6 rounded-xl card-shadow hover:shadow-xl transition-all">
-                <div className="flex items-center gap-4 mb-4">
-                  <img src="/sherlayne-galvane.jpg" alt="Sherlayne Galvane" className="w-16 h-16 rounded-full object-cover border-2 border-[var(--lavanda)]" />
+            <h3 className="text-3xl text-center font-bold text-gray-900">Resultados Comprovados</h3>
+            <p className="text-center text-gray-500 mt-2">Profissionais reais usando a LucresIA no dia a dia</p>
+            <div className="mt-10 grid md:grid-cols-3 gap-8">
+              <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100">
+                <div className="text-4xl text-gray-300 mb-4">❝</div>
+                <blockquote className="text-gray-700 text-lg leading-relaxed">"O Radar de Bio mudou meu perfil em um dia. Comecei a receber clientes qualificadas na mesma semana."</blockquote>
+                <div className="mt-6 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600"></div>
                   <div>
-                    <p className="font-semibold text-gray-800">Sherlayne Galvane</p>
-                    <p className="text-sm text-gray-500">Vila Velha, ES</p>
+                    <p className="font-bold text-gray-900">Sherlayne Galvane</p>
+                    <p className="text-sm text-gray-500">Esteticista • Vila Velha, ES</p>
                   </div>
                 </div>
-                <blockquote className="italic text-gray-600">"O Radar de Bio mudou meu perfil em um dia. Comecei a receber leads qualificados na mesma semana."</blockquote>
               </div>
-              <div className="bg-white p-6 rounded-xl card-shadow hover:shadow-xl transition-all">
-                <div className="flex items-center gap-4 mb-4">
-                  <img src="/marta-amorin.jpg" alt="Marta Amorin" className="w-16 h-16 rounded-full object-cover border-2 border-[var(--lavanda)]" />
+              <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100">
+                <div className="text-4xl text-gray-300 mb-4">❝</div>
+                <blockquote className="text-gray-700 text-lg leading-relaxed">"Com os e-books da IA, virei referência na minha cidade. Clientes chegam já confiando em mim."</blockquote>
+                <div className="mt-6 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500"></div>
                   <div>
-                    <p className="font-semibold text-gray-800">Marta Amorin</p>
-                    <p className="text-sm text-gray-500">Vitória, ES</p>
+                    <p className="font-bold text-gray-900">Marta Amorin</p>
+                    <p className="text-sm text-gray-500">Esteticista • Vitória, ES</p>
                   </div>
                 </div>
-                <blockquote className="italic text-gray-600">"Com a Automação de Blogs, virei autoridade na minha cidade sem escrever uma linha sequer."</blockquote>
               </div>
-              <div className="bg-white p-6 rounded-xl card-shadow hover:shadow-xl transition-all">
-                <div className="flex items-center gap-4 mb-4">
-                  <img src="/geisy-dias.jpg" alt="Geisy Dias" className="w-16 h-16 rounded-full object-cover border-2 border-[var(--lavanda)]" />
+              <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100">
+                <div className="text-4xl text-gray-300 mb-4">❝</div>
+                <blockquote className="text-gray-700 text-lg leading-relaxed">"Minha agenda nunca mais ficou vazia. O fluxo de clientes mudou completamente."</blockquote>
+                <div className="mt-6 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-500"></div>
                   <div>
-                    <p className="font-semibold text-gray-800">Geisy Dias</p>
-                    <p className="text-sm text-gray-500">Teixeira de Freitas, BA</p>
+                    <p className="font-bold text-gray-900">Geisy Dias</p>
+                    <p className="text-sm text-gray-500">Esteticista • Teixeira de Freitas, BA</p>
                   </div>
                 </div>
-                <blockquote className="italic text-gray-600">"Os e-books gerados pela IA são incríveis. Uso como isca digital e minha lista de clientes explodiu."</blockquote>
               </div>
             </div>
           </div>
