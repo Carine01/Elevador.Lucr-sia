@@ -294,6 +294,16 @@ async function startServer() {
     }
   );
 
+  // ==================== HEALTH CHECK ====================
+  // Endpoint para Railway/Kubernetes verificar se a aplicação está saudável
+  app.get('/api/health', (_req, res) => {
+    res.status(200).json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      version: '1.0.0'
+    });
+  });
+
   // ==================== BODY PARSERS ====================
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));

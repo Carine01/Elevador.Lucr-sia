@@ -31,13 +31,9 @@ export const ENV = {
   oAuthServerUrl: getOptionalEnv('OAUTH_SERVER_URL', 'https://oauth.manus.im'),
   ownerOpenId: getOptionalEnv('OWNER_OPEN_ID', 'admin'),
   
-  // Obrigatórias apenas em produção
-  forgeApiUrl: isProduction 
-    ? getRequiredEnv('BUILT_IN_FORGE_API_URL')
-    : getOptionalEnv('BUILT_IN_FORGE_API_URL'),
-  forgeApiKey: isProduction
-    ? getRequiredEnv('BUILT_IN_FORGE_API_KEY')
-    : getOptionalEnv('BUILT_IN_FORGE_API_KEY'),
+  // Forge API - Opcional (funcionalidade de IA não funcionará sem)
+  forgeApiUrl: getOptionalEnv('BUILT_IN_FORGE_API_URL'),
+  forgeApiKey: getOptionalEnv('BUILT_IN_FORGE_API_KEY'),
   
   // Stripe - obrigatório em produção
   STRIPE_SECRET_KEY: getOptionalEnv('STRIPE_SECRET_KEY', 'sk_test_placeholder'),
