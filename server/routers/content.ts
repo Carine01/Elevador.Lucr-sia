@@ -10,6 +10,78 @@ import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
 
 export const contentRouter = router({
+  // ============================================
+  // GERADOR DE CONTEÚDO GENÉRICO
+  // Usado por VeoCinema e AdsManager
+  // ============================================
+  generateContent: protectedProcedure
+    .input(
+      z.object({
+        type: z.string(),
+        prompt: z.string().min(10),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const response = await llm.chat.completions.create({
+          model: "gemini-2.5-flash",
+          messages: [
+            {
+              role: "system",
+              content: "Você é um especialista em marketing e conteúdo para clínicas de estética. Responda de forma detalhada e profissional.",
+            },
+            {
+              role: "user",
+              content: input.prompt,
+            },
+          ],
+          temperature: 0.8,
+        });
+
+        const content = response.choices[0]?.message?.content;
+        
+        if (!content) {
+          logger.error('IA retornou resposta vazia ao gerar conteúdo genérico');
+          throw new AIServiceError('Não foi possível gerar conteúdo. Tente novamente.');
+        }
+
+        // Salvar no banco
+        const [saved] = await db
+          .insert(contentGeneration)
+          .values({
+            userId: ctx.user.id,
+            type: input.type,
+            title: `${input.type}: ${new Date().toISOString()}`,
+            content: String(content),
+            metadata: JSON.stringify({ generatedAt: new Date().toISOString() }),
+            creditsUsed: 2,
+          })
+          .$returningId();
+
+        logger.info('Generic content generated', { 
+          type: input.type, 
+          userId: ctx.user.id 
+        });
+
+        return {
+          id: saved.id,
+          content: String(content),
+        };
+      } catch (error) {
+        if (error instanceof AIServiceError) {
+          throw error;
+        }
+        
+        logger.error('Erro ao gerar conteúdo genérico', {
+          error: error instanceof Error ? error.message : String(error),
+          userId: ctx.user.id,
+          type: input.type,
+        });
+        
+        throw new AIServiceError('Erro ao gerar conteúdo. Tente novamente.', error);
+      }
+    }),
+
   // Gerar e-book
   generateEbook: protectedProcedure
     .input(
