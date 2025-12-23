@@ -85,10 +85,10 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 backdrop-blur-md bg-white/80 z-[100] border-b border-gray-100 shadow-sm">
         <nav className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between relative">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-300 to-purple-500 text-white flex items-center justify-center font-bold">EL</div>
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-300 to-purple-500 text-white flex items-center justify-center font-bold">L$</div>
             <div>
-              <div className="font-semibold text-gray-800">Elevare AI</div>
-              <div className="text-xs text-gray-500 -mt-1">NeuroVendas & Automação</div>
+              <div className="font-semibold text-gray-800">LucresIA</div>
+              <div className="text-xs text-gray-500 -mt-1">Estética Lucrativa</div>
             </div>
           </div>
 
@@ -126,17 +126,17 @@ export default function Home() {
             {/* Badge de posicionamento */}
             <div className="mb-4">
               <span className="inline-block bg-[#6b2fa8] text-white px-4 py-2 rounded-full text-sm font-semibold">
-                🧠 Venda como ciência, não como esperança.
+                🧠 LucresIA — Estética Lucrativa
               </span>
             </div>
             
             <h1 className="text-4xl md:text-5xl font-extrabold text-[#5f3fb2] leading-tight max-w-4xl mx-auto">
-              Crie 30 dias de conteúdo em 30 minutos
+              Transforme sua clínica em uma máquina previsível de agendamentos premium
             </h1>
 
             <p className="mt-5 text-xl font-medium text-gray-700 max-w-2xl mx-auto">
-              IA que gera posts, anúncios e e-books para esteticistas.<br/>
-              Enquanto você atende, a Elevare vende por você.
+              A LucresIA é o centro de comando com IA para donas de clínicas<br/>
+              que querem parar de improvisar e começar a escalar.
             </p>
 
             {/* Prova social rápida */}
@@ -148,67 +148,73 @@ export default function Home() {
                 <div className="w-8 h-8 rounded-full bg-green-300 border-2 border-white"></div>
               </div>
               <p className="text-sm text-gray-500">
-                <strong className="text-[#6b2fa8]">+120 esteticistas</strong> já usam a Elevare
+                <strong className="text-[#6b2fa8]">+120 clínicas</strong> já operam com a LucresIA
+              </p>
+            </div>
+            
+            {/* CTA Diagnóstico Gratuito */}
+            <div className="mt-8">
+              <button onClick={() => navigate('/radar-bio')} className="px-10 py-5 rounded-full btn-primary shadow-xl text-lg font-black hover:scale-105 transition-all">
+                🔍 Fazer Diagnóstico Gratuito
+              </button>
+              <p className="mt-3 text-xs text-gray-400">
+                Descubra onde sua clínica está perdendo agendamentos — sem pagar nada
               </p>
             </div>
             
             {/* Garantia */}
             <p className="mt-4 text-xs text-gray-400">
-              🔒 Pagamento seguro • Cancele quando quiser • Acesso imediato
+              🔒 A LucresIA não substitui sua decisão. Ela elimina o caos e acelera quem está pronta.
             </p>
           </div>
         </section>
 
-        {/* Seção de Custo de Oportunidade - PRIMEIRO ITEM APÓS HERO */}
-        <section className="bg-gradient-to-b from-red-50 to-white py-12 border-y border-red-100">
+        {/* Seção Diagnóstico Gratuito - PRIMEIRO ITEM APÓS HERO */}
+        <section className="bg-gradient-to-b from-purple-50 to-white py-12 border-y border-purple-100">
           <div className="max-w-5xl mx-auto px-6">
             <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-2">
-              Quanto custa um perfil amador?
+              🧪 O Diagnóstico que Abre os Olhos
             </h2>
-            <p className="text-center text-gray-500 mb-8">O preço de NÃO ter a Elevare:</p>
+            <p className="text-center text-gray-500 mb-8">Antes de qualquer assinatura, você passa por um raio-X completo do seu posicionamento digital.</p>
             
-            <div className="grid md:grid-cols-3 gap-6">
-              {/* Card 1 - Perda de pacientes */}
-              <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-red-400 hover:shadow-xl transition-all">
-                <div className="text-4xl mb-3">📉</div>
-                <h3 className="font-bold text-red-600 text-lg mb-2">Pacientes perdidos</h3>
-                <p className="text-gray-600 text-sm">
-                  Perda de <strong className="text-red-600">3 a 5 pacientes por semana</strong> por falta de desejo visual no seu perfil.
-                </p>
-                <p className="mt-3 text-xs text-gray-400">≈ R$ 1.500/semana perdidos</p>
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="bg-white p-5 rounded-xl shadow-lg border-t-4 border-purple-400 hover:shadow-xl transition-all text-center">
+                <div className="text-3xl mb-3">📱</div>
+                <h3 className="font-bold text-gray-800 text-sm mb-2">Análise da Bio</h3>
+                <p className="text-gray-500 text-xs">Estética e comunicação do seu Instagram</p>
               </div>
               
-              {/* Card 2 - Gasto com agências */}
-              <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-amber-400 hover:shadow-xl transition-all">
-                <div className="text-4xl mb-3">💸</div>
-                <h3 className="font-bold text-amber-600 text-lg mb-2">Agências genéricas</h3>
-                <p className="text-gray-600 text-sm">
-                  Gasto médio de <strong className="text-amber-600">R$ 2.000/mês</strong> com agências que não entendem estética.
-                </p>
-                <p className="mt-3 text-xs text-gray-400">Posts bonitos que não vendem</p>
+              <div className="bg-white p-5 rounded-xl shadow-lg border-t-4 border-amber-400 hover:shadow-xl transition-all text-center">
+                <div className="text-3xl mb-3">🔍</div>
+                <h3 className="font-bold text-gray-800 text-sm mb-2">Pontos Invisíveis</h3>
+                <p className="text-gray-500 text-xs">O que está travando seus agendamentos</p>
               </div>
               
-              {/* Card 3 - Tempo perdido */}
-              <div className="bg-white p-6 rounded-xl shadow-lg border-l-4 border-purple-400 hover:shadow-xl transition-all">
-                <div className="text-4xl mb-3">⌛</div>
-                <h3 className="font-bold text-purple-600 text-lg mb-2">Seu tempo vale ouro</h3>
-                <p className="text-gray-600 text-sm">
-                  Sua hora clínica vale <strong>R$ 150</strong>. Gasta 4h criando posts? <strong className="text-purple-600">R$ 600 perdidos.</strong>
-                </p>
-                <p className="mt-3 text-xs text-gray-400">Tempo que deveria estar atendendo</p>
+              <div className="bg-white p-5 rounded-xl shadow-lg border-t-4 border-green-400 hover:shadow-xl transition-all text-center">
+                <div className="text-3xl mb-3">📊</div>
+                <h3 className="font-bold text-gray-800 text-sm mb-2">Diagnóstico Completo</h3>
+                <p className="text-gray-500 text-xs">Autoridade, desejo e conversão</p>
+              </div>
+              
+              <div className="bg-white p-5 rounded-xl shadow-lg border-t-4 border-blue-400 hover:shadow-xl transition-all text-center">
+                <div className="text-3xl mb-3">🎯</div>
+                <h3 className="font-bold text-gray-800 text-sm mb-2">Plano de Correção</h3>
+                <p className="text-gray-500 text-xs">Não genérico — feito para você</p>
               </div>
             </div>
             
             <div className="mt-8 text-center">
-              <p className="text-lg font-semibold text-gray-700">
-                💡 Com a Elevare: <span className="text-[#6b2fa8]">R$ 97/mês</span> e você recupera tudo isso.
+              <p className="text-base text-gray-600 mb-4">
+                Muitas clínicas perdem dinheiro todos os dias sem saber onde está o vazamento.<br/>
+                <strong className="text-[#6b2fa8]">Aqui você descobre — sem pagar nada.</strong>
               </p>
               <button
-                onClick={() => navigate('/register')}
-                className="mt-4 px-8 py-3 rounded-full btn-primary font-bold hover:scale-105 transition-all"
+                onClick={() => navigate('/radar-bio')}
+                className="mt-2 px-8 py-4 rounded-full btn-primary font-bold hover:scale-105 transition-all shadow-lg"
               >
-                Parar de Perder Dinheiro →
+                👉 Quero meu diagnóstico gratuito agora
               </button>
+              <p className="mt-3 text-xs text-gray-400">Isso não é isca. É prova de inteligência do sistema.</p>
             </div>
           </div>
         </section>
@@ -216,15 +222,15 @@ export default function Home() {
         <section className="max-w-6xl mx-auto px-6 py-12">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
-              <h2 className="text-3xl font-semibold text-[#6b2fa8]">O maior problema: Falta de Tempo.</h2>
-              <p className="mt-4 text-gray-600">A Elevare resolve isso combinando NeuroVendas com automação inteligente. Chega de encarar a tela em branco.</p>
+              <h2 className="text-3xl font-semibold text-[#6b2fa8]">Você não assina uma ferramenta.</h2>
+              <p className="mt-4 text-gray-600 text-lg">Você ativa um sistema que trabalha por você 24h por dia, enquanto você cuida do que realmente importa: <strong>procedimentos, autoridade e faturamento.</strong></p>
               <ul className="mt-4 space-y-2 text-gray-700">
-                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Gere conteúdo de qualidade em minutos</li>
-                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Automatize em múltiplos canais (Insta, Blog)</li>
-                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Aumente vendas com copy estratégica</li>
+                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Organize sua estratégia com clareza</li>
+                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Produza conteúdo com método, não improviso</li>
+                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Tome decisões melhores, mais rápido</li>
               </ul>
               <div className="mt-6">
-                <button onClick={() => navigate('/register')} className="px-6 py-3 rounded-full btn-primary font-bold">Começar Agora →</button>
+                <button onClick={() => navigate('/register')} className="px-6 py-3 rounded-full btn-primary font-bold">Ativar Meu Centro de Comando →</button>
               </div>
             </div>
             <div className="video-wrap h-72 md:h-96">
@@ -245,174 +251,199 @@ export default function Home() {
         
         <section className="bg-gradient-to-b from-[#f5f3ff] to-white py-12">
           <div className="max-w-5xl mx-auto px-6">
-            <h3 className="text-2xl text-center font-semibold text-[#6b2fa8] mb-2">Sua Transformação Digital</h3>
-            <p className="text-center text-gray-500 text-sm mb-8">Veja a diferença entre fazer sozinha e ter a Elevare ao seu lado</p>
+            <h3 className="text-2xl text-center font-semibold text-[#6b2fa8] mb-2">🚀 Por Que Isso Funciona?</h3>
+            <p className="text-center text-gray-500 text-sm mb-8">Estética não vende só procedimento. Vende confiança, imagem e autoridade.</p>
             
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-purple-100">
               <div className="grid md:grid-cols-2">
-                {/* Lado ANTES - Sem Elevare */}
+                {/* Lado ANTES - Improviso */}
                 <div className="p-6 bg-gray-50 border-r border-gray-200">
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-2xl">😰</span>
-                    <h4 className="font-bold text-gray-600">Sem Elevare AI</h4>
+                    <h4 className="font-bold text-gray-600">Operando no Improviso</h4>
                   </div>
                   <ul className="space-y-3 text-sm">
                     <li className="flex items-start gap-3 text-gray-600">
                       <span className="text-red-400 text-lg">✖</span>
-                      <span>Horas gastas criando um único post</span>
+                      <span>Agenda irregular e imprevisível</span>
                     </li>
                     <li className="flex items-start gap-3 text-gray-600">
                       <span className="text-red-400 text-lg">✖</span>
-                      <span>Gasto alto com agências de marketing</span>
+                      <span>Posta sem padrão, sem estratégia</span>
                     </li>
                     <li className="flex items-start gap-3 text-gray-600">
                       <span className="text-red-400 text-lg">✖</span>
-                      <span>Posts bonitos que não vendem</span>
+                      <span>Refém de agências genéricas</span>
                     </li>
                     <li className="flex items-start gap-3 text-gray-600">
                       <span className="text-red-400 text-lg">✖</span>
-                      <span>Instabilidade e falta de previsibilidade</span>
+                      <span>Decisões no achismo</span>
                     </li>
                   </ul>
                 </div>
                 
-                {/* Lado DEPOIS - Com Elevare */}
+                {/* Lado DEPOIS - Com LucresIA */}
                 <div className="p-6 bg-gradient-to-br from-purple-50 to-white">
                   <div className="flex items-center gap-2 mb-4">
-                    <span className="text-2xl">🚀</span>
-                    <h4 className="font-bold text-[#6b2fa8]">Com Elevare AI</h4>
+                    <span className="text-2xl">🧠</span>
+                    <h4 className="font-bold text-[#6b2fa8]">Com Centro de Comando LucresIA</h4>
                   </div>
                   <ul className="space-y-3 text-sm">
                     <li className="flex items-start gap-3 text-gray-700">
                       <span className="text-green-500 text-lg">✔</span>
-                      <span><strong>Conteúdo pronto em minutos</strong> (não horas)</span>
+                      <span><strong>Visão clara</strong> de onde vem o dinheiro</span>
                     </li>
                     <li className="flex items-start gap-3 text-gray-700">
                       <span className="text-green-500 text-lg">✔</span>
-                      <span><strong>Economia real</strong> de dinheiro</span>
+                      <span><strong>Conteúdo com método</strong>, não inspiração</span>
                     </li>
                     <li className="flex items-start gap-3 text-gray-700">
                       <span className="text-green-500 text-lg">✔</span>
-                      <span><strong>Copywriting estratégico</strong> que converte</span>
+                      <span><strong>Estratégia organizada</strong> em um lugar só</span>
                     </li>
                     <li className="flex items-start gap-3 text-gray-700">
                       <span className="text-green-500 text-lg">✔</span>
-                      <span><strong>Crescimento consistente</strong> do negócio</span>
+                      <span><strong>Decisões com diagnóstico</strong>, não achismo</span>
                     </li>
                   </ul>
                 </div>
               </div>
             </div>
+            
+            <p className="mt-6 text-center text-sm text-gray-500 italic">
+              A LucresIA não foi criada em laboratório. Foi moldada na rotina real de clínicas que precisavam crescer — sem virar reféns de agência.
+            </p>
           </div>
         </section>
 
         <section id="modulos" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24">
-          <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Módulos Principais</h3>
-          <p className="text-center mt-3 text-gray-600">Um ecossistema completo para dominar o digital.</p>
+          <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">🧠 O Que Você Ativa no Centro de Comando</h3>
+          <p className="text-center mt-3 text-gray-600">Ferramentas estratégicas para clínicas que pensam como empresa.</p>
           <div className="mt-10 grid md:grid-cols-3 gap-6">
             
             <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#A36BFF]">
-              <div className="text-3xl mb-4">🎯</div>
-              <h5 className="text-xl font-bold text-gray-800">Radar de Bio (Lead Magnet)</h5>
-              <p className="mt-2 text-sm text-gray-600">Diagnóstico automático do seu perfil. A IA analisa sua bio e entrega recomendações de melhoria instantâneas para atrair leads qualificados.</p>
+              <div className="text-3xl mb-4">📡</div>
+              <h5 className="text-xl font-bold text-gray-800">RADAR DE BIO</h5>
+              <p className="text-xs text-purple-600 font-semibold mb-2">DIAGNÓSTICO QUE PARA DE QUEIMAR DINHEIRO</p>
+              <p className="mt-2 text-sm text-gray-600">A IA escaneia seu Instagram como um especialista em Neurovendas e mostra exatamente onde você está perdendo autoridade, desejo e agendamentos.</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#F6C86A]">
               <div className="text-3xl mb-4">🤖</div>
-              <h5 className="text-xl font-bold text-gray-800">Robô Produtor</h5>
-              <p className="mt-2 text-sm text-gray-600">Suite de automação completa. Gerador de Prompts (Midjourney/DALL-E), Criador de Anúncios (Ads) e Assistente IA para mentoria.</p>
+              <h5 className="text-xl font-bold text-gray-800">ROBÔ DE POST</h5>
+              <p className="text-xs text-amber-600 font-semibold mb-2">PRODUÇÃO GUIADA DE CONTEÚDO</p>
+              <p className="mt-2 text-sm text-gray-600">Conteúdos prontos com estética premium e legendas que posicionam você como referência. Alinhado à sua estratégia, sem depender de inspiração ou agência.</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#A36BFF]">
-              <div className="text-3xl mb-4">📘</div>
-              <h5 className="text-xl font-bold text-gray-800">Fábrica de E-books</h5>
-              <p className="mt-2 text-sm text-gray-600">Crie iscas digitais profissionais. Conteúdo, capa, diagramas e até versão <strong>Audiobook</strong> (Text-to-Speech) gerados automaticamente.</p>
+              <div className="text-3xl mb-4">📖</div>
+              <h5 className="text-xl font-bold text-gray-800">IA DE E-BOOKS</h5>
+              <p className="text-xs text-purple-600 font-semibold mb-2">ESTRUTURAÇÃO DE AUTORIDADE</p>
+              <p className="mt-2 text-sm text-gray-600">Transforme conhecimento em material estratégico para relacionamento e captação. Capa, conteúdo e até <strong>audiobook</strong> gerados automaticamente.</p>
             </div>
 
              <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#F6C86A]">
-              <div className="text-3xl mb-4">✍️</div>
-              <h5 className="text-xl font-bold text-gray-800">Automação de Blogs</h5>
-              <p className="mt-2 text-sm text-gray-600">Domine o Google. Calendário editorial e agendador de posts para blog com SEO, criando autoridade enquanto você dorme.</p>
+              <div className="text-3xl mb-4">🎥</div>
+              <h5 className="text-xl font-bold text-gray-800">VEO CINEMA</h5>
+              <p className="text-xs text-amber-600 font-semibold mb-2">VISUAL PROFISSIONAL DE ALTO IMPACTO</p>
+              <p className="mt-2 text-sm text-gray-600">Vídeos cinematográficos que elevam o valor percebido do seu trabalho. Quando sua comunicação parece profissional, sua percepção de valor sobe.</p>
             </div>
 
             <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#A36BFF]">
-              <div className="text-3xl mb-4">🎓</div>
-              <h5 className="text-xl font-bold text-gray-800">Área de Membros</h5>
-              <p className="mt-2 text-sm text-gray-600">Educação continuada. Acesso à "Imersão IA NA PRÁTICA", replays de eventos e materiais de apoio exclusivos.</p>
+              <div className="text-3xl mb-4">🎯</div>
+              <h5 className="text-xl font-bold text-gray-800">ADS MANAGER</h5>
+              <p className="text-xs text-purple-600 font-semibold mb-2">PLANEJAMENTO DE CAMPANHAS</p>
+              <p className="mt-2 text-sm text-gray-600">Planejamento guiado para investir melhor, não para apostar no escuro. Estratégia focada em pacientes premium, não caçadores de preço.</p>
             </div>
 
              <div className="bg-white rounded-xl p-6 card-shadow hover:shadow-lg transition-all border-t-4 border-[#F6C86A]">
-              <div className="text-3xl mb-4">📊</div>
-              <h5 className="text-xl font-bold text-gray-800">Dashboard de Controle</h5>
-              <p className="mt-2 text-sm text-gray-600">Visão total do seu negócio. Resumo de uso, histórico de gerações e atalhos rápidos para todas as ferramentas.</p>
+              <div className="text-3xl mb-4">💎</div>
+              <h5 className="text-xl font-bold text-gray-800">LEADS PIPELINE</h5>
+              <p className="text-xs text-amber-600 font-semibold mb-2">ORGANIZAÇÃO E PRIORIDADE</p>
+              <p className="mt-2 text-sm text-gray-600">CRM com termômetro neural que mostra quem está pronta para comprar e o que dizer no WhatsApp. Organize oportunidades, não perca vendas.</p>
             </div>
 
           </div>
         </section>
 
         <section id="planos" className="max-w-6xl mx-auto px-6 py-16 scroll-mt-24 bg-gray-50 rounded-3xl">
-          <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">Entre no Sistema Elevare</h3>
-          <p className="text-center text-gray-600 mt-2">Você não está comprando aulas. Está entrando em um sistema de crescimento.</p>
+          <h3 className="text-3xl text-center font-semibold text-[#6b2fa8]">🔓 Planos de Assinatura LucresIA</h3>
+          <p className="text-center text-gray-600 mt-2">Escolha o nível de maturidade do seu negócio. A IA evolui. Você evolui junto.</p>
           
-          {/* Contador discreto */}
-          <div className="mt-4 flex justify-center">
-            <span className="text-xs text-gray-400 border border-gray-200 px-3 py-1 rounded-full">
-              🔥 Oferta expira em {String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
-            </span>
-          </div>
-          
-          {/* Opção Comece Grátis */}
+          {/* Diagnóstico Gratuito */}
           <div className="mt-6 text-center">
-            <button onClick={() => navigate('/register')} className="text-[#6b2fa8] hover:underline text-sm font-medium">
-              ✨ Comece Grátis com o Radar de Bio →
+            <button onClick={() => navigate('/radar-bio')} className="text-[#6b2fa8] hover:underline text-sm font-medium">
+              🔍 Começar com Diagnóstico Gratuito →
             </button>
           </div>
           
           <div className="mt-8 flex flex-wrap justify-center gap-6">
             
-            {/* Acesso Essencial */}
-            <div className="bg-white rounded-xl p-8 card-shadow hover:shadow-xl transition-all w-[300px]">
-              <h4 className="font-semibold text-gray-800 text-lg">Acesso Essencial Elevare</h4>
+            {/* PLANO START */}
+            <div className="bg-white rounded-xl p-8 card-shadow hover:shadow-xl transition-all w-[320px]">
+              <div className="text-sm font-bold text-purple-600 mb-2">🌱 PLANO START</div>
+              <h4 className="font-bold text-gray-800 text-xl">Clínica Visível & Posicionada</h4>
               <p className="text-3xl font-extrabold mt-4 text-[#6b2fa8]">R$ 57<span className="text-base font-normal text-gray-500">/mês</span></p>
-              <p className="mt-4 text-sm text-gray-600">Estrutura inicial para sua clínica</p>
+              <p className="mt-4 text-sm text-gray-600">Para quem cansou de postar bonito e vender pouco.</p>
               <ul className="mt-4 text-sm text-gray-700 space-y-2">
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Acesso ao Radar de Bio</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 5 créditos por mês</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Gerador de Prompts</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte por e-mail</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 📡 Radar de Bio</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 🤖 Robô de Post Inteligente</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 📖 IA de E-books</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 🧠 Diagnóstico de Posicionamento</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Gerações inteligentes incluídas</li>
               </ul>
+              <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                <p className="text-xs text-gray-600"><strong>Resultado prático:</strong></p>
+                <p className="text-xs text-gray-500">✔ Sua clínica deixa de parecer comum<br/>✔ Atrai clientes certas<br/>✔ Instagram trabalha por você</p>
+              </div>
               <div className="mt-6">
                 <button onClick={() => navigate('/register')} className="w-full px-6 py-3 rounded-full font-semibold btn-ghost hover:bg-purple-50 transition-all">
-                  Assinar Essencial
+                  👉 Ativar Clínica Visível
                 </button>
-                <p className="mt-2 text-xs text-center text-gray-400">Acesso imediato</p>
+                <p className="mt-2 text-xs text-center text-gray-400">Ideal para clínicas em crescimento</p>
               </div>
             </div>
 
-            {/* Acesso Profissional - Destacado */}
-            <div className="relative bg-[#eef2ff] border-2 border-[var(--dourado)] rounded-xl p-8 hover:shadow-2xl transition-all w-[320px] scale-105 z-10">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-bold bg-[var(--dourado)] text-white shadow-md">RECOMENDADO</div>
-              <h4 className="font-semibold text-[#6b2fa8] text-lg mt-2">Acesso Profissional Elevare</h4>
+            {/* PLANO PRO - Destacado */}
+            <div className="relative bg-[#eef2ff] border-2 border-[var(--dourado)] rounded-xl p-8 hover:shadow-2xl transition-all w-[340px] scale-105 z-10">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-sm font-bold bg-[var(--dourado)] text-white shadow-md">🔥 MAIS ESCOLHIDO</div>
+              <div className="text-sm font-bold text-amber-600 mb-2 mt-2">⭐ PLANO PRO</div>
+              <h4 className="font-bold text-[#6b2fa8] text-xl">Clínica Desejada & Lotada</h4>
               <p className="text-3xl font-extrabold mt-4 text-[#6b2fa8]">R$ 97<span className="text-base font-normal text-gray-500">/mês</span></p>
-              <p className="mt-4 text-sm text-gray-600">Automação completa + crescimento acelerado</p>
+              <p className="mt-4 text-sm text-gray-600">Para quem quer previsibilidade, agenda cheia e autoridade local.</p>
               <ul className="mt-4 text-sm text-gray-700 space-y-2">
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> <strong>Créditos ilimitados</strong></li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Tudo do Acesso Essencial</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Gerador de E-books</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Gerador de Anúncios</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Automação de Blogs (SEO)</li>
-                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Área de Membros Exclusiva</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> <strong>Tudo do Plano Start +</strong></li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 🎥 Veo Cinema</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 🎯 Ads Manager Inteligente</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 💎 Leads Pipeline com Termômetro</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> 📅 Agenda Smart Financeira</li>
+                <li className="flex items-center gap-2"><span className="text-green-500">✓</span> IA sem limite operacional</li>
                 <li className="flex items-center gap-2"><span className="text-green-500">✓</span> Suporte VIP prioritário</li>
               </ul>
-              <div className="mt-6">
-                <button onClick={() => navigate('/register')} className="w-full px-6 py-3 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all" style={{background: 'linear-gradient(135deg, #F6C86A 0%, #f59e0b 100%)', color: 'white'}}>
-                  Assinar Profissional
-                </button>
-                <p className="mt-2 text-xs text-center text-amber-600 font-semibold">⚡ Mais escolhido</p>
+              <div className="mt-4 p-3 bg-amber-50 rounded-lg">
+                <p className="text-xs text-gray-600"><strong>Resultado prático:</strong></p>
+                <p className="text-xs text-gray-500">✔ Agenda previsível<br/>✔ Menos tempo no Instagram<br/>✔ Clareza total de onde vem o dinheiro</p>
               </div>
-              <p className="mt-4 text-xs text-center text-gray-500 italic">Você não está comprando aulas.<br/>Está entrando em um sistema de crescimento.</p>
+              <div className="mt-6">
+                <button onClick={() => navigate('/register')} className="w-full px-6 py-4 rounded-full font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all" style={{background: 'linear-gradient(135deg, #F6C86A 0%, #f59e0b 100%)', color: 'white'}}>
+                  👉 Quero Meu Centro de Comando
+                </button>
+                <p className="mt-2 text-xs text-center text-amber-600 font-semibold">Para quem parou de brincar de clínica</p>
+              </div>
             </div>
 
+          </div>
+          
+          {/* Bônus */}
+          <div className="mt-10 max-w-2xl mx-auto text-center p-6 bg-white rounded-xl border border-purple-100">
+            <h4 className="font-bold text-[#6b2fa8] mb-3">🎁 BÔNUS EXCLUSIVOS (Enquanto Durar)</h4>
+            <p className="text-sm text-gray-600">Ao ativar qualquer plano, você recebe:</p>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-500">
+              <span>✅ Diagnóstico CEO de Mentalidade</span>
+              <span>✅ Scripts prontos de WhatsApp</span>
+              <span>✅ Templates de campanhas locais</span>
+              <span>✅ Atualizações contínuas da IA</span>
+            </div>
           </div>
         </section>
 
@@ -521,20 +552,22 @@ export default function Home() {
             </div>
         </section>
 
-        <section className="py-16 bg-white border-t border-gray-100">
+        <section className="py-16 bg-gradient-to-b from-purple-100 to-white border-t border-gray-100">
           <div className="max-w-4xl mx-auto px-6 text-center">
-            <h3 className="text-2xl font-semibold text-[#6b2fa8]">Sua estética merece estratégia — e você merece tempo.</h3>
-            <p className="mt-2 text-gray-600">A Elevare cuida da parte difícil enquanto você cuida do que ama.</p>
+            <h3 className="text-3xl font-bold text-[#6b2fa8]">🔔 Pare de Operar no Improviso</h3>
+            <p className="mt-4 text-lg text-gray-600">Você pode continuar tentando acertar sozinha.<br/>Ou pode ativar um sistema que já sabe o caminho.</p>
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-              <button onClick={() => navigate('/register')} className="px-8 py-4 rounded-full btn-primary shadow-lg text-lg font-bold hover:shadow-xl transition-all">
-                Entrar no Método Elevare
+              <button onClick={() => navigate('/register')} className="px-10 py-5 rounded-full shadow-xl text-lg font-black hover:shadow-2xl hover:scale-105 transition-all" style={{background: 'linear-gradient(135deg, #6b2fa8 0%, #A36BFF 100%)', color: 'white'}}>
+                👉 ATIVAR MEU CENTRO DE COMANDO AGORA
               </button>
-              <a href="#modulos" className="px-8 py-4 rounded-full btn-ghost text-lg font-semibold hover:bg-purple-50 transition-colors">
-                Ver Como Funciona na Prática
-              </a>
+            </div>
+            <div className="mt-6">
+              <button onClick={() => navigate('/radar-bio')} className="text-[#6b2fa8] hover:underline font-medium">
+                🔍 Ou começar com diagnóstico gratuito
+              </button>
             </div>
             <p className="mt-6 text-xs text-gray-400">
-              Acesso imediato à Plataforma Elevare • Sem teste gratuito • Método validado
+              A LucresIA não substitui sua decisão. Ela elimina o caos, organiza a estratégia e acelera quem está pronta para crescer.
             </p>
           </div>
         </section>
@@ -542,7 +575,7 @@ export default function Home() {
 
       <footer className="mt-12 bg-[#f3f5f8] py-8 border-t border-gray-200">
         <div className="max-w-6xl mx-auto px-6 text-center text-sm text-gray-500">
-          © 2025 Elevare Global — Transformando estética em inteligência e lucro. • Suporte: carinefisio@hotmail.com
+          © 2025 LucresIA — O Centro de Comando por IA para Clínicas Estéticas que Pensam Grande. • Suporte: carinefisio@hotmail.com
         </div>
       </footer>
     </>
