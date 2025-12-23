@@ -1,6 +1,17 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useSearch } from "wouter";
+import { motion, AnimatePresence } from "framer-motion";
+import { AlertTriangle, Target, TrendingUp, Crown, ArrowRight, ChevronRight, ArrowLeft } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { 
+  PERGUNTAS_CONSCIENCIA, 
+  PERGUNTAS_MATURIDADE, 
+  PERGUNTAS_FINANCEIRO, 
+  PERGUNTAS_POSICIONAMENTO,
+  MENSAGENS_ESPELHO,
+  classificarNivel,
+  QuizQuestion 
+} from "@/data/quizData";
 
 // ============================================
 // TIPOS
@@ -8,14 +19,17 @@ import { trpc } from "@/lib/trpc";
 type Etapa = 
   | "intro"
   | "consciencia"
+  | "maturidade"
   | "financeiro"
   | "posicionamento"
+  | "abismo"
   | "resultado"
   | "plano"
   | "feedback";
 
 interface Scores {
   consciencia: number;
+  maturidade: number;
   financeiro: number;
   posicionamento: number;
 }
@@ -28,96 +42,23 @@ interface QuizData {
 }
 
 // ============================================
-// PERGUNTAS
+// PERGUNTAS COM MICROCOPY (AUTORIDADE COGNITIVA)
 // ============================================
 const PERGUNTAS = {
-  consciencia: [
-    {
-      id: "c1",
-      pergunta: "Quando algo precisa ser feito na clínica, sua tendência natural é:",
-      opcoes: [
-        { texto: "Fazer pessoalmente para garantir o padrão", valor: 1 },
-        { texto: "Acompanhar de perto mesmo delegando", valor: 2 },
-        { texto: "Criar um padrão que não dependa de mim", valor: 3 },
-      ]
-    },
-    {
-      id: "c2",
-      pergunta: "A maior parte do seu dia é consumida por:",
-      opcoes: [
-        { texto: "Execução técnica e imprevistos", valor: 1 },
-        { texto: "Atendimento e organização", valor: 2 },
-        { texto: "Decisão e direcionamento estratégico", valor: 3 },
-      ]
-    },
-    {
-      id: "c3",
-      pergunta: "Se você tirasse 15 dias de férias hoje, o que aconteceria?",
-      opcoes: [
-        { texto: "A clínica pararia", valor: 1 },
-        { texto: "Funcionaria com dificuldade", valor: 2 },
-        { texto: "Seguiria normalmente", valor: 3 },
-      ]
-    },
-  ],
-  financeiro: [
-    {
-      id: "f1",
-      pergunta: "Você sabe exatamente quanto lucrou nos últimos 3 meses?",
-      opcoes: [
-        { texto: "Não tenho esse controle", valor: 1 },
-        { texto: "Tenho uma ideia aproximada", valor: 2 },
-        { texto: "Sei com precisão", valor: 3 },
-      ]
-    },
-    {
-      id: "f2",
-      pergunta: "Seu pró-labore está definido e separado do caixa?",
-      opcoes: [
-        { texto: "Retiro conforme preciso", valor: 1 },
-        { texto: "Tenho um valor, mas nem sempre sigo", valor: 2 },
-        { texto: "Fixo e separado das despesas", valor: 3 },
-      ]
-    },
-    {
-      id: "f3",
-      pergunta: "Se uma cliente cancelar hoje, você sabe o impacto no mês?",
-      opcoes: [
-        { texto: "Não consigo calcular", valor: 1 },
-        { texto: "Teria que verificar", valor: 2 },
-        { texto: "Sei exatamente", valor: 3 },
-      ]
-    },
-  ],
-  posicionamento: [
-    {
-      id: "p1",
-      pergunta: "Quando alguém visita seu perfil, ela entende em 5 segundos o que você faz?",
-      opcoes: [
-        { texto: "Não tenho certeza", valor: 1 },
-        { texto: "Acho que sim", valor: 2 },
-        { texto: "Com certeza", valor: 3 },
-      ]
-    },
-    {
-      id: "p2",
-      pergunta: "Sua bio fala sobre você ou para a cliente certa?",
-      opcoes: [
-        { texto: "Fala sobre mim e minha formação", valor: 1 },
-        { texto: "Um pouco dos dois", valor: 2 },
-        { texto: "Fala diretamente com quem quero atrair", valor: 3 },
-      ]
-    },
-    {
-      id: "p3",
-      pergunta: "Suas clientes chegam pelo Instagram já querendo agendar?",
-      opcoes: [
-        { texto: "Não, só perguntam preço", valor: 1 },
-        { texto: "Algumas sim, outras não", valor: 2 },
-        { texto: "A maioria já vem decidida", valor: 3 },
-      ]
-    },
-  ],
+  consciencia: PERGUNTAS_CONSCIENCIA,
+  maturidade: PERGUNTAS_MATURIDADE,
+  financeiro: PERGUNTAS_FINANCEIRO,
+  posicionamento: PERGUNTAS_POSICIONAMENTO,
+};
+
+// Total de perguntas: 3 + 7 + 8 + 3 = 21
+const TOTAL_PERGUNTAS = 21;
+
+// Cores e ícones por nível
+const NIVEL_CONFIG = {
+  desbravadora: { cor: "#b8975a", icone: Target },
+  estrategista: { cor: "#6b2fa8", icone: TrendingUp },
+  rainha: { cor: "#2d2d2d", icone: Crown },
 };
 
 // ============================================
@@ -148,6 +89,7 @@ export default function DiagnosticoElevare() {
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [scores, setScores] = useState<Scores>({
     consciencia: 0,
+    maturidade: 0,
     financeiro: 0,
     posicionamento: 0,
   });
@@ -210,7 +152,7 @@ export default function DiagnosticoElevare() {
       
       if (hoursDiff < 24) {
         setAnswers(saved.answers || {});
-        setScores(saved.scores || { consciencia: 0, financeiro: 0, posicionamento: 0 });
+        setScores(saved.scores || { consciencia: 0, maturidade: 0, financeiro: 0, posicionamento: 0 });
         // Restaurar etapa se não estava no resultado
         if (saved.currentStep && saved.currentStep !== "resultado") {
           setEtapa(saved.currentStep as Etapa);
@@ -241,8 +183,8 @@ export default function DiagnosticoElevare() {
     const isRightSwipe = distance < -minSwipeDistance;
 
     // Só funciona durante o quiz
-    if (etapa === "consciencia" || etapa === "financeiro" || etapa === "posicionamento") {
-      const perguntasAtuais = PERGUNTAS[etapa];
+    if (etapa === "consciencia" || etapa === "maturidade" || etapa === "financeiro" || etapa === "posicionamento") {
+      const perguntasAtuais = getPerguntasAtuais();
       const pergunta = perguntasAtuais[perguntaAtual];
       
       if (isRightSwipe) {
@@ -260,30 +202,44 @@ export default function DiagnosticoElevare() {
   // ============================================
   const getProgresso = () => {
     let respondidas = Object.keys(answers).length;
-    return Math.round((respondidas / 9) * 100);
+    return Math.round((respondidas / TOTAL_PERGUNTAS) * 100);
+  };
+
+  const getTotalScore = () => {
+    return scores.consciencia + scores.maturidade + scores.financeiro + scores.posicionamento;
   };
 
   const getNivel = () => {
-    const total = scores.consciencia + scores.financeiro + scores.posicionamento;
-    if (total <= 15) return "desbravadora";
-    if (total <= 21) return "estrategista";
-    return "rainha";
+    const total = getTotalScore();
+    return classificarNivel(total);
   };
 
   const getPontoFraco = () => {
     const areas = [
-      { nome: "consciencia", label: "consciência empreendedora", score: scores.consciencia },
-      { nome: "financeiro", label: "gestão financeira", score: scores.financeiro },
-      { nome: "posicionamento", label: "posicionamento digital", score: scores.posicionamento },
+      { nome: "consciencia", label: "consciência empreendedora", score: scores.consciencia, max: 9 },
+      { nome: "maturidade", label: "maturidade de gestão", score: scores.maturidade, max: 21 },
+      { nome: "financeiro", label: "gestão financeira", score: scores.financeiro, max: 24 },
+      { nome: "posicionamento", label: "posicionamento digital", score: scores.posicionamento, max: 9 },
     ];
-    return areas.reduce((a, b) => a.score < b.score ? a : b);
+    // Calcular percentual para comparação justa
+    return areas.reduce((a, b) => (a.score / a.max) < (b.score / b.max) ? a : b);
+  };
+
+  // Obter perguntas do bloco atual
+  const getPerguntasAtuais = (): QuizQuestion[] => {
+    if (etapa === "consciencia") return PERGUNTAS.consciencia;
+    if (etapa === "maturidade") return PERGUNTAS.maturidade;
+    if (etapa === "financeiro") return PERGUNTAS.financeiro;
+    if (etapa === "posicionamento") return PERGUNTAS.posicionamento;
+    return [];
   };
 
   // ============================================
   // HANDLERS
   // ============================================
   const handleResposta = async (questionId: string, valor: number) => {
-    const blocoAtual = etapa as "consciencia" | "financeiro" | "posicionamento";
+    const blocoAtual = etapa as "consciencia" | "maturidade" | "financeiro" | "posicionamento";
+    const perguntasBloco = getPerguntasAtuais();
     
     // Atualizar answers
     const newAnswers = { ...answers, [questionId]: valor };
@@ -303,19 +259,24 @@ export default function DiagnosticoElevare() {
     });
 
     // Próxima pergunta ou próximo bloco
-    if (perguntaAtual < 2) {
+    if (perguntaAtual < perguntasBloco.length - 1) {
       setPerguntaAtual(perguntaAtual + 1);
     } else {
       setPerguntaAtual(0);
+      // Fluxo: consciencia -> maturidade -> financeiro -> posicionamento -> abismo
       if (etapa === "consciencia") {
+        setEtapa("maturidade");
+        saveToLocal({ currentStep: "maturidade" });
+      } else if (etapa === "maturidade") {
         setEtapa("financeiro");
         saveToLocal({ currentStep: "financeiro" });
       } else if (etapa === "financeiro") {
         setEtapa("posicionamento");
         saveToLocal({ currentStep: "posicionamento" });
       } else {
-        // Fim do quiz - submeter para backend
-        await submitQuizToBackend(newAnswers, newScores);
+        // Mostrar Card do Abismo antes do resultado
+        setEtapa("abismo");
+        saveToLocal({ currentStep: "abismo" });
       }
     }
   };
@@ -420,10 +381,6 @@ export default function DiagnosticoElevare() {
   // ============================================
   // RENDER
   // ============================================
-  const perguntasAtuais = etapa === "consciencia" ? PERGUNTAS.consciencia :
-                          etapa === "financeiro" ? PERGUNTAS.financeiro :
-                          etapa === "posicionamento" ? PERGUNTAS.posicionamento : [];
-
   return (
     <div 
       ref={containerRef}
@@ -476,39 +433,159 @@ export default function DiagnosticoElevare() {
         )}
 
         {/* ═══════════════════════════════════════════════════════════════
-            PERGUNTAS (consciencia, financeiro, posicionamento)
+            PERGUNTAS PREMIUM (consciencia, maturidade, financeiro, posicionamento)
         ═══════════════════════════════════════════════════════════════ */}
-        {(etapa === "consciencia" || etapa === "financeiro" || etapa === "posicionamento") && (
-          <div className="animate-fade-in" key={`${etapa}-${perguntaAtual}`}>
-            <p className="text-xs text-[#6b7280] mb-6 uppercase tracking-wide">
-              {etapa === "consciencia" && "Consciência Empreendedora"}
-              {etapa === "financeiro" && "Gestão Financeira"}
-              {etapa === "posicionamento" && "Posicionamento Digital"}
-              {" • "}{perguntaAtual + 1}/3
-            </p>
-            
-            <div className="text-[18px] font-medium text-[#1f2933] mb-6 leading-snug">
-              {perguntasAtuais[perguntaAtual]?.pergunta}
-            </div>
+        {(etapa === "consciencia" || etapa === "maturidade" || etapa === "financeiro" || etapa === "posicionamento") && (
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={`${etapa}-${perguntaAtual}`}
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-6"
+            >
+              {/* Header do bloco */}
+              <p className="text-xs text-[#6b7280] uppercase tracking-wide">
+                {etapa === "consciencia" && "Consciência Empreendedora"}
+                {etapa === "maturidade" && "Maturidade de Gestão"}
+                {etapa === "financeiro" && "Diagnóstico Financeiro"}
+                {etapa === "posicionamento" && "Posicionamento Digital"}
+                {" • "}{perguntaAtual + 1}/{getPerguntasAtuais().length}
+              </p>
+              
+              {/* Microcopy de Autoridade */}
+              <p className="text-sm text-[#6b2fa8] font-medium tracking-wide">
+                {getPerguntasAtuais()[perguntaAtual]?.microcopy}
+              </p>
+              
+              {/* Pergunta com tipografia serifada */}
+              <h2 className="font-serif text-[22px] font-medium text-[#1f2933] leading-relaxed">
+                {getPerguntasAtuais()[perguntaAtual]?.pergunta}
+              </h2>
 
-            <div className="flex flex-col gap-3">
-              {perguntasAtuais[perguntaAtual]?.opcoes.map((opcao, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleResposta(perguntasAtuais[perguntaAtual].id, opcao.valor)}
-                  className="p-4 border border-[#d1d5db] bg-transparent text-left text-[15px] text-[#1f2933] hover:bg-white hover:border-[#111827] transition-all"
-                >
-                  {opcao.texto}
-                </button>
-              ))}
-            </div>
+              {/* Opções */}
+              <div className="flex flex-col gap-3 pt-2">
+                {getPerguntasAtuais()[perguntaAtual]?.opcoes.map((opcao, index) => (
+                  <motion.button
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * (index + 1) }}
+                    onClick={() => handleResposta(getPerguntasAtuais()[perguntaAtual].id, opcao.valor)}
+                    className="p-5 border-2 border-[#d1d5db] bg-white rounded-xl text-left text-[15px] text-[#1f2933] hover:border-[#6b2fa8] hover:bg-[#6b2fa8]/5 transition-all group flex items-center justify-between"
+                  >
+                    <span>{opcao.texto}</span>
+                    <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-[#6b2fa8] transition-colors" />
+                  </motion.button>
+                ))}
+              </div>
 
-            {/* Indicador de swipe */}
-            <div className="mt-8 flex justify-between text-[11px] text-[#9ca3af]">
-              <span>← Operacional</span>
-              <span>Estratégico →</span>
-            </div>
-          </div>
+              {/* Indicador de swipe */}
+              <div className="mt-6 flex justify-between text-[11px] text-[#9ca3af]">
+                <span>← Operacional</span>
+                <span>Estratégico →</span>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════════
+            CARD DO ABISMO ELEGANTE
+        ═══════════════════════════════════════════════════════════════ */}
+        {etapa === "abismo" && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="space-y-6"
+          >
+            {(() => {
+              const nivel = getNivel();
+              const mensagem = MENSAGENS_ESPELHO[nivel];
+              const config = NIVEL_CONFIG[nivel];
+              const Icone = config.icone;
+              
+              return (
+                <>
+                  {/* Header com ícone */}
+                  <div className="text-center">
+                    <div 
+                      className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center"
+                      style={{ backgroundColor: `${config.cor}15` }}
+                    >
+                      <Icone className="w-8 h-8" style={{ color: config.cor }} />
+                    </div>
+                    <h1 className="font-serif text-[26px] font-medium text-[#1f2933]">
+                      {mensagem.titulo}
+                    </h1>
+                  </div>
+
+                  {/* Mensagem Espelho */}
+                  <div className="bg-white rounded-2xl p-6 border border-gray-100">
+                    <p className="text-[16px] text-[#1f2933] leading-relaxed">
+                      {mensagem.espelho}
+                    </p>
+                  </div>
+
+                  {/* CARD DO ABISMO - bg-slate-900 */}
+                  <div className="relative overflow-hidden rounded-2xl bg-slate-900 p-8 text-white">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/5 to-transparent rounded-full -translate-y-1/2 translate-x-1/2" />
+                    
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                        <AlertTriangle className="w-5 h-5 text-amber-400" />
+                      </div>
+                      <h3 className="font-serif text-xl text-white">
+                        {mensagem.abismo}
+                      </h3>
+                    </div>
+                    
+                    <p className="text-gray-300 leading-relaxed mb-6">
+                      {mensagem.descricaoAbismo}
+                    </p>
+                    
+                    <div className="w-12 h-px bg-white/20 mb-6" />
+                    
+                    <p className="text-sm text-gray-400 italic mb-8">
+                      "A diferença entre quem sonha e quem conquista não é talento. É clareza sobre o que está invisível."
+                    </p>
+                    
+                    <button
+                      onClick={async () => {
+                        await submitQuizToBackend(answers, scores);
+                      }}
+                      className="w-full py-4 rounded-xl bg-white text-slate-900 font-medium hover:bg-gray-100 transition-all flex items-center justify-center gap-2 group"
+                    >
+                      <span>{mensagem.cta}</span>
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    </button>
+                  </div>
+
+                  {/* Barra de Classificação */}
+                  <div className="bg-white rounded-2xl p-6 border border-gray-100">
+                    <p className="text-sm text-gray-500 mb-4 text-center">Sua fase atual</p>
+                    <div className="relative">
+                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${(getTotalScore() / 63) * 100}%` }}
+                          transition={{ delay: 0.3, duration: 0.6 }}
+                          className="h-full rounded-full"
+                          style={{ backgroundColor: config.cor }}
+                        />
+                      </div>
+                      <div className="flex justify-between mt-3 text-xs">
+                        <span className={nivel === "desbravadora" ? "text-[#b8975a] font-medium" : "text-gray-400"}>Desbravadora</span>
+                        <span className={nivel === "estrategista" ? "text-[#6b2fa8] font-medium" : "text-gray-400"}>Estrategista</span>
+                        <span className={nivel === "rainha" ? "text-[#2d2d2d] font-medium" : "text-gray-400"}>Rainha</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+          </motion.div>
         )}
 
         {/* ═══════════════════════════════════════════════════════════════
