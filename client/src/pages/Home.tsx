@@ -1,21 +1,20 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
 
-// Modal Component - Cinematográfico
+// Modal Component - Elegante e silencioso
 function Modal({ isOpen, onClose, children }: { isOpen: boolean; onClose: () => void; children: React.ReactNode }) {
   if (!isOpen) return null;
   
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       <div 
-        className="relative bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in"
+        className="relative bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto animate-fade-in"
         onClick={e => e.stopPropagation()}
       >
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors"
+          className="absolute top-5 right-5 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 transition-colors text-lg"
         >
           ×
         </button>
@@ -26,573 +25,535 @@ function Modal({ isOpen, onClose, children }: { isOpen: boolean; onClose: () => 
 }
 
 export default function Home() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [, navigate] = useLocation();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
-  // Modal states
+  // Modal states - Revelação progressiva
+  const [modalBio, setModalBio] = useState(false);
+  const [modalGargalos, setModalGargalos] = useState(false);
   const [modalDiagnostico, setModalDiagnostico] = useState(false);
-  const [modalMetodo, setModalMetodo] = useState(false);
-  const [modalModulo, setModalModulo] = useState<string | null>(null);
-
-  useEffect(() => {
-    const videoElement = videoRef.current;
-    if (!videoElement) return;
-    videoElement.muted = true;
-    const tryPlay = () => {
-      const promise = videoElement.play();
-      if (promise !== undefined) {
-        promise.catch(() => {});
-      }
-    };
-    tryPlay();
-    const handleClick = () => tryPlay();
-    document.addEventListener('click', handleClick, { once: true, passive: true });
-    return () => document.removeEventListener('click', handleClick);
-  }, []);
+  const [modalPlano, setModalPlano] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
   const premiumStyles = `
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Inter:wght@400;500;600&display=swap');
+    
     :root {
-      --lavanda: #6b2fa8;
-      --lavanda-light: #A36BFF;
-      --dourado: #c9a227;
-      --bg: #fafafa;
+      --roxo-elevare: #6b2fa8;
+      --dourado-fosco: #b8975a;
+      --grafite: #2d2d2d;
+      --off-white: #faf9f7;
     }
-    .hero-gradient { background: linear-gradient(180deg, #f8f6ff 0%, #ffffff 100%); }
-    .card-shadow { box-shadow: 0 2px 12px rgba(0,0,0,0.04); }
-    .card-hover { transition: all 0.3s ease; }
-    .card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(107,47,168,0.12); }
-    .btn-primary { background: var(--lavanda); color: white; }
-    .btn-secondary { background: transparent; border: 1.5px solid var(--lavanda); color: var(--lavanda); }
-    .btn-gold { background: linear-gradient(135deg, #c9a227 0%, #e6c65c 100%); color: white; }
-    .animate-fade-in { animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-    .text-balance { text-wrap: balance; }
+    
+    .font-serif { font-family: 'Libre Baskerville', Georgia, serif; }
+    .font-sans { font-family: 'Inter', -apple-system, sans-serif; }
+    
+    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { 
+      from { opacity: 0; transform: translateY(8px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    .animate-fade-up { animation: fadeUp 0.6s ease-out; }
+    @keyframes fadeUp { 
+      from { opacity: 0; transform: translateY(20px); } 
+      to { opacity: 1; transform: translateY(0); } 
+    }
+    
+    .card-elegant {
+      transition: all 0.3s ease;
+    }
+    .card-elegant:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
   `;
-
-  const modulos = [
-    {
-      id: 'radar',
-      titulo: 'Radar de Bio',
-      subtitulo: 'Diagnóstico de posicionamento',
-      descricao: 'Análise profunda do seu Instagram com inteligência artificial especializada em estética.',
-      modalContent: {
-        headline: 'Descubra onde você está perdendo clientes',
-        corpo: 'A IA escaneia seu perfil como um especialista em neurovendas e revela exatamente onde você está deixando dinheiro na mesa. Sem achismo. Com dados.',
-        beneficios: ['Análise de bio e posicionamento', 'Score de autoridade digital', 'Plano de correção personalizado', 'Identificação de pontos cegos']
-      }
-    },
-    {
-      id: 'posts',
-      titulo: 'Produção de Conteúdo',
-      subtitulo: 'Posts estratégicos com IA',
-      descricao: 'Conteúdos prontos que posicionam você como referência, sem depender de inspiração.',
-      modalContent: {
-        headline: 'Conteúdo com método, não improviso',
-        corpo: 'Posts criados com técnica de neurovendas, alinhados à sua estratégia de posicionamento. Legendas que convertem, não que só engajam.',
-        beneficios: ['Carrosséis de autoridade', 'Legendas que vendem', 'Calendário estratégico', 'Visual premium']
-      }
-    },
-    {
-      id: 'ebooks',
-      titulo: 'E-books com IA',
-      subtitulo: 'Autoridade em formato premium',
-      descricao: 'Transforme conhecimento em material estratégico para captação de clientes qualificadas.',
-      modalContent: {
-        headline: 'Sua autoridade em formato tangível',
-        corpo: 'E-books profissionais gerados automaticamente. Capa, conteúdo estruturado e até audiobook. Material que posiciona você como especialista.',
-        beneficios: ['Geração automática de conteúdo', 'Capas profissionais', 'Audiobook incluso', 'Lead magnet pronto']
-      }
-    },
-    {
-      id: 'reels',
-      titulo: 'Roteiros de Reels',
-      subtitulo: 'Vídeos que convertem',
-      descricao: 'Scripts prontos para gravar. Sem pensar no que falar. Você só executa.',
-      modalContent: {
-        headline: 'Pare de improvisar na câmera',
-        corpo: 'Roteiros estruturados com ganchos de atenção, desenvolvimento e chamada para ação. Técnicas de retenção aplicadas automaticamente.',
-        beneficios: ['Roteiros com gancho validado', 'Estrutura de retenção', 'CTA que converte', 'Adaptados ao seu nicho']
-      }
-    },
-    {
-      id: 'anuncios',
-      titulo: 'Anúncios Estratégicos',
-      subtitulo: 'Tráfego qualificado',
-      descricao: 'Campanhas que atraem quem paga, não quem só pergunta preço.',
-      modalContent: {
-        headline: 'Invista em quem tem perfil de cliente',
-        corpo: 'Anúncios criados com copy de alta conversão. Segmentação estratégica. Resultados mensuráveis. Sem queimar dinheiro com curiosas.',
-        beneficios: ['Copy de alta conversão', 'Segmentação premium', 'Criativos testados', 'ROI mensurável']
-      }
-    },
-    {
-      id: 'fluxo',
-      titulo: 'Fluxo de Clientes',
-      subtitulo: 'CRM inteligente',
-      descricao: 'Organize cada lead do primeiro contato ao fechamento. Nunca mais perca uma venda.',
-      modalContent: {
-        headline: 'Nenhuma oportunidade esquecida',
-        corpo: 'Sistema de acompanhamento automático. Cliente sumiu? Você é lembrada. Orçamento enviado? Acompanhamento automático. Pipeline visual.',
-        beneficios: ['Pipeline de vendas visual', 'Follow-up automático', 'Histórico de conversas', 'Métricas de conversão']
-      }
-    }
-  ];
 
   return (
     <>
       <style>{premiumStyles}</style>
       
-      {/* Header Premium - Minimalista */}
-      <header className="fixed top-0 left-0 right-0 backdrop-blur-md bg-white/90 z-[100] border-b border-gray-100">
-        <nav className="max-w-6xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[var(--lavanda)] text-white flex items-center justify-center font-semibold text-sm">E</div>
-            <span className="font-semibold text-gray-900 tracking-tight">Elevare</span>
+      {/* Header - Minimalista */}
+      <header className="fixed top-0 left-0 right-0 backdrop-blur-md bg-[var(--off-white)]/95 z-[100] border-b border-gray-100">
+        <nav className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[var(--roxo-elevare)] text-white flex items-center justify-center font-semibold text-sm">L</div>
+            <span className="font-semibold text-[var(--grafite)] tracking-tight">LucresIA</span>
           </div>
 
-          <div className="hidden md:flex items-center gap-10">
-            <a href="#metodo" className="text-sm text-gray-600 hover:text-[var(--lavanda)] transition-colors">Método</a>
-            <a href="#modulos" className="text-sm text-gray-600 hover:text-[var(--lavanda)] transition-colors">Módulos</a>
-            <a href="#planos" className="text-sm text-gray-600 hover:text-[var(--lavanda)] transition-colors">Planos</a>
-            <a href="#mentora" className="text-sm text-gray-600 hover:text-[var(--lavanda)] transition-colors">Mentora</a>
+          <div className="hidden md:flex items-center gap-4">
+            <button onClick={() => navigate('/login')} className="px-4 py-2 text-sm text-gray-500 hover:text-[var(--grafite)] transition-colors">
+              Entrar
+            </button>
+            <button onClick={() => navigate('/diagnostico')} className="px-5 py-2.5 rounded-lg bg-[var(--grafite)] text-white text-sm font-medium hover:bg-gray-800 transition-colors">
+              Diagnóstico
+            </button>
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
-            <button onClick={() => navigate('/login')} className="px-4 py-2 text-sm text-gray-600 hover:text-[var(--lavanda)] transition-colors">Entrar</button>
-            <button onClick={() => navigate('/register')} className="px-5 py-2.5 rounded-lg btn-primary text-sm font-medium hover:opacity-90 transition-opacity">Começar</button>
-          </div>
-
-          <button onClick={toggleMenu} className="md:hidden p-2 text-gray-600">
-            {isMenuOpen ? '✕' : '☰'}
+          <button onClick={toggleMenu} className="md:hidden p-2 text-gray-500">
+            {isMenuOpen ? '×' : '≡'}
           </button>
 
           {isMenuOpen && (
             <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-100 shadow-lg md:hidden p-6 space-y-4">
-              <a href="#metodo" onClick={closeMenu} className="block text-gray-600 py-2">Método</a>
-              <a href="#modulos" onClick={closeMenu} className="block text-gray-600 py-2">Módulos</a>
-              <a href="#planos" onClick={closeMenu} className="block text-gray-600 py-2">Planos</a>
-              <a href="#mentora" onClick={closeMenu} className="block text-gray-600 py-2">Mentora</a>
-              <hr className="border-gray-100" />
               <button onClick={() => { closeMenu(); navigate('/login'); }} className="w-full text-left text-gray-600 py-2">Entrar</button>
-              <button onClick={() => { closeMenu(); navigate('/register'); }} className="w-full py-3 rounded-lg btn-primary text-sm font-medium">Começar</button>
+              <button onClick={() => { closeMenu(); navigate('/diagnostico'); }} className="w-full py-3 rounded-lg bg-[var(--grafite)] text-white text-sm font-medium">Diagnóstico</button>
             </div>
           )}
         </nav>
       </header>
 
-      <main className="pt-20">
-        {/* Hero - Clean & Premium */}
-        <section className="hero-gradient min-h-[85vh] flex items-center">
-          <div className="max-w-4xl mx-auto px-6 py-24 text-center">
-            <p className="text-sm font-medium text-[var(--lavanda)] tracking-wide uppercase mb-6">Centro de Comando para Clínicas de Estética</p>
+      <main className="pt-20 bg-[var(--off-white)] font-sans">
+        
+        {/* ═══════════════════════════════════════════════════════════════
+            DOBRA 1 — HERO
+        ═══════════════════════════════════════════════════════════════ */}
+        <section className="min-h-[85vh] flex items-center">
+          <div className="max-w-3xl mx-auto px-6 py-24 text-center animate-fade-up">
             
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight text-balance">
-              Transforme sua clínica em uma operação previsível
+            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-[var(--grafite)] leading-[1.15] tracking-tight">
+              Transforme sua clínica em uma operação previsível e lucrativa.
             </h1>
 
-            <p className="mt-8 text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-              Inteligência artificial aplicada a estratégia, conteúdo e vendas.<br/>
-              Para quem cansou de improvisar.
+            <p className="mt-8 text-lg md:text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto">
+              Diagnóstico estratégico para clínicas estéticas que querem sair do improviso e escalar com inteligência.
             </p>
 
-            <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="mt-12">
               <button 
                 onClick={() => navigate('/diagnostico')} 
-                className="px-8 py-4 rounded-lg btn-primary font-medium text-base hover:opacity-90 transition-all"
+                className="px-10 py-4 rounded-xl bg-[var(--grafite)] text-white font-medium text-base hover:bg-gray-800 transition-all"
               >
-                Iniciar diagnóstico gratuito
-              </button>
-              <button 
-                onClick={() => setModalDiagnostico(true)} 
-                className="px-8 py-4 rounded-lg btn-secondary font-medium text-base hover:bg-purple-50 transition-all"
-              >
-                Ver como funciona
+                Iniciar Diagnóstico Gratuito
               </button>
             </div>
 
-            <p className="mt-8 text-sm text-gray-400">
-              Mais de 120 clínicas já operam com o método Elevare
+            <p className="mt-5 text-sm text-gray-400">
+              Análise estratégica real. Sem promessas vazias.
             </p>
           </div>
         </section>
 
-        {/* Diagnóstico - Premium Section */}
-        <section id="metodo" className="py-24 bg-white border-t border-gray-100">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                Diagnóstico Estratégico Gratuito
-              </h2>
-              <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-                Avaliação profunda do seu posicionamento atual. Onde você está perdendo dinheiro — e o que precisa mudar.
-              </p>
-              <button 
-                onClick={() => setModalDiagnostico(true)}
-                className="mt-6 text-[var(--lavanda)] font-medium hover:underline"
-              >
-                Ver como funciona →
-              </button>
+        {/* ═══════════════════════════════════════════════════════════════
+            DOBRA 2 — O PROBLEMA (SEM DRAMA)
+        ═══════════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-white">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            
+            <h2 className="font-serif text-3xl md:text-4xl text-[var(--grafite)] leading-tight">
+              Você pode ser excelente tecnicamente<br/>
+              <span className="text-gray-400">e ainda assim estar perdendo dinheiro todos os dias.</span>
+            </h2>
+
+            <p className="mt-10 text-lg text-gray-500 leading-relaxed">
+              O problema raramente é falta de esforço.<br/>
+              É falta de clareza estratégica.
+            </p>
+
+            <div className="mt-14 grid md:grid-cols-3 gap-6 text-left">
+              <div className="p-6 rounded-xl border border-gray-100">
+                <p className="text-gray-400 text-sm mb-2">Padrão comum</p>
+                <p className="text-[var(--grafite)]">Posta sem estratégia</p>
+              </div>
+              <div className="p-6 rounded-xl border border-gray-100">
+                <p className="text-gray-400 text-sm mb-2">Padrão comum</p>
+                <p className="text-[var(--grafite)]">Agenda sem previsibilidade</p>
+              </div>
+              <div className="p-6 rounded-xl border border-gray-100">
+                <p className="text-gray-400 text-sm mb-2">Padrão comum</p>
+                <p className="text-[var(--grafite)]">Cresce sem controle</p>
+              </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-400 mb-6">Operando no improviso</h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start gap-3 text-gray-500">
-                    <span className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs mt-0.5">×</span>
-                    <span>Agenda irregular e imprevisível</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-gray-500">
-                    <span className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs mt-0.5">×</span>
-                    <span>Conteúdo sem estratégia definida</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-gray-500">
-                    <span className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs mt-0.5">×</span>
-                    <span>Decisões baseadas em achismo</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-gray-500">
-                    <span className="w-5 h-5 rounded-full bg-gray-200 flex items-center justify-center text-xs mt-0.5">×</span>
-                    <span>Dependência de agências genéricas</span>
-                  </li>
-                </ul>
-              </div>
+            <p className="mt-14 text-lg text-[var(--grafite)] font-medium">
+              A LucresIA existe para corrigir isso.
+            </p>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            DOBRA 3 — O QUE O DIAGNÓSTICO ENTREGA (CARDS + MODALS)
+        ═══════════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-[var(--off-white)]">
+          <div className="max-w-4xl mx-auto px-6">
+            
+            <div className="text-center mb-16">
+              <p className="text-sm text-gray-400 uppercase tracking-wide mb-4">Etapas do Diagnóstico</p>
+              <h2 className="font-serif text-3xl md:text-4xl text-[var(--grafite)]">
+                O que você vai descobrir
+              </h2>
+            </div>
+
+            <div className="space-y-4">
               
-              <div className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-8 border border-purple-100">
-                <h3 className="text-lg font-semibold text-[var(--lavanda)] mb-6">Com o método Elevare</h3>
-                <ul className="space-y-4">
-                  <li className="flex items-start gap-3 text-gray-700">
-                    <span className="w-5 h-5 rounded-full bg-[var(--lavanda)] flex items-center justify-center text-xs text-white mt-0.5">✓</span>
-                    <span>Visão clara de onde vem o faturamento</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-gray-700">
-                    <span className="w-5 h-5 rounded-full bg-[var(--lavanda)] flex items-center justify-center text-xs text-white mt-0.5">✓</span>
-                    <span>Conteúdo com método e propósito</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-gray-700">
-                    <span className="w-5 h-5 rounded-full bg-[var(--lavanda)] flex items-center justify-center text-xs text-white mt-0.5">✓</span>
-                    <span>Decisões baseadas em diagnóstico</span>
-                  </li>
-                  <li className="flex items-start gap-3 text-gray-700">
-                    <span className="w-5 h-5 rounded-full bg-[var(--lavanda)] flex items-center justify-center text-xs text-white mt-0.5">✓</span>
-                    <span>Autonomia estratégica total</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Módulos - Clean Cards with Modal */}
-        <section id="modulos" className="py-24 bg-[#fafafa]">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                O que você ativa
-              </h2>
-              <p className="mt-4 text-lg text-gray-600">
-                Ferramentas estratégicas para clínicas que pensam como empresa.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {modulos.map((modulo) => (
-                <div 
-                  key={modulo.id}
-                  className="bg-white rounded-xl p-8 border border-gray-100 card-hover cursor-pointer"
-                  onClick={() => setModalModulo(modulo.id)}
-                >
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">{modulo.titulo}</h3>
-                  <p className="text-sm text-[var(--lavanda)] font-medium mb-4">{modulo.subtitulo}</p>
-                  <p className="text-gray-600 text-sm leading-relaxed">{modulo.descricao}</p>
-                  <button className="mt-6 text-sm text-[var(--lavanda)] font-medium hover:underline">
-                    Ver detalhes →
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Planos - Premium */}
-        <section id="planos" className="py-24 bg-white">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                Planos
-              </h2>
-              <p className="mt-4 text-lg text-gray-600">
-                Escolha o nível de maturidade do seu negócio.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-              {/* Start */}
-              <div className="bg-white rounded-2xl p-8 border border-gray-200">
-                <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Start</p>
-                <h3 className="mt-2 text-2xl font-bold text-gray-900">Clínica Visível</h3>
-                <p className="mt-4 text-4xl font-bold text-gray-900">R$ 57<span className="text-lg font-normal text-gray-500">/mês</span></p>
-                <p className="mt-4 text-gray-600">Para quem está construindo presença e autoridade.</p>
-                
-                <ul className="mt-8 space-y-3">
-                  <li className="flex items-center gap-3 text-gray-700 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">✓</span>
-                    Radar de Bio
-                  </li>
-                  <li className="flex items-center gap-3 text-gray-700 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">✓</span>
-                    Produção de Conteúdo
-                  </li>
-                  <li className="flex items-center gap-3 text-gray-700 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">✓</span>
-                    E-books com IA
-                  </li>
-                  <li className="flex items-center gap-3 text-gray-700 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-xs">✓</span>
-                    Diagnóstico de Posicionamento
-                  </li>
-                </ul>
-
-                <button 
-                  onClick={() => navigate('/register')}
-                  className="mt-8 w-full py-4 rounded-lg btn-secondary font-medium hover:bg-purple-50 transition-all"
-                >
-                  Começar agora
-                </button>
-              </div>
-
-              {/* Pro */}
-              <div className="bg-gradient-to-br from-[var(--lavanda)] to-purple-700 rounded-2xl p-8 text-white relative overflow-hidden">
-                <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-white/20 text-xs font-medium">
-                  Mais escolhido
-                </div>
-                <p className="text-sm font-medium text-purple-200 uppercase tracking-wide">Pro</p>
-                <h3 className="mt-2 text-2xl font-bold">Clínica Desejada</h3>
-                <p className="mt-4 text-4xl font-bold">R$ 97<span className="text-lg font-normal text-purple-200">/mês</span></p>
-                <p className="mt-4 text-purple-100">Para quem quer previsibilidade e escala.</p>
-                
-                <ul className="mt-8 space-y-3">
-                  <li className="flex items-center gap-3 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>
-                    Tudo do Start, mais:
-                  </li>
-                  <li className="flex items-center gap-3 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>
-                    Roteiros de Reels
-                  </li>
-                  <li className="flex items-center gap-3 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>
-                    Anúncios Estratégicos
-                  </li>
-                  <li className="flex items-center gap-3 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>
-                    Fluxo de Clientes (CRM)
-                  </li>
-                  <li className="flex items-center gap-3 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>
-                    Agenda e Calendário Estratégico
-                  </li>
-                  <li className="flex items-center gap-3 text-sm">
-                    <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-xs">✓</span>
-                    Suporte prioritário
-                  </li>
-                </ul>
-
-                <button 
-                  onClick={() => navigate('/register')}
-                  className="mt-8 w-full py-4 rounded-lg bg-white text-[var(--lavanda)] font-semibold hover:bg-gray-100 transition-all"
-                >
-                  Ativar centro de comando
-                </button>
-              </div>
-            </div>
-
-            <p className="mt-12 text-center text-sm text-gray-500">
-              Não sabe por onde começar? <button onClick={() => navigate('/diagnostico')} className="text-[var(--lavanda)] hover:underline">Faça o diagnóstico gratuito</button>
-            </p>
-          </div>
-        </section>
-
-        {/* Depoimentos - Clean */}
-        <section className="py-24 bg-[#fafafa]">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                Resultados reais
-              </h2>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                { nome: 'Sherlayne Galvane', local: 'Vila Velha, ES', foto: '/sherlayne-galvane.jpg', depoimento: 'O Radar de Bio mudou meu perfil em um dia. Comecei a receber clientes qualificadas na mesma semana.' },
-                { nome: 'Marta Amorin', local: 'Vitória, ES', foto: '/marta-amorin.jpg', depoimento: 'Com os e-books da IA, virei referência na minha cidade. Clientes chegam já confiando em mim.' },
-                { nome: 'Geisy Dias', local: 'Teixeira de Freitas, BA', foto: '/geisy-dias.jpg', depoimento: 'Minha agenda nunca mais ficou vazia. O fluxo de clientes mudou completamente.' }
-              ].map((dep, i) => (
-                <div key={i} className="bg-white rounded-xl p-8 border border-gray-100">
-                  <blockquote className="text-gray-700 leading-relaxed">"{dep.depoimento}"</blockquote>
-                  <div className="mt-6 flex items-center gap-4">
-                    <img src={dep.foto} alt={dep.nome} className="w-12 h-12 rounded-full object-cover" />
-                    <div>
-                      <p className="font-semibold text-gray-900">{dep.nome}</p>
-                      <p className="text-sm text-gray-500">{dep.local}</p>
+              {/* Card 1 - Análise da Bio */}
+              <div 
+                className="bg-white rounded-xl border border-gray-100 p-8 card-elegant cursor-pointer"
+                onClick={() => setModalBio(true)}
+              >
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-sm text-gray-500">1</span>
+                      <h3 className="font-semibold text-[var(--grafite)] text-lg">Análise Estratégica da Bio</h3>
                     </div>
+                    <p className="text-gray-500 leading-relaxed">
+                      Avaliação da estética, clareza e comunicação do seu Instagram para identificar se seu perfil constrói autoridade e gera intenção real de agendamento.
+                    </p>
+                    <button className="mt-4 text-sm text-[var(--roxo-elevare)] font-medium hover:underline">
+                      Ver análise detalhada da bio →
+                    </button>
+                    <p className="mt-2 text-xs text-gray-400">Leva menos de 2 minutos.</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Mentora - Elegante */}
-        <section id="mentora" className="py-24 bg-white">
-          <div className="max-w-5xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="relative">
-                <img 
-                  src="/carine-marques.jpg" 
-                  alt="Carine Marques" 
-                  className="rounded-2xl shadow-lg w-full object-cover h-[500px]"
-                />
               </div>
 
-              <div>
-                <p className="text-sm font-medium text-[var(--lavanda)] uppercase tracking-wide">Quem está por trás</p>
-                <h2 className="mt-2 text-3xl font-bold text-gray-900">Carine Marques</h2>
-                <p className="text-lg text-gray-500">Mentora e criadora do método Elevare</p>
-
-                <blockquote className="mt-8 text-gray-600 leading-relaxed border-l-2 border-[var(--dourado)] pl-6 italic">
-                  "Não sou administradora por formação. Sou esteticista por paixão. Mas precisei me tornar líder, gestora e estrategista — mesmo sem estar preparada. Hoje, transformo essa vivência em caminho: para te mostrar o que ninguém nunca te ensinou."
-                </blockquote>
-
-                <p className="mt-8 text-gray-600 leading-relaxed">
-                  Carine desenvolveu um método que combina técnica, estratégia e inteligência emocional. Para quem quer parar de improvisar e começar a operar como empresa.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ - Clean */}
-        <section className="py-24 bg-[#fafafa]">
-          <div className="max-w-3xl mx-auto px-6">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Perguntas frequentes</h2>
-            
-            <div className="space-y-4">
-              {[
-                { q: 'O que é o método Elevare?', a: 'Um sistema completo que usa IA para automatizar estratégia, conteúdo e vendas para clínicas de estética. Desenvolvido por quem conhece a rotina do mercado.' },
-                { q: 'Como funciona o Radar de Bio?', a: 'Você insere seu @ do Instagram e a IA analisa seu posicionamento, identificando pontos de melhoria para aumentar conversão e autoridade.' },
-                { q: 'A IA cria o conteúdo completo?', a: 'Sim. Posts, legendas, e-books, roteiros de vídeo e anúncios. Tudo alinhado à sua estratégia de posicionamento.' },
-                { q: 'Posso testar antes de assinar?', a: 'Sim. O diagnóstico Radar de Bio é gratuito. Você pode avaliar a qualidade antes de decidir.' }
-              ].map((faq, i) => (
-                <details key={i} className="bg-white rounded-lg border border-gray-100 group">
-                  <summary className="p-6 font-medium text-gray-900 cursor-pointer list-none flex justify-between items-center">
-                    {faq.q}
-                    <span className="text-gray-400 transition-transform group-open:rotate-180">↓</span>
-                  </summary>
-                  <p className="px-6 pb-6 text-gray-600">{faq.a}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Final - Clean */}
-        <section className="py-24 bg-white border-t border-gray-100">
-          <div className="max-w-3xl mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Pronta para parar de improvisar?
-            </h2>
-            <p className="mt-6 text-lg text-gray-600">
-              Comece pelo diagnóstico gratuito ou ative seu centro de comando agora.
-            </p>
-            
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button 
-                onClick={() => navigate('/register')} 
-                className="px-8 py-4 rounded-lg btn-primary font-medium hover:opacity-90 transition-all"
+              {/* Card 2 - Pontos Invisíveis */}
+              <div 
+                className="bg-white rounded-xl border border-gray-100 p-8 card-elegant cursor-pointer"
+                onClick={() => setModalGargalos(true)}
               >
-                Ativar centro de comando
-              </button>
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-sm text-gray-500">2</span>
+                      <h3 className="font-semibold text-[var(--grafite)] text-lg">Pontos Invisíveis</h3>
+                    </div>
+                    <p className="text-gray-500 leading-relaxed">
+                      Mapeamento dos fatores ocultos que silenciosamente travam seus agendamentos, mesmo quando você posta, atende bem e se esforça.
+                    </p>
+                    <button className="mt-4 text-sm text-[var(--roxo-elevare)] font-medium hover:underline">
+                      Revelar gargalos ocultos →
+                    </button>
+                    <p className="mt-2 text-xs text-gray-400">Análise baseada no seu momento atual.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3 - Diagnóstico Completo */}
+              <div 
+                className="bg-white rounded-xl border border-gray-100 p-8 card-elegant cursor-pointer"
+                onClick={() => setModalDiagnostico(true)}
+              >
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-sm text-gray-500">3</span>
+                      <h3 className="font-semibold text-[var(--grafite)] text-lg">Diagnóstico de Autoridade, Desejo e Conversão</h3>
+                    </div>
+                    <p className="text-gray-500 leading-relaxed">
+                      Avaliação de como sua clínica é percebida hoje e como isso impacta diretamente sua capacidade de cobrar, escalar e prever faturamento.
+                    </p>
+                    <button className="mt-4 text-sm text-[var(--roxo-elevare)] font-medium hover:underline">
+                      Ver diagnóstico completo →
+                    </button>
+                    <p className="mt-2 text-xs text-gray-400">Clareza antes da decisão.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 4 - Plano de Correção */}
+              <div 
+                className="bg-white rounded-xl border border-gray-100 p-8 card-elegant cursor-pointer"
+                onClick={() => setModalPlano(true)}
+              >
+                <div className="flex items-start justify-between gap-6">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-sm text-gray-500">4</span>
+                      <h3 className="font-semibold text-[var(--grafite)] text-lg">Plano de Correção Estratégico</h3>
+                    </div>
+                    <p className="text-gray-500 leading-relaxed">
+                      Direcionamento claro e personalizado para corrigir posicionamento, comunicação e estrutura de conversão.
+                    </p>
+                    <p className="mt-3 text-gray-400 text-sm">
+                      Nada genérico. Nada automático.
+                    </p>
+                    <button className="mt-4 text-sm text-[var(--roxo-elevare)] font-medium hover:underline">
+                      Ver plano recomendado para mim →
+                    </button>
+                    <p className="mt-2 text-xs text-gray-400">Baseado nas suas respostas.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12 text-center">
               <button 
                 onClick={() => navigate('/diagnostico')} 
-                className="px-8 py-4 rounded-lg btn-secondary font-medium hover:bg-purple-50 transition-all"
+                className="px-10 py-4 rounded-xl bg-[var(--grafite)] text-white font-medium hover:bg-gray-800 transition-all"
               >
-                Diagnóstico gratuito
+                Iniciar Diagnóstico Gratuito
               </button>
             </div>
           </div>
         </section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            DOBRA 4 — POSICIONAMENTO / AUTORIDADE
+        ═══════════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-white">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            
+            <h2 className="font-serif text-3xl md:text-4xl text-[var(--grafite)] leading-tight">
+              A LucresIA não é uma ferramenta genérica.
+            </h2>
+            
+            <p className="mt-6 text-xl text-[var(--roxo-elevare)] font-medium">
+              Ela foi treinada dentro da estética.
+            </p>
+
+            <div className="mt-14 grid md:grid-cols-3 gap-8 text-left">
+              <div className="text-center">
+                <p className="text-gray-400 text-sm mb-2">Aqui</p>
+                <p className="text-[var(--grafite)] text-lg">Imagem é produto.</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-sm mb-2">Aqui</p>
+                <p className="text-[var(--grafite)] text-lg">Confiança é moeda.</p>
+              </div>
+              <div className="text-center">
+                <p className="text-gray-400 text-sm mb-2">Aqui</p>
+                <p className="text-[var(--grafite)] text-lg">Decisão é estratégica.</p>
+              </div>
+            </div>
+
+            <div className="mt-16 p-8 rounded-xl border border-gray-100 bg-[var(--off-white)]">
+              <p className="text-lg text-gray-500">
+                Você não recebe achismo.<br/>
+                <span className="text-[var(--grafite)] font-medium">Recebe clareza.</span>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            DOBRA 5 — CTA FINAL
+        ═══════════════════════════════════════════════════════════════ */}
+        <section className="py-24 bg-[var(--off-white)] border-t border-gray-100">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            
+            <h2 className="font-serif text-3xl md:text-4xl text-[var(--grafite)] leading-tight">
+              Pronta para enxergar onde sua clínica realmente está?
+            </h2>
+
+            <p className="mt-8 text-lg text-gray-500 leading-relaxed max-w-xl mx-auto">
+              O diagnóstico gratuito revela o cenário.<br/>
+              A escala vem depois — para quem decide avançar.
+            </p>
+
+            <div className="mt-12">
+              <button 
+                onClick={() => navigate('/diagnostico')} 
+                className="px-10 py-4 rounded-xl bg-[var(--grafite)] text-white font-medium text-base hover:bg-gray-800 transition-all"
+              >
+                Iniciar Diagnóstico Gratuito
+              </button>
+            </div>
+
+            <p className="mt-6 text-sm text-gray-400">
+              A execução completa e automações fazem parte dos planos avançados.
+            </p>
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════════════
+            FRASE-CHAVE (RODAPÉ DA LANDING)
+        ═══════════════════════════════════════════════════════════════ */}
+        <section className="py-16 bg-white border-t border-gray-100">
+          <div className="max-w-3xl mx-auto px-6 text-center">
+            <p className="font-serif text-xl text-gray-400 italic">
+              "Clareza vem antes da escala.<br/>
+              A LucresIA apenas revela o caminho."
+            </p>
+          </div>
+        </section>
+
       </main>
 
       {/* Footer - Minimal */}
-      <footer className="bg-gray-50 py-12 border-t border-gray-100">
-        <div className="max-w-6xl mx-auto px-6 text-center text-sm text-gray-500">
-          © 2025 Elevare · Centro de Comando para Clínicas de Estética · carinefisio@hotmail.com
+      <footer className="bg-[var(--off-white)] py-10 border-t border-gray-100">
+        <div className="max-w-5xl mx-auto px-6 text-center text-sm text-gray-400">
+          © 2025 LucresIA · Diagnóstico Estratégico para Clínicas de Estética
         </div>
       </footer>
 
-      {/* Modal: Diagnóstico */}
-      <Modal isOpen={modalDiagnostico} onClose={() => setModalDiagnostico(false)}>
+      {/* ═══════════════════════════════════════════════════════════════
+          MODAIS — REVELAÇÃO PROGRESSIVA
+      ═══════════════════════════════════════════════════════════════ */}
+      
+      {/* Modal: Análise da Bio */}
+      <Modal isOpen={modalBio} onClose={() => setModalBio(false)}>
         <div className="p-10">
-          <h3 className="text-2xl font-bold text-gray-900">Diagnóstico Estratégico</h3>
-          <p className="mt-4 text-gray-600 leading-relaxed">
-            Se sua clínica não agenda como poderia, o problema não é o mercado. É estratégia mal aplicada.
+          <p className="text-sm text-gray-400 uppercase tracking-wide mb-2">Etapa 1 de 4</p>
+          <h3 className="font-serif text-2xl text-[var(--grafite)]">Análise Estratégica da Bio</h3>
+          
+          <p className="mt-6 text-gray-500 leading-relaxed">
+            Sua bio é o primeiro filtro de decisão de uma paciente.
+            Em poucos segundos, ela decide se confia, se valoriza — ou se ignora.
           </p>
-          <p className="mt-4 text-gray-600 leading-relaxed">
-            O Radar de Bio é uma análise profunda feita por IA especializada em estética. Em minutos, você descobre:
+
+          <div className="mt-8">
+            <p className="text-sm text-gray-400 mb-4">A LucresIA analisa:</p>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--roxo-elevare)] mt-2 flex-shrink-0"></span>
+                Clareza da sua proposta
+              </li>
+              <li className="flex items-start gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--roxo-elevare)] mt-2 flex-shrink-0"></span>
+                Linguagem estética e persuasiva
+              </li>
+              <li className="flex items-start gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--roxo-elevare)] mt-2 flex-shrink-0"></span>
+                Coerência entre imagem e posicionamento
+              </li>
+              <li className="flex items-start gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--roxo-elevare)] mt-2 flex-shrink-0"></span>
+                Chamada para ação e fluxo de contato
+              </li>
+            </ul>
+          </div>
+
+          <p className="mt-8 text-gray-600 border-l-2 border-[var(--dourado-fosco)] pl-4 italic">
+            Você descobre se seu perfil convida para agendar — ou se apenas existe.
           </p>
-          <ul className="mt-6 space-y-3">
-            <li className="flex items-center gap-3 text-gray-700">
-              <span className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs text-[var(--lavanda)]">1</span>
-              Onde você está perdendo autoridade no Instagram
-            </li>
-            <li className="flex items-center gap-3 text-gray-700">
-              <span className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs text-[var(--lavanda)]">2</span>
-              O que está travando seus agendamentos
-            </li>
-            <li className="flex items-center gap-3 text-gray-700">
-              <span className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-xs text-[var(--lavanda)]">3</span>
-              Plano de correção personalizado
-            </li>
-          </ul>
+          
           <button 
-            onClick={() => { setModalDiagnostico(false); navigate('/diagnostico'); }}
-            className="mt-10 w-full py-4 rounded-lg btn-primary font-medium"
+            onClick={() => { setModalBio(false); navigate('/diagnostico'); }}
+            className="mt-10 w-full py-4 rounded-xl bg-[var(--grafite)] text-white font-medium hover:bg-gray-800 transition-all"
           >
-            Iniciar diagnóstico gratuito
+            Iniciar Análise da Bio
           </button>
         </div>
       </Modal>
 
-      {/* Modal: Módulos */}
-      {modulos.map((modulo) => (
-        <Modal key={modulo.id} isOpen={modalModulo === modulo.id} onClose={() => setModalModulo(null)}>
-          <div className="p-10">
-            <p className="text-sm font-medium text-[var(--lavanda)] uppercase tracking-wide">{modulo.subtitulo}</p>
-            <h3 className="mt-2 text-2xl font-bold text-gray-900">{modulo.modalContent.headline}</h3>
-            <p className="mt-4 text-gray-600 leading-relaxed">{modulo.modalContent.corpo}</p>
-            
-            <ul className="mt-8 space-y-3">
-              {modulo.modalContent.beneficios.map((b, i) => (
-                <li key={i} className="flex items-center gap-3 text-gray-700">
-                  <span className="w-5 h-5 rounded-full bg-purple-100 flex items-center justify-center text-xs text-[var(--lavanda)]">✓</span>
-                  {b}
-                </li>
-              ))}
+      {/* Modal: Pontos Invisíveis */}
+      <Modal isOpen={modalGargalos} onClose={() => setModalGargalos(false)}>
+        <div className="p-10">
+          <p className="text-sm text-gray-400 uppercase tracking-wide mb-2">Etapa 2 de 4</p>
+          <h3 className="font-serif text-2xl text-[var(--grafite)]">Pontos Invisíveis</h3>
+          
+          <p className="mt-6 text-gray-500 leading-relaxed">
+            Existem falhas que você não vê — mas que suas clientes sentem.
+            São os gargalos silenciosos que drenam seu faturamento enquanto você trabalha cada vez mais.
+          </p>
+
+          <div className="mt-8">
+            <p className="text-sm text-gray-400 mb-4">Identificamos:</p>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--roxo-elevare)] mt-2 flex-shrink-0"></span>
+                Onde a jornada da cliente trava
+              </li>
+              <li className="flex items-start gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--roxo-elevare)] mt-2 flex-shrink-0"></span>
+                Por que orçamentos não fecham
+              </li>
+              <li className="flex items-start gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--roxo-elevare)] mt-2 flex-shrink-0"></span>
+                O que afasta clientes de alto valor
+              </li>
+              <li className="flex items-start gap-3 text-gray-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--roxo-elevare)] mt-2 flex-shrink-0"></span>
+                Padrões que sabotam sem você perceber
+              </li>
             </ul>
-            
-            <button 
-              onClick={() => { setModalModulo(null); navigate('/register'); }}
-              className="mt-10 w-full py-4 rounded-lg btn-primary font-medium"
-            >
-              Ativar este módulo
-            </button>
           </div>
-        </Modal>
-      ))}
+
+          <p className="mt-8 text-gray-600 border-l-2 border-[var(--dourado-fosco)] pl-4 italic">
+            Nomear a dor é o primeiro passo para resolver.
+          </p>
+          
+          <button 
+            onClick={() => { setModalGargalos(false); navigate('/diagnostico'); }}
+            className="mt-10 w-full py-4 rounded-xl bg-[var(--grafite)] text-white font-medium hover:bg-gray-800 transition-all"
+          >
+            Revelar Meus Gargalos
+          </button>
+        </div>
+      </Modal>
+
+      {/* Modal: Diagnóstico Completo */}
+      <Modal isOpen={modalDiagnostico} onClose={() => setModalDiagnostico(false)}>
+        <div className="p-10">
+          <p className="text-sm text-gray-400 uppercase tracking-wide mb-2">Etapa 3 de 4</p>
+          <h3 className="font-serif text-2xl text-[var(--grafite)]">Diagnóstico de Autoridade, Desejo e Conversão</h3>
+          
+          <p className="mt-6 text-gray-500 leading-relaxed">
+            Como sua clínica é percebida hoje?
+            Técnica comum, especialista respeitada ou referência premium?
+          </p>
+
+          <p className="mt-4 text-gray-500 leading-relaxed">
+            Essa percepção define quanto você pode cobrar, quantas clientes fecham sem negociar, e se você atrai quem valoriza ou quem só pergunta preço.
+          </p>
+
+          <div className="mt-8 p-6 rounded-xl bg-gray-50">
+            <p className="text-sm text-gray-400 mb-3">O diagnóstico revela:</p>
+            <ul className="space-y-2 text-gray-600 text-sm">
+              <li>• Seu nível de autoridade percebida</li>
+              <li>• O quanto seu conteúdo gera desejo real</li>
+              <li>• Onde está o vazamento de conversão</li>
+            </ul>
+          </div>
+
+          <p className="mt-8 text-gray-600 border-l-2 border-[var(--dourado-fosco)] pl-4 italic">
+            Aqui você aceita ser avaliada. É o ponto de virada.
+          </p>
+          
+          <button 
+            onClick={() => { setModalDiagnostico(false); navigate('/diagnostico'); }}
+            className="mt-10 w-full py-4 rounded-xl bg-[var(--grafite)] text-white font-medium hover:bg-gray-800 transition-all"
+          >
+            Ver Meu Diagnóstico
+          </button>
+        </div>
+      </Modal>
+
+      {/* Modal: Plano de Correção */}
+      <Modal isOpen={modalPlano} onClose={() => setModalPlano(false)}>
+        <div className="p-10">
+          <p className="text-sm text-gray-400 uppercase tracking-wide mb-2">Etapa 4 de 4</p>
+          <h3 className="font-serif text-2xl text-[var(--grafite)]">Plano de Correção Estratégico</h3>
+          
+          <p className="mt-6 text-gray-500 leading-relaxed">
+            Com base nas suas respostas, este plano mostra o que ajustar agora para melhorar autoridade, desejo e conversão na sua clínica.
+          </p>
+
+          <div className="mt-8 space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-500">✓</span>
+              <span className="text-gray-600">Nada genérico.</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-500">✓</span>
+              <span className="text-gray-600">Nada copiado.</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center text-xs text-gray-500">✓</span>
+              <span className="text-gray-600">Aplicável ao seu momento real.</span>
+            </div>
+          </div>
+
+          <p className="mt-8 text-gray-600 border-l-2 border-[var(--dourado-fosco)] pl-4 italic">
+            Aqui você não recebe promessas. Recebe direção.
+          </p>
+
+          <p className="mt-6 text-xs text-gray-400">
+            Este é um plano inicial e gratuito. A execução contínua, automações e inteligência evolutiva fazem parte dos planos avançados.
+          </p>
+          
+          <button 
+            onClick={() => { setModalPlano(false); navigate('/diagnostico'); }}
+            className="mt-8 w-full py-4 rounded-xl bg-[var(--grafite)] text-white font-medium hover:bg-gray-800 transition-all"
+          >
+            Ver Meu Plano Personalizado
+          </button>
+        </div>
+      </Modal>
     </>
   );
 }
