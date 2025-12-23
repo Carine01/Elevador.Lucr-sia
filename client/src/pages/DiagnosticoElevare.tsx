@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 
@@ -7,9 +7,9 @@ import { trpc } from "@/lib/trpc";
 // ============================================
 type Etapa = 
   | "intro"
-  | "consciencia"    // Bloco 1 - Consciência empreendedora
-  | "financeiro"     // Bloco 2 - Gestão financeira
-  | "posicionamento" // Bloco 3 - Bio e posicionamento
+  | "consciencia"
+  | "financeiro"
+  | "posicionamento"
   | "resultado"
   | "plano"
   | "feedback";
@@ -20,12 +20,20 @@ interface Scores {
   posicionamento: number;
 }
 
+interface QuizData {
+  answers: Record<string, number>;
+  scores: Scores;
+  currentStep: string;
+  startedAt: string;
+}
+
 // ============================================
 // PERGUNTAS
 // ============================================
 const PERGUNTAS = {
   consciencia: [
     {
+      id: "c1",
       pergunta: "Quando algo precisa ser feito na clínica, sua tendência natural é:",
       opcoes: [
         { texto: "Fazer pessoalmente para garantir o padrão", valor: 1 },
@@ -34,6 +42,7 @@ const PERGUNTAS = {
       ]
     },
     {
+      id: "c2",
       pergunta: "A maior parte do seu dia é consumida por:",
       opcoes: [
         { texto: "Execução técnica e imprevistos", valor: 1 },
@@ -42,6 +51,7 @@ const PERGUNTAS = {
       ]
     },
     {
+      id: "c3",
       pergunta: "Se você tirasse 15 dias de férias hoje, o que aconteceria?",
       opcoes: [
         { texto: "A clínica pararia", valor: 1 },
@@ -52,6 +62,7 @@ const PERGUNTAS = {
   ],
   financeiro: [
     {
+      id: "f1",
       pergunta: "Você sabe exatamente quanto lucrou nos últimos 3 meses?",
       opcoes: [
         { texto: "Não tenho esse controle", valor: 1 },
@@ -60,6 +71,7 @@ const PERGUNTAS = {
       ]
     },
     {
+      id: "f2",
       pergunta: "Seu pró-labore está definido e separado do caixa?",
       opcoes: [
         { texto: "Retiro conforme preciso", valor: 1 },
@@ -68,6 +80,7 @@ const PERGUNTAS = {
       ]
     },
     {
+      id: "f3",
       pergunta: "Se uma cliente cancelar hoje, você sabe o impacto no mês?",
       opcoes: [
         { texto: "Não consigo calcular", valor: 1 },
@@ -78,6 +91,7 @@ const PERGUNTAS = {
   ],
   posicionamento: [
     {
+      id: "p1",
       pergunta: "Quando alguém visita seu perfil, ela entende em 5 segundos o que você faz?",
       opcoes: [
         { texto: "Não tenho certeza", valor: 1 },
@@ -86,6 +100,7 @@ const PERGUNTAS = {
       ]
     },
     {
+      id: "p2",
       pergunta: "Sua bio fala sobre você ou para a cliente certa?",
       opcoes: [
         { texto: "Fala sobre mim e minha formação", valor: 1 },
@@ -94,6 +109,7 @@ const PERGUNTAS = {
       ]
     },
     {
+      id: "p3",
       pergunta: "Suas clientes chegam pelo Instagram já querendo agendar?",
       opcoes: [
         { texto: "Não, só perguntam preço", valor: 1 },
@@ -105,14 +121,31 @@ const PERGUNTAS = {
 };
 
 // ============================================
+// STORAGE KEY
+// ============================================
+const STORAGE_KEY = "elevare_quiz_data";
+
+function getVisitorId(): string {
+  let id = localStorage.getItem("elevare_visitor_id");
+  if (!id) {
+    id = `v_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem("elevare_visitor_id", id);
+  }
+  return id;
+}
+
+// ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
 export default function DiagnosticoElevare() {
   const [, navigate] = useLocation();
   const searchString = useSearch();
+  const containerRef = useRef<HTMLDivElement>(null);
   
+  // Estado principal
   const [etapa, setEtapa] = useState<Etapa>("intro");
   const [perguntaAtual, setPerguntaAtual] = useState(0);
+  const [answers, setAnswers] = useState<Record<string, number>>({});
   const [scores, setScores] = useState<Scores>({
     consciencia: 0,
     financeiro: 0,
@@ -120,30 +153,113 @@ export default function DiagnosticoElevare() {
   });
   const [feedbackRating, setFeedbackRating] = useState(0);
   const [showUnlock, setShowUnlock] = useState(false);
+  const [diagnosticoIA, setDiagnosticoIA] = useState<string | null>(null);
+  const [isLoadingIA, setIsLoadingIA] = useState(false);
+  const [diagnosticoId, setDiagnosticoId] = useState<number | null>(null);
+
+  // Swipe state
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 80;
 
   // Referral tracking
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  
+  // tRPC mutations
+  const submitQuiz = trpc.quiz.submit.useMutation();
+  const gerarDiagnosticoIA = trpc.quiz.gerarDiagnosticoIA.useMutation();
   const trackReferralClick = trpc.gamification.trackReferralClick.useMutation();
 
+  // ============================================
+  // PERSISTÊNCIA LOCAL
+  // ============================================
+  const saveToLocal = useCallback((data: Partial<QuizData>) => {
+    const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+    const updated = { ...existing, ...data };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  }, []);
+
+  const loadFromLocal = useCallback((): QuizData | null => {
+    const data = localStorage.getItem(STORAGE_KEY);
+    return data ? JSON.parse(data) : null;
+  }, []);
+
+  const clearLocal = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEY);
+  }, []);
+
+  // ============================================
+  // INICIALIZAÇÃO
+  // ============================================
   useEffect(() => {
+    // Capturar referral code da URL
     const params = new URLSearchParams(searchString);
     const ref = params.get('ref');
     if (ref) {
       setReferralCode(ref);
       trackReferralClick.mutate({ referralCode: ref });
     }
+
+    // Carregar dados salvos
+    const saved = loadFromLocal();
+    if (saved && saved.startedAt) {
+      // Verificar se não expirou (24h)
+      const startTime = new Date(saved.startedAt).getTime();
+      const now = Date.now();
+      const hoursDiff = (now - startTime) / (1000 * 60 * 60);
+      
+      if (hoursDiff < 24) {
+        setAnswers(saved.answers || {});
+        setScores(saved.scores || { consciencia: 0, financeiro: 0, posicionamento: 0 });
+        // Restaurar etapa se não estava no resultado
+        if (saved.currentStep && saved.currentStep !== "resultado") {
+          setEtapa(saved.currentStep as Etapa);
+        }
+      } else {
+        clearLocal();
+      }
+    }
   }, [searchString]);
+
+  // ============================================
+  // SWIPE HANDLERS (MOBILE)
+  // ============================================
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    // Só funciona durante o quiz
+    if (etapa === "consciencia" || etapa === "financeiro" || etapa === "posicionamento") {
+      const perguntasAtuais = PERGUNTAS[etapa];
+      const pergunta = perguntasAtuais[perguntaAtual];
+      
+      if (isRightSwipe) {
+        // Swipe direita = resposta mais estratégica (valor 3)
+        handleResposta(pergunta.id, 3);
+      } else if (isLeftSwipe) {
+        // Swipe esquerda = resposta mais operacional (valor 1)
+        handleResposta(pergunta.id, 1);
+      }
+    }
+  };
 
   // ============================================
   // CÁLCULOS
   // ============================================
   const getProgresso = () => {
-    let respondidas = 0;
-    if (etapa === "intro") return 0;
-    if (etapa === "consciencia") respondidas = perguntaAtual;
-    else if (etapa === "financeiro") respondidas = 3 + perguntaAtual;
-    else if (etapa === "posicionamento") respondidas = 6 + perguntaAtual;
-    else respondidas = 9;
+    let respondidas = Object.keys(answers).length;
     return Math.round((respondidas / 9) * 100);
   };
 
@@ -166,20 +282,75 @@ export default function DiagnosticoElevare() {
   // ============================================
   // HANDLERS
   // ============================================
-  const handleResposta = (valor: number) => {
+  const handleResposta = async (questionId: string, valor: number) => {
     const blocoAtual = etapa as "consciencia" | "financeiro" | "posicionamento";
-    setScores(prev => ({
-      ...prev,
-      [blocoAtual]: prev[blocoAtual] + valor
-    }));
+    
+    // Atualizar answers
+    const newAnswers = { ...answers, [questionId]: valor };
+    setAnswers(newAnswers);
 
+    // Atualizar score do bloco
+    const newScores = { ...scores };
+    newScores[blocoAtual] = newScores[blocoAtual] + valor;
+    setScores(newScores);
+
+    // Salvar no localStorage
+    saveToLocal({
+      answers: newAnswers,
+      scores: newScores,
+      currentStep: etapa,
+      startedAt: loadFromLocal()?.startedAt || new Date().toISOString(),
+    });
+
+    // Próxima pergunta ou próximo bloco
     if (perguntaAtual < 2) {
       setPerguntaAtual(perguntaAtual + 1);
     } else {
       setPerguntaAtual(0);
-      if (etapa === "consciencia") setEtapa("financeiro");
-      else if (etapa === "financeiro") setEtapa("posicionamento");
-      else setEtapa("resultado");
+      if (etapa === "consciencia") {
+        setEtapa("financeiro");
+        saveToLocal({ currentStep: "financeiro" });
+      } else if (etapa === "financeiro") {
+        setEtapa("posicionamento");
+        saveToLocal({ currentStep: "posicionamento" });
+      } else {
+        // Fim do quiz - submeter para backend
+        await submitQuizToBackend(newAnswers, newScores);
+      }
+    }
+  };
+
+  const submitQuizToBackend = async (finalAnswers: Record<string, number>, finalScores: Scores) => {
+    setIsLoadingIA(true);
+    
+    try {
+      // Submeter quiz
+      const result = await submitQuiz.mutateAsync({
+        answers: finalAnswers,
+        scores: finalScores,
+        visitorId: getVisitorId(),
+        referralCode: referralCode || undefined,
+      });
+
+      setDiagnosticoId(Number(result.diagnosticoId));
+
+      // Gerar diagnóstico com IA
+      const iaResult = await gerarDiagnosticoIA.mutateAsync({
+        answers: finalAnswers,
+        scores: finalScores,
+        diagnosticoId: Number(result.diagnosticoId),
+      });
+
+      setDiagnosticoIA(iaResult.diagnostico);
+      setEtapa("resultado");
+      saveToLocal({ currentStep: "resultado" });
+
+    } catch (error) {
+      console.error("Erro ao submeter quiz:", error);
+      // Fallback: mostrar resultado sem IA
+      setEtapa("resultado");
+    } finally {
+      setIsLoadingIA(false);
     }
   };
 
@@ -188,10 +359,26 @@ export default function DiagnosticoElevare() {
     if (rating >= 4) setShowUnlock(true);
   };
 
+  const handleUnlockAction = (action: "google" | "whatsapp" | "pdf") => {
+    // Limpar dados locais após completar
+    clearLocal();
+    
+    if (action === "google") {
+      window.open("https://g.page/r/lucresia", "_blank");
+    } else if (action === "whatsapp") {
+      const msg = encodeURIComponent(
+        `Fiz um diagnóstico gratuito da minha clínica e me surpreendi. Testa aqui: ${window.location.origin}/diagnostico${referralCode ? `?ref=${referralCode}` : ''}`
+      );
+      window.open(`https://wa.me/?text=${msg}`, "_blank");
+    } else {
+      window.print();
+    }
+  };
+
   // ============================================
-  // TEXTOS DO RESULTADO
+  // RESULTADO ESTÁTICO (FALLBACK)
   // ============================================
-  const getResultado = () => {
+  const getResultadoEstatico = () => {
     const nivel = getNivel();
     const pontoFraco = getPontoFraco();
 
@@ -238,7 +425,13 @@ export default function DiagnosticoElevare() {
                           etapa === "posicionamento" ? PERGUNTAS.posicionamento : [];
 
   return (
-    <div className="min-h-screen bg-[#f8f7f4] flex items-center justify-center">
+    <div 
+      ref={containerRef}
+      className="min-h-screen bg-[#f8f7f4] flex items-center justify-center"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       <div className="w-full max-w-[520px] px-8 py-10">
         
         {/* Barra de progresso fina */}
@@ -263,11 +456,22 @@ export default function DiagnosticoElevare() {
               e onde sua energia está sendo drenada silenciosamente.
             </p>
             <button
-              onClick={() => setEtapa("consciencia")}
+              onClick={() => {
+                setEtapa("consciencia");
+                saveToLocal({ 
+                  currentStep: "consciencia", 
+                  startedAt: new Date().toISOString() 
+                });
+              }}
               className="w-full py-4 bg-[#111827] text-white text-[15px] hover:opacity-90 transition-opacity"
             >
               Iniciar diagnóstico
             </button>
+            
+            {/* Dica de swipe para mobile */}
+            <p className="mt-6 text-center text-[12px] text-[#6b7280]">
+              No celular: deslize para responder rapidamente
+            </p>
           </div>
         )}
 
@@ -291,53 +495,91 @@ export default function DiagnosticoElevare() {
               {perguntasAtuais[perguntaAtual]?.opcoes.map((opcao, index) => (
                 <button
                   key={index}
-                  onClick={() => handleResposta(opcao.valor)}
+                  onClick={() => handleResposta(perguntasAtuais[perguntaAtual].id, opcao.valor)}
                   className="p-4 border border-[#d1d5db] bg-transparent text-left text-[15px] text-[#1f2933] hover:bg-white hover:border-[#111827] transition-all"
                 >
                   {opcao.texto}
                 </button>
               ))}
             </div>
+
+            {/* Indicador de swipe */}
+            <div className="mt-8 flex justify-between text-[11px] text-[#9ca3af]">
+              <span>← Operacional</span>
+              <span>Estratégico →</span>
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════════
+            LOADING IA
+        ═══════════════════════════════════════════════════════════════ */}
+        {isLoadingIA && (
+          <div className="animate-fade-in text-center py-20">
+            <div className="w-12 h-12 mx-auto mb-6 border-2 border-[#111827] border-t-transparent rounded-full animate-spin" />
+            <p className="text-[15px] text-[#6b7280]">
+              Analisando suas respostas...
+            </p>
           </div>
         )}
 
         {/* ═══════════════════════════════════════════════════════════════
             RESULTADO
         ═══════════════════════════════════════════════════════════════ */}
-        {etapa === "resultado" && (
+        {etapa === "resultado" && !isLoadingIA && (
           <div className="animate-fade-in">
-            {(() => {
-              const { momento, insight, nivel, pontoFraco } = getResultado();
-              return (
-                <>
-                  <p className="text-xs text-[#6b7280] mb-4 uppercase tracking-wide">
-                    Leitura inicial concluída
-                  </p>
-                  <h1 className="font-serif text-[26px] font-medium text-[#1f2933] mb-4">
-                    {nivel === "desbravadora" && "Fase Desbravadora"}
-                    {nivel === "estrategista" && "Fase Estrategista"}
-                    {nivel === "rainha" && "Fase Rainha"}
-                  </h1>
-                  <p className="text-[15px] text-[#6b7280] leading-relaxed mb-6">
-                    {momento}
-                  </p>
-                  <div className="p-4 bg-white border border-[#d1d5db] mb-8">
-                    <p className="text-xs text-[#6b7280] mb-2 uppercase tracking-wide">
-                      Ponto de atenção: {pontoFraco.label}
-                    </p>
-                    <p className="text-[15px] text-[#1f2933]">
-                      {insight}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => setEtapa("plano")}
-                    className="w-full py-4 bg-[#111827] text-white text-[15px] hover:opacity-90 transition-opacity"
-                  >
-                    Ver meu plano de correção
-                  </button>
-                </>
-              );
-            })()}
+            {diagnosticoIA ? (
+              // Resultado com IA
+              <>
+                <p className="text-xs text-[#6b7280] mb-4 uppercase tracking-wide">
+                  Leitura inicial concluída
+                </p>
+                <div 
+                  className="prose prose-sm max-w-none mb-8 text-[#1f2933]"
+                  dangerouslySetInnerHTML={{ 
+                    __html: diagnosticoIA
+                      .replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#111827]">$1</strong>')
+                      .replace(/\n/g, '<br />') 
+                  }}
+                />
+              </>
+            ) : (
+              // Resultado estático (fallback)
+              <>
+                {(() => {
+                  const { momento, insight, nivel, pontoFraco } = getResultadoEstatico();
+                  return (
+                    <>
+                      <p className="text-xs text-[#6b7280] mb-4 uppercase tracking-wide">
+                        Leitura inicial concluída
+                      </p>
+                      <h1 className="font-serif text-[26px] font-medium text-[#1f2933] mb-4">
+                        {nivel === "desbravadora" && "Fase Desbravadora"}
+                        {nivel === "estrategista" && "Fase Estrategista"}
+                        {nivel === "rainha" && "Fase Rainha"}
+                      </h1>
+                      <p className="text-[15px] text-[#6b7280] leading-relaxed mb-6">
+                        {momento}
+                      </p>
+                      <div className="p-4 bg-white border border-[#d1d5db] mb-8">
+                        <p className="text-xs text-[#6b7280] mb-2 uppercase tracking-wide">
+                          Ponto de atenção: {pontoFraco.label}
+                        </p>
+                        <p className="text-[15px] text-[#1f2933]">
+                          {insight}
+                        </p>
+                      </div>
+                    </>
+                  );
+                })()}
+              </>
+            )}
+            <button
+              onClick={() => setEtapa("plano")}
+              className="w-full py-4 bg-[#111827] text-white text-[15px] hover:opacity-90 transition-opacity"
+            >
+              Ver meu plano de correção
+            </button>
           </div>
         )}
 
@@ -347,7 +589,7 @@ export default function DiagnosticoElevare() {
         {etapa === "plano" && (
           <div className="animate-fade-in">
             {(() => {
-              const { pontoFraco } = getResultado();
+              const pontoFraco = getPontoFraco();
               return (
                 <>
                   <p className="text-xs text-[#6b7280] mb-4 uppercase tracking-wide">
@@ -358,11 +600,8 @@ export default function DiagnosticoElevare() {
                   </h1>
 
                   <div className="space-y-4 mb-8">
-                    {/* Ação 1 */}
                     <div className="flex gap-4">
-                      <div className="w-6 h-6 border border-[#d1d5db] flex items-center justify-center flex-shrink-0 text-xs text-[#6b7280]">
-                        1
-                      </div>
+                      <div className="w-6 h-6 border border-[#d1d5db] flex items-center justify-center flex-shrink-0 text-xs text-[#6b7280]">1</div>
                       <div>
                         <p className="text-[15px] text-[#1f2933] font-medium mb-1">
                           {pontoFraco.nome === "consciencia" && "Delegue uma tarefa operacional"}
@@ -377,11 +616,8 @@ export default function DiagnosticoElevare() {
                       </div>
                     </div>
 
-                    {/* Ação 2 */}
                     <div className="flex gap-4">
-                      <div className="w-6 h-6 border border-[#d1d5db] flex items-center justify-center flex-shrink-0 text-xs text-[#6b7280]">
-                        2
-                      </div>
+                      <div className="w-6 h-6 border border-[#d1d5db] flex items-center justify-center flex-shrink-0 text-xs text-[#6b7280]">2</div>
                       <div>
                         <p className="text-[15px] text-[#1f2933] font-medium mb-1">
                           {pontoFraco.nome === "consciencia" && "Bloqueie 1h/semana para estratégia"}
@@ -396,11 +632,8 @@ export default function DiagnosticoElevare() {
                       </div>
                     </div>
 
-                    {/* Ação 3 */}
                     <div className="flex gap-4">
-                      <div className="w-6 h-6 border border-[#d1d5db] flex items-center justify-center flex-shrink-0 text-xs text-[#6b7280]">
-                        3
-                      </div>
+                      <div className="w-6 h-6 border border-[#d1d5db] flex items-center justify-center flex-shrink-0 text-xs text-[#6b7280]">3</div>
                       <div>
                         <p className="text-[15px] text-[#1f2933] font-medium mb-1">
                           {pontoFraco.nome === "consciencia" && "Pergunte: isso depende só de mim?"}
@@ -493,30 +726,24 @@ export default function DiagnosticoElevare() {
                 </p>
 
                 <div className="space-y-3 text-left">
-                  <a
-                    href="https://g.page/r/lucresia"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block p-4 border border-[#d1d5db] hover:bg-white hover:border-[#111827] transition-all"
+                  <button
+                    onClick={() => handleUnlockAction("google")}
+                    className="w-full p-4 border border-[#d1d5db] text-left hover:bg-white hover:border-[#111827] transition-all"
                   >
                     <p className="text-[15px] text-[#1f2933] font-medium">Avaliar no Google</p>
                     <p className="text-[14px] text-[#6b7280]">Ajude outras profissionais a encontrar</p>
-                  </a>
+                  </button>
 
-                  <a
-                    href={`https://wa.me/?text=${encodeURIComponent(
-                      `Fiz um diagnóstico gratuito da minha clínica e me surpreendi. Testa aqui: ${window.location.origin}/diagnostico${referralCode ? `?ref=${referralCode}` : ''}`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block p-4 border border-[#d1d5db] hover:bg-white hover:border-[#111827] transition-all"
+                  <button
+                    onClick={() => handleUnlockAction("whatsapp")}
+                    className="w-full p-4 border border-[#d1d5db] text-left hover:bg-white hover:border-[#111827] transition-all"
                   >
                     <p className="text-[15px] text-[#1f2933] font-medium">Compartilhar com uma amiga</p>
                     <p className="text-[14px] text-[#6b7280]">Link único rastreável</p>
-                  </a>
+                  </button>
 
                   <button
-                    onClick={() => window.print()}
+                    onClick={() => handleUnlockAction("pdf")}
                     className="w-full p-4 border border-[#d1d5db] text-left hover:bg-white hover:border-[#111827] transition-all"
                   >
                     <p className="text-[15px] text-[#1f2933] font-medium">Salvar diagnóstico</p>
@@ -529,7 +756,10 @@ export default function DiagnosticoElevare() {
                 </p>
 
                 <button
-                  onClick={() => navigate("/")}
+                  onClick={() => {
+                    clearLocal();
+                    navigate("/");
+                  }}
                   className="mt-4 text-[14px] text-[#6b7280] hover:text-[#1f2933] transition-colors"
                 >
                   Talvez depois
@@ -564,6 +794,10 @@ export default function DiagnosticoElevare() {
             opacity: 1; 
             transform: translateY(0); 
           }
+        }
+
+        .prose strong {
+          font-weight: 600;
         }
       `}</style>
     </div>
