@@ -201,7 +201,7 @@ export default function Home() {
 
             <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
               <button 
-                onClick={() => navigate('/radar-bio')} 
+                onClick={() => navigate('/diagnostico')} 
                 className="px-8 py-4 rounded-lg btn-primary font-medium text-base hover:opacity-90 transition-all"
               >
                 Iniciar diagnóstico gratuito
@@ -411,7 +411,7 @@ export default function Home() {
             </div>
 
             <p className="mt-12 text-center text-sm text-gray-500">
-              Não sabe por onde começar? <button onClick={() => navigate('/radar-bio')} className="text-[var(--lavanda)] hover:underline">Faça o diagnóstico gratuito</button>
+              Não sabe por onde começar? <button onClick={() => navigate('/diagnostico')} className="text-[var(--lavanda)] hover:underline">Faça o diagnóstico gratuito</button>
             </p>
           </div>
         </section>
@@ -517,7 +517,7 @@ export default function Home() {
                 Ativar centro de comando
               </button>
               <button 
-                onClick={() => navigate('/radar-bio')} 
+                onClick={() => navigate('/diagnostico')} 
                 className="px-8 py-4 rounded-lg btn-secondary font-medium hover:bg-purple-50 transition-all"
               >
                 Diagnóstico gratuito
@@ -559,7 +559,7 @@ export default function Home() {
             </li>
           </ul>
           <button 
-            onClick={() => { setModalDiagnostico(false); navigate('/radar-bio'); }}
+            onClick={() => { setModalDiagnostico(false); navigate('/diagnostico'); }}
             className="mt-10 w-full py-4 rounded-lg btn-primary font-medium"
           >
             Iniciar diagnóstico gratuito

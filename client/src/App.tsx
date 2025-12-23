@@ -18,6 +18,7 @@ import AgendaEstrategica from "./pages/AgendaEstrategica";
 import CalendarioEstrategico from "./pages/CalendarioEstrategico";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import DiagnosticoElevare from "./pages/DiagnosticoElevare";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 function Router() {
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/radar-bio" component={RadarBio} />
+      <Route path="/diagnostico" component={DiagnosticoElevare} />
       
       {/* Protected Routes */}
       {isAuthenticated && (
