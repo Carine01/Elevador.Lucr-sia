@@ -13,8 +13,19 @@ const stripe = new Stripe(env.STRIPE_SECRET_KEY || "", {
 
 // Definição dos planos - Atualizado 21/12/2024
 export const PLANS = {
+  free: {
+    id: "free" as const,
+    name: "Plano Gratuito",
+    price: 0,
+    priceId: "",
+    credits: 1,
+    features: [
+      "1 crédito por mês",
+      "Acesso ao Radar de Bio",
+    ],
+  },
   essencial: {
-    id: "essencial",
+    id: "essencial" as const,
     name: "Plano Essencial",
     price: 57,
     priceId: env.STRIPE_ESSENCIAL_PRICE_ID || "",
@@ -27,7 +38,7 @@ export const PLANS = {
     ],
   },
   profissional: {
-    id: "profissional",
+    id: "profissional" as const,
     name: "Plano Profissional",
     price: 97,
     priceId: env.STRIPE_PROFISSIONAL_PRICE_ID || "",

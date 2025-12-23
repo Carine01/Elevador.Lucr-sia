@@ -83,7 +83,7 @@ export interface ParsedBioRadarDiagnosis extends Omit<BioRadarDiagnosis, 'diagno
 }
 
 // Subscription
-export type SubscriptionPlan = 'free' | 'pro' | 'pro_plus';
+export type SubscriptionPlan = 'free' | 'essencial' | 'profissional';
 export type SubscriptionStatus = 'active' | 'inactive' | 'cancelled' | 'expired';
 
 export interface Subscription {
