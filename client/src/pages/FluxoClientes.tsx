@@ -223,7 +223,7 @@ export default function FluxoClientes() {
   };
 
   // Filtrar leads localmente
-  const filteredLeads = leads.filter((lead) => {
+  const filteredLeads = leads.filter((lead: Lead) => {
     const matchTemp = filtroTemperatura === "todos" || lead.temperatura === filtroTemperatura;
     const matchStatus = filtroStatus === "todos" || lead.status === filtroStatus;
     const matchSearch = lead.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -348,20 +348,20 @@ export default function FluxoClientes() {
               <p className="text-slate-500">Adicione seu primeiro lead clicando em "Nova Cliente"</p>
             </Card>
           ) : (
-            filteredLeads.map((lead) => {
-              const TempIcon = temperaturaBadge[lead.temperatura].icon;
+            filteredLeads.map((lead: Lead) => {
+              const TempIcon = temperaturaBadge[lead.temperatura as keyof typeof temperaturaBadge].icon;
               return (
                 <Card key={lead.id} className="bg-slate-800/50 border-slate-700 p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
-                      <div className={`p-2 rounded-lg ${temperaturaBadge[lead.temperatura].color}`}>
+                      <div className={`p-2 rounded-lg ${temperaturaBadge[lead.temperatura as keyof typeof temperaturaBadge].color}`}>
                         <TempIcon className="w-5 h-5" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold text-white">{lead.nome}</h3>
-                          <Badge className={statusBadge[lead.status].color}>
-                            {statusBadge[lead.status].label}
+                          <Badge className={statusBadge[lead.status as keyof typeof statusBadge].color}>
+                            {statusBadge[lead.status as keyof typeof statusBadge].label}
                           </Badge>
                         </div>
                         <p className="text-slate-400 text-sm">{lead.procedimento || "Sem procedimento definido"}</p>

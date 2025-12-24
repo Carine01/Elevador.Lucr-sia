@@ -368,26 +368,26 @@ export const quizRouter = router({
       // Calcular KPIs
       const total = todos.length;
       const porNivel = {
-        desbravadora: todos.filter(d => d.conscienciaNivel === "desbravadora").length,
-        estrategista: todos.filter(d => d.conscienciaNivel === "estrategista").length,
-        rainha: todos.filter(d => d.conscienciaNivel === "rainha").length,
+        desbravadora: todos.filter((d: typeof todos[0]) => d.conscienciaNivel === "desbravadora").length,
+        estrategista: todos.filter((d: typeof todos[0]) => d.conscienciaNivel === "estrategista").length,
+        rainha: todos.filter((d: typeof todos[0]) => d.conscienciaNivel === "rainha").length,
       };
 
       // Score médio
-      const scores = todos.map(d => 
+      const scores = todos.map((d: typeof todos[0]) => 
         (d.conscienciaScore || 0) + (d.financeiroScore || 0) + (d.bioScore || 0)
       );
       const scoreMedio = scores.length > 0 
-        ? scores.reduce((a, b) => a + b, 0) / scores.length 
+        ? scores.reduce((a: number, b: number) => a + b, 0) / scores.length 
         : 0;
 
       // Gargalos mais comuns
       const gargalos = {
-        consciencia: todos.filter(d => d.conscienciaNivel === "atencao" || 
+        consciencia: todos.filter((d: typeof todos[0]) => d.conscienciaNivel === "atencao" || 
           (d.conscienciaScore && d.conscienciaScore <= 5)).length,
-        financeiro: todos.filter(d => d.financeiroNivel === "atencao" ||
+        financeiro: todos.filter((d: typeof todos[0]) => d.financeiroNivel === "atencao" ||
           (d.financeiroScore && d.financeiroScore <= 5)).length,
-        posicionamento: todos.filter(d => d.bioNivel === "atencao" ||
+        posicionamento: todos.filter((d: typeof todos[0]) => d.bioNivel === "atencao" ||
           (d.bioScore && d.bioScore <= 5)).length,
       };
 
@@ -399,7 +399,7 @@ export const quizRouter = router({
       // Feedbacks
       const feedbacks = await db.select().from(feedback);
       const mediaRating = feedbacks.length > 0
-        ? feedbacks.reduce((a, b) => a + b.rating, 0) / feedbacks.length
+        ? feedbacks.reduce((a: number, b: typeof feedbacks[0]) => a + b.rating, 0) / feedbacks.length
         : 0;
 
       // Conversões via referral
@@ -415,7 +415,7 @@ export const quizRouter = router({
         trialsAtivos: trialsAtivos.length,
         mediaRating: Math.round(mediaRating * 10) / 10,
         conversoesPorReferral: referralsConvertidos.length,
-        ultimosDiagnosticos: todos.slice(-5).reverse().map(d => ({
+        ultimosDiagnosticos: todos.slice(-5).reverse().map((d: typeof todos[0]) => ({
           id: d.id,
           nivel: d.conscienciaNivel,
           score: (d.conscienciaScore || 0) + (d.financeiroScore || 0) + (d.bioScore || 0),

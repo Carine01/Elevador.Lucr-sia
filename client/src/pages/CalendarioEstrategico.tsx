@@ -349,17 +349,17 @@ export default function CalendarioEstrategico() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {dayPosts.map((post) => {
-                      const TipoIcon = tipoConfig[post.tipo]?.icon || Sparkles;
+                    {dayPosts.map((post: Post) => {
+                      const TipoIcon = tipoConfig[post.tipo as keyof typeof tipoConfig]?.icon || Sparkles;
                       return (
                         <div 
                           key={post.id}
                           onClick={() => setSelectedPost(post)}
-                          className={`p-2 rounded-lg ${tipoConfig[post.tipo].color} border cursor-pointer hover:opacity-80 transition-opacity`}
+                          className={`p-2 rounded-lg ${tipoConfig[post.tipo as keyof typeof tipoConfig].color} border cursor-pointer hover:opacity-80 transition-opacity`}
                         >
                           <div className="flex items-center gap-1 mb-1">
                             <TipoIcon className="w-3 h-3" />
-                            <span className="text-xs font-semibold">{tipoConfig[post.tipo].label}</span>
+                            <span className="text-xs font-semibold">{tipoConfig[post.tipo as keyof typeof tipoConfig].label}</span>
                             {post.status === "publicado" && (
                               <Check className="w-3 h-3 ml-auto" />
                             )}

@@ -217,7 +217,7 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
       .orderBy(bioRadarDiagnosis.createdAt);
 
     // BUG-011: Usar safeParse
-    return diagnoses.map((d) => ({
+    return diagnoses.map((d: typeof diagnoses[0]) => ({
       ...d,
       bioAnalysis: safeParse(d.bioAnalysis),
       recommendations: safeParse(d.recommendations),
