@@ -125,29 +125,29 @@ export default function AgendaEstrategica() {
   const mesAtual = new Date().getMonth();
   const anoAtual = new Date().getFullYear();
 
-  const agendamentosDoMes = agendamentos.filter(a => {
+  const agendamentosDoMes = agendamentos.filter((a: Agendamento) => {
     const d = new Date(a.data);
     return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
   });
 
   const faturamentoRealizado = agendamentosDoMes
-    .filter(a => a.status === "realizado")
-    .reduce((acc, a) => acc + a.valor, 0);
+    .filter((a: Agendamento) => a.status === "realizado")
+    .reduce((acc: number, a: Agendamento) => acc + a.valor, 0);
 
   const faturamentoPrevisto = agendamentosDoMes
-    .filter(a => a.status === "confirmado" || a.status === "pendente")
-    .reduce((acc, a) => acc + a.valor, 0);
+    .filter((a: Agendamento) => a.status === "confirmado" || a.status === "pendente")
+    .reduce((acc: number, a: Agendamento) => acc + a.valor, 0);
 
   const faturamentoTotal = faturamentoRealizado + faturamentoPrevisto;
   const progressoMeta = Math.min((faturamentoTotal / (metaMensal * 100)) * 100, 100);
 
   const agendamentosDoDia = agendamentos
-    .filter(a => a.data === selectedDate)
-    .sort((a, b) => a.horario.localeCompare(b.horario));
+    .filter((a: Agendamento) => a.data === selectedDate)
+    .sort((a: Agendamento, b: Agendamento) => a.horario.localeCompare(b.horario));
 
   const faturamentoDoDia = agendamentosDoDia
-    .filter(a => a.status !== "cancelado")
-    .reduce((acc, a) => acc + a.valor, 0);
+    .filter((a: Agendamento) => a.status !== "cancelado")
+    .reduce((acc: number, a: Agendamento) => acc + a.valor, 0);
 
   // Obter dias da semana atual
   const getWeekDays = (date: Date) => {
@@ -330,8 +330,8 @@ export default function AgendaEstrategica() {
         <div className="grid grid-cols-7 gap-2 mb-8">
           {weekDays.map((day) => {
             const dateStr = day.toISOString().split('T')[0];
-            const dayAgendamentos = agendamentos.filter(a => a.data === dateStr && a.status !== "cancelado");
-            const dayTotal = dayAgendamentos.reduce((acc, a) => acc + a.valor, 0);
+            const dayAgendamentos = agendamentos.filter((a: Agendamento) => a.data === dateStr && a.status !== "cancelado");
+            const dayTotal = dayAgendamentos.reduce((acc: number, a: Agendamento) => acc + a.valor, 0);
             const isSelected = dateStr === selectedDate;
             const isToday = dateStr === hoje;
 
@@ -399,7 +399,7 @@ export default function AgendaEstrategica() {
             </div>
           ) : (
             <div className="space-y-3">
-              {agendamentosDoDia.map((agendamento) => (
+              {agendamentosDoDia.map((agendamento: Agendamento) => (
                 <div 
                   key={agendamento.id}
                   className={`flex items-center justify-between p-4 rounded-lg border ${

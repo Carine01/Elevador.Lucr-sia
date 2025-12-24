@@ -149,6 +149,8 @@ export default function ElevareDashboardLayout({
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+            aria-label={sidebarOpen ? "Fechar menu" : "Abrir menu"}
+            title={sidebarOpen ? "Fechar menu" : "Abrir menu"}
           >
             <Menu className="w-5 h-5 text-slate-600" />
           </button>

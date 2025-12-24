@@ -22,7 +22,7 @@ if (!STRIPE_SECRET_KEY) {
 }
 
 const stripe = new Stripe(STRIPE_SECRET_KEY, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-10-29.clover',
 });
 
 // Planos da LucresIA
@@ -77,8 +77,10 @@ async function setupStripe() {
     const product = await stripe.products.create({
       name: plan.name,
       description: plan.description,
-      metadata: plan.metadata,
-      features: plan.features.map(f => ({ name: f })),
+      metadata: {
+        ...plan.metadata,
+        features: JSON.stringify(plan.features),
+      },
     });
 
     console.log(`   ✅ Produto criado: ${product.id}`);

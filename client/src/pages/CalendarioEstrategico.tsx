@@ -349,7 +349,7 @@ export default function CalendarioEstrategico() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {dayPosts.map((post) => {
+                    {dayPosts.map((post: Post) => {
                       const TipoIcon = tipoConfig[post.tipo]?.icon || Sparkles;
                       return (
                         <div 

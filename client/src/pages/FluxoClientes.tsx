@@ -223,7 +223,7 @@ export default function FluxoClientes() {
   };
 
   // Filtrar leads localmente
-  const filteredLeads = leads.filter((lead) => {
+  const filteredLeads = leads.filter((lead: Lead) => {
     const matchTemp = filtroTemperatura === "todos" || lead.temperatura === filtroTemperatura;
     const matchStatus = filtroStatus === "todos" || lead.status === filtroStatus;
     const matchSearch = lead.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -348,7 +348,7 @@ export default function FluxoClientes() {
               <p className="text-slate-500">Adicione seu primeiro lead clicando em "Nova Cliente"</p>
             </Card>
           ) : (
-            filteredLeads.map((lead) => {
+            filteredLeads.map((lead: Lead) => {
               const TempIcon = temperaturaBadge[lead.temperatura].icon;
               return (
                 <Card key={lead.id} className="bg-slate-800/50 border-slate-700 p-4">
