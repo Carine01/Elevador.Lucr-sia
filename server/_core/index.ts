@@ -184,18 +184,54 @@ async function startServer() {
   const app = express();
   const server = createServer(app);
 
+  // ==================== TRUST PROXY ====================
+  // IMPORTANTE: Necessário quando atrás de um proxy reverso (Railway, Heroku, etc)
+  // Isso permite que o express-rate-limit identifique corretamente os IPs dos usuários
+  // via header X-Forwarded-For
+  if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 1); // Confiar no primeiro proxy
+    console.log('[Server] Trust proxy enabled for production');
+  }
+
+  // ==================== HEALTH CHECK ====================
+  // IMPORTANTE: Registrar ANTES de qualquer outro middleware
+  // Endpoint para Railway/Kubernetes verificar se a aplicação está saudável
+  app.get('/api/health', (_req, res) => {
+    res.status(200).json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development'
+    });
+  });
+
   // ==================== CORS CONFIGURATION ====================
   // BUG-009: Configurar CORS apropriadamente
+  // Em produção no Railway, pegar a URL automaticamente
+  const railwayUrl = process.env.RAILWAY_STATIC_URL || process.env.RAILWAY_PUBLIC_DOMAIN;
   const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
     'http://localhost:3000',
     'http://localhost:5173',
-    'https://yourdomain.com'
+    ...(railwayUrl ? [`https://${railwayUrl}`] : []),
   ];
+
+  // Log de startup para debug
+  console.log('[Server] Starting with configuration:', {
+    nodeEnv: process.env.NODE_ENV,
+    port: process.env.PORT,
+    allowedOrigins,
+    railwayUrl,
+  });
 
   app.use(cors({
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
-      // Permitir requisições sem origin (mobile apps, postman, etc)
+      // Permitir requisições sem origin (mobile apps, postman, health checks, etc)
       if (!origin) return callback(null, true);
+      
+      // Em produção, ser mais permissivo para health checks do Railway
+      if (process.env.NODE_ENV === 'production') {
+        return callback(null, true);
+      }
       
       if (allowedOrigins.includes(origin)) {
         callback(null, true);
@@ -294,16 +330,6 @@ async function startServer() {
     }
   );
 
-  // ==================== HEALTH CHECK ====================
-  // Endpoint para Railway/Kubernetes verificar se a aplicação está saudável
-  app.get('/api/health', (_req, res) => {
-    res.status(200).json({ 
-      status: 'healthy', 
-      timestamp: new Date().toISOString(),
-      version: '1.0.0'
-    });
-  });
-
   // ==================== BODY PARSERS ====================
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
@@ -327,23 +353,42 @@ async function startServer() {
   if (process.env.NODE_ENV === "development") {
     await setupVite(app, server);
   } else {
+    console.log('[Server] Production mode - serving static files');
     serveStatic(app);
   }
 
   // ==================== START SERVER ====================
-  const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
+  const port = parseInt(process.env.PORT || "3000");
+  
+  // Em produção, NÃO procurar por outra porta - usar exatamente a PORT definida
+  // Em desenvolvimento, podemos procurar uma porta disponível
+  const finalPort = process.env.NODE_ENV === "production" 
+    ? port 
+    : await findAvailablePort(port);
 
-  if (port !== preferredPort) {
-    logger.warn(`Port ${preferredPort} is busy, using port ${port} instead`);
+  if (finalPort !== port && process.env.NODE_ENV !== "production") {
+    logger.warn(`Port ${port} is busy, using port ${finalPort} instead`);
   }
 
-  server.listen(port, () => {
-    logger.info(`Server running on http://localhost:${port}/`);
+  // Em produção (containers), SEMPRE fazer bind em 0.0.0.0
+  // Em desenvolvimento, usar localhost
+  const host = process.env.NODE_ENV === "production" ? "0.0.0.0" : "localhost";
+
+  console.log(`[Server] Attempting to bind to ${host}:${finalPort}`);
+  
+  server.listen(finalPort, host, () => {
+    console.log(`[Server] ✅ Successfully bound to ${host}:${finalPort}`);
+    logger.info(`Server running on http://${host}:${finalPort}/`);
+  });
+  
+  server.on('error', (err) => {
+    console.error('[Server] ❌ Failed to start:', err);
+    process.exit(1);
   });
 }
 
 startServer().catch((error) => {
+  console.error('[Server] ❌ Startup error:', error);
   logger.error('Failed to start server', error);
   process.exit(1);
 });

@@ -5,7 +5,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { APP_LOGO, APP_TITLE } from "@/const";
@@ -18,7 +17,6 @@ import {
   Zap,
   ChevronDown,
   Home,
-  Settings,
   Video,
   Target,
   Users,
@@ -208,14 +206,6 @@ export default function ElevareDashboardLayout({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={() => navigate("/dashboard/settings")}
-                className="cursor-pointer"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Configurações
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLogout}
                 className="cursor-pointer text-red-500"
