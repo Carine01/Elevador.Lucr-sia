@@ -22,6 +22,7 @@ import DiagnosticoElevare from "./pages/DiagnosticoElevare";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import SettingsLGPD from "./pages/SettingsLGPD";
 import CookieBanner from "./components/CookieBanner";
 import { useAuth } from "@/_core/hooks/useAuth";
 
@@ -109,6 +110,10 @@ function Router() {
       {/* Legal Pages - Public */}
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      
+      {/* LGPD Settings - Protected */}
+      <Route path="/settings/lgpd">{() => <ProtectedRoute component={SettingsLGPD} />}</Route>
+      <Route path="/settings/privacidade">{() => <ProtectedRoute component={SettingsLGPD} />}</Route>
       
       {/* Protected Routes - redirect to login if not authenticated */}
       <Route path="/dashboard">{() => <ProtectedRoute component={Dashboard} />}</Route>

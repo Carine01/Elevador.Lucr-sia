@@ -1,7 +1,51 @@
 /**
  * Gerenciamento de Variáveis de Ambiente
  * BUG-002: Validação de credenciais obrigatórias
+ * 🔒 SEGURANÇA: Validação rigorosa em produção
  */
+
+import { z } from "zod";
+
+// Schema de validação para produção
+const productionEnvSchema = z.object({
+  JWT_SECRET: z.string().min(32, "JWT_SECRET deve ter no mínimo 32 caracteres"),
+  DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatória"),
+  STRIPE_SECRET_KEY: z.string().startsWith("sk_", "STRIPE_SECRET_KEY deve começar com sk_").optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_", "STRIPE_WEBHOOK_SECRET deve começar com whsec_").optional(),
+});
+
+/**
+ * 🔒 Validar variáveis críticas em startup
+ * Chame esta função no início do servidor
+ */
+export function validateEnvOnStartup(): void {
+  const isProduction = process.env.NODE_ENV === "production";
+  
+  if (isProduction) {
+    console.log("🔒 [ENV] Validando variáveis de ambiente em PRODUÇÃO...");
+    
+    const result = productionEnvSchema.safeParse(process.env);
+    
+    if (!result.success) {
+      console.error("❌ [ENV] ERRO CRÍTICO - Variáveis inválidas:");
+      result.error.errors.forEach(err => {
+        console.error(`   - ${err.path.join(".")}: ${err.message}`);
+      });
+      console.error("\n⛔ Servidor não pode iniciar com configuração insegura.");
+      process.exit(1);
+    }
+    
+    // Validações adicionais de segurança
+    if (process.env.JWT_SECRET === 'dev-secret-change-in-production-32chars') {
+      console.error("❌ [ENV] JWT_SECRET está usando valor padrão de desenvolvimento!");
+      process.exit(1);
+    }
+    
+    console.log("✅ [ENV] Todas as variáveis validadas com sucesso");
+  } else {
+    console.log("⚠️  [ENV] Modo desenvolvimento - validação relaxada");
+  }
+}
 
 function getRequiredEnv(key: string, defaultForDev?: string): string {
   const value = process.env[key];

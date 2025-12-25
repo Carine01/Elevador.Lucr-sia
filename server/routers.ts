@@ -11,6 +11,7 @@ import { diagnosticoRouter } from "./routers/diagnostico";
 import { gamificationRouter } from "./routers/gamification";
 import { quizRouter } from "./routers/quiz";
 import { adminRouter } from "./routers/admin";
+import { lgpdRouter } from "./routers/lgpd";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -40,6 +41,9 @@ export const appRouter = router({
   
   // 🔒 ADMIN
   admin: adminRouter,
+  
+  // 🔐 LGPD - Conformidade com Lei Geral de Proteção de Dados
+  lgpd: lgpdRouter,
 });
 
 export type AppRouter = typeof appRouter;

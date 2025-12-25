@@ -11,9 +11,12 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
-import { ENV } from "./env";
+import { ENV, validateEnvOnStartup } from "./env";
 import { logger } from "./logger";
 import { getDb } from "../db";
+
+// 🔐 VALIDAR VARIÁVEIS CRÍTICAS EM STARTUP
+validateEnvOnStartup();
 import { subscription as subscriptionTable } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { PLANS } from "../routers/subscription";
