@@ -20,6 +20,9 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DiagnosticoElevare from "./pages/DiagnosticoElevare";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import CookieBanner from "./components/CookieBanner";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 // Protected Route wrapper - redirects to login if not authenticated
@@ -103,6 +106,10 @@ function Router() {
       {/* Admin Routes */}
       <Route path="/admin">{() => <AdminRoute component={AdminDashboard} />}</Route>
       
+      {/* Legal Pages - Public */}
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      
       {/* Protected Routes - redirect to login if not authenticated */}
       <Route path="/dashboard">{() => <ProtectedRoute component={Dashboard} />}</Route>
       <Route path="/dashboard/radar-bio">{() => <ProtectedRoute component={RadarBio} />}</Route>
@@ -136,6 +143,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <CookieBanner />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>

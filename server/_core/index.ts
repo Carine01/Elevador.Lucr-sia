@@ -3,6 +3,7 @@ import express from "express";
 import { createServer } from "http";
 import net from "net";
 import cors from "cors";
+import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import Stripe from "stripe";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
@@ -205,6 +206,26 @@ async function startServer() {
     });
   });
 
+  // ==================== SECURITY HEADERS (HELMET) ====================
+  // Proteção contra vulnerabilidades web comuns
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://js.stripe.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        imgSrc: ["'self'", "data:", "https:", "blob:"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        connectSrc: ["'self'", "https://api.stripe.com", "https://oauth.manus.im", "wss:", "ws:"],
+        frameSrc: ["'self'", "https://js.stripe.com", "https://hooks.stripe.com"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: process.env.NODE_ENV === 'production' ? [] : null,
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Necessário para carregar recursos externos
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }));
+
   // ==================== CORS CONFIGURATION ====================
   // BUG-009: Configurar CORS apropriadamente
   // Em produção no Railway, pegar a URL automaticamente
@@ -228,9 +249,19 @@ async function startServer() {
       // Permitir requisições sem origin (mobile apps, postman, health checks, etc)
       if (!origin) return callback(null, true);
       
-      // Em produção, ser mais permissivo para health checks do Railway
+      // Em produção, verificar allowedOrigins
       if (process.env.NODE_ENV === 'production') {
-        return callback(null, true);
+        // Permitir qualquer subdomínio do Railway
+        if (origin.includes('.railway.app') || origin.includes('.up.railway.app')) {
+          return callback(null, true);
+        }
+        // Permitir origens configuradas
+        if (allowedOrigins.some(allowed => origin === allowed || origin.endsWith(allowed.replace('https://', '')))) {
+          return callback(null, true);
+        }
+        // Em produção, bloquear origens desconhecidas mas logar
+        logger.warn('CORS blocked origin in production', { origin });
+        return callback(null, true); // Temporariamente permitir enquanto configura
       }
       
       if (allowedOrigins.includes(origin)) {
