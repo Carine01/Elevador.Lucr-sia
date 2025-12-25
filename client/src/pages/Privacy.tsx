@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { SUPPORT_EMAIL } from "@shared/const";
 
 export default function Privacy() {
   return (
@@ -85,8 +86,8 @@ export default function Privacy() {
             <h2 className="text-xl font-semibold text-white mb-3">7. Contato</h2>
             <p>
               Dúvidas sobre privacidade? Entre em contato: <br />
-              <a href="mailto:contato@lucresia.com" className="text-amber-400 hover:text-amber-300 underline">
-                contato@lucresia.com
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="text-amber-400 hover:text-amber-300 underline">
+                {SUPPORT_EMAIL}
               </a>
             </p>
           </section>

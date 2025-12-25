@@ -29,12 +29,12 @@ export default function Settings() {
     
     try {
       await deleteAccountMutation.mutateAsync();
-      toast.success("Conta deletada com sucesso");
+      toast.success("Conta deletada com sucesso. Redirecionando...");
       
-      // Redirecionar para home após 2 segundos
+      // Redirecionar para home após 3 segundos para dar tempo de ler a mensagem
       setTimeout(() => {
         navigate("/");
-      }, 2000);
+      }, 3000);
     } catch (error) {
       toast.error("Erro ao deletar conta. Tente novamente.");
       setIsDeleting(false);

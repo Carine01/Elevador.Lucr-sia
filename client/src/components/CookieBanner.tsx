@@ -45,7 +45,6 @@ export default function CookieBanner() {
               Ao continuar navegando, você concorda com nossa{" "}
               <a 
                 href="/privacy" 
-                target="_blank"
                 className="text-amber-400 hover:text-amber-300 underline font-medium"
               >
                 Política de Privacidade
