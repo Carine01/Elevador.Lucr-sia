@@ -36,7 +36,7 @@ export const appRouter = router({
       const db = getDbSync();
       
       if (!db) {
-        logger.error("Database not available for account deletion", { userId });
+        logger.error("Database not available for account deletion");
         throw new Error("Serviço temporariamente indisponível. Tente novamente mais tarde.");
       }
       

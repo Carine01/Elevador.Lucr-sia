@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
 
+const BANNER_DELAY_MS = 1000;
+
 /**
  * Banner de Consentimento de Cookies - LGPD Compliance
  * Exibe na primeira visita e salva preferência no localStorage
@@ -13,7 +15,7 @@ export default function CookieBanner() {
     const accepted = localStorage.getItem("cookiesAccepted");
     if (!accepted) {
       // Delay de 1s para não ser intrusivo
-      setTimeout(() => setShow(true), 1000);
+      setTimeout(() => setShow(true), BANNER_DELAY_MS);
     }
   }, []);
 

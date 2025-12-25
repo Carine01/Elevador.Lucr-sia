@@ -18,6 +18,8 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import ElevareDashboardLayout from "@/components/ElevareDashboardLayout";
 
+const REDIRECT_DELAY_MS = 3000;
+
 export default function Settings() {
   const [, navigate] = useLocation();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -34,7 +36,7 @@ export default function Settings() {
       // Redirecionar para home após 3 segundos para dar tempo de ler a mensagem
       setTimeout(() => {
         navigate("/");
-      }, 3000);
+      }, REDIRECT_DELAY_MS);
     } catch (error) {
       toast.error("Erro ao deletar conta. Tente novamente.");
       setIsDeleting(false);
