@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch, Redirect } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
+import CookieBanner from "./components/CookieBanner";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -20,6 +21,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DiagnosticoElevare from "./pages/DiagnosticoElevare";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import Privacy from "./pages/Privacy";
+import Settings from "./pages/Settings";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 // Protected Route wrapper - redirects to login if not authenticated
@@ -99,12 +102,14 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/radar-bio" component={RadarBio} />
       <Route path="/diagnostico" component={DiagnosticoElevare} />
+      <Route path="/privacy" component={Privacy} />
       
       {/* Admin Routes */}
       <Route path="/admin">{() => <AdminRoute component={AdminDashboard} />}</Route>
       
       {/* Protected Routes - redirect to login if not authenticated */}
       <Route path="/dashboard">{() => <ProtectedRoute component={Dashboard} />}</Route>
+      <Route path="/dashboard/settings">{() => <ProtectedRoute component={Settings} />}</Route>
       <Route path="/dashboard/radar-bio">{() => <ProtectedRoute component={RadarBio} />}</Route>
       <Route path="/dashboard/ebooks">{() => <ProtectedRoute component={EbookGenerator} />}</Route>
       <Route path="/dashboard/robo-produtor">{() => <ProtectedRoute component={RoboProdutor} />}</Route>
@@ -136,6 +141,7 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Router />
+          <CookieBanner />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
