@@ -10,6 +10,9 @@
     "check": "tsc --noEmit",
     "format": "prettier --write .",
     "test": "vitest run",
+    "test:security": "node scripts/test-security.cjs",
+    "test:health": "node scripts/test-health.cjs",
+    "test:all": "pnpm test:security && pnpm test:health",
     "db:push": "drizzle-kit generate && drizzle-kit migrate"
   },
   "dependencies": {

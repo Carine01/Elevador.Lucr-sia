@@ -1,0 +1,156 @@
+name: Production Health Check
+
+on:
+  schedule:
+    # Executa a cada 5 minutos
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Permite execução manual
+
+jobs:
+  check-health:
+    name: Verificar Saúde da Produção
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Testar Health Check Endpoint
+        id: health
+        run: |
+          # URL de produção do Railway
+          PROD_URL="https://acceptable-elegance-production-0f9f.up.railway.app"
+          
+          RESPONSE=$(curl -s -w "\n%{http_code}" $PROD_URL/api/trpc/health.check || echo "000")
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | head -n-1)
+          
+          echo "http_code=$HTTP_CODE" >> $GITHUB_OUTPUT
+          echo "response=$BODY" >> $GITHUB_OUTPUT
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "❌ Health check falhou! HTTP $HTTP_CODE"
+            echo "Response: $BODY"
+            exit 1
+          fi
+          
+          echo "✅ Sistema saudável: $BODY"
+
+      - name: Testar Autenticação
+        run: |
+          PROD_URL="https://acceptable-elegance-production-0f9f.up.railway.app"
+          
+          # Tenta acessar endpoint protegido sem auth (deve retornar 401 ou erro)
+          HTTP_CODE=$(curl -s -w "%{http_code}" -o /dev/null $PROD_URL/api/trpc/auth.me || echo "000")
+          
+          echo "Auth endpoint retornou: HTTP $HTTP_CODE"
+          
+          # Aceitar 401 (não autorizado) ou 200 (sem usuário) como respostas válidas
+          if [ "$HTTP_CODE" == "401" ] || [ "$HTTP_CODE" == "200" ]; then
+            echo "✅ Autenticação funcionando corretamente"
+          else
+            echo "⚠️ Endpoint de autenticação retornou código inesperado: $HTTP_CODE"
+          fi
+
+      - name: Testar Rate Limiting
+        run: |
+          PROD_URL="https://acceptable-elegance-production-0f9f.up.railway.app"
+          
+          echo "Testando rate limiting com múltiplas requisições..."
+          
+          # Faz 12 requisições rápidas (limite é 10)
+          for i in {1..12}; do
+            curl -s $PROD_URL/api/trpc/health.check > /dev/null
+            sleep 0.1
+          done
+          
+          # A próxima pode ser bloqueada
+          HTTP_CODE=$(curl -s -w "%{http_code}" -o /dev/null $PROD_URL/api/trpc/health.check || echo "000")
+          
+          if [ "$HTTP_CODE" == "429" ]; then
+            echo "✅ Rate limiting ativo e funcionando"
+          elif [ "$HTTP_CODE" == "200" ]; then
+            echo "⚠️ Rate limiting pode estar configurado mas não bloqueou (HTTP 200)"
+          else
+            echo "⚠️ Rate limiting resposta: HTTP $HTTP_CODE"
+          fi
+
+      - name: Verificar tempo de resposta
+        run: |
+          PROD_URL="https://acceptable-elegance-production-0f9f.up.railway.app"
+          
+          START_TIME=$(date +%s%3N)
+          HTTP_CODE=$(curl -s -w "%{http_code}" -o /dev/null $PROD_URL/api/trpc/health.check)
+          END_TIME=$(date +%s%3N)
+          
+          RESPONSE_TIME=$((END_TIME - START_TIME))
+          
+          echo "Tempo de resposta: ${RESPONSE_TIME}ms"
+          
+          if [ $RESPONSE_TIME -lt 2000 ]; then
+            echo "✅ Tempo de resposta adequado (<2s)"
+          else
+            echo "⚠️ Tempo de resposta alto: ${RESPONSE_TIME}ms"
+          fi
+
+      - name: Notificar falha via Issue
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date().toISOString();
+            
+            // Buscar issues abertas com label 'health-check-alert'
+            const { data: existingIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'health-check-alert'
+            });
+            
+            if (existingIssues.length > 0) {
+              // Adicionar comentário à issue existente
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssues[0].number,
+                body: `🚨 **ALERTA ADICIONAL DE PRODUÇÃO**\n\nO sistema falhou no health check às ${now}\n\nVerifique: https://railway.app/dashboard\n\nWorkflow: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+              });
+            } else {
+              // Criar nova issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚨 ALERTA: Sistema em Produção Fora do Ar',
+                body: `🚨 **ALERTA DE PRODUÇÃO**\n\nO sistema falhou no health check às ${now}\n\n**O que verificar:**\n- Railway Dashboard: https://railway.app/dashboard\n- Logs da aplicação\n- Conexão com banco de dados\n- Variáveis de ambiente\n\n**Workflow:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\nEsta issue será fechada automaticamente quando o sistema voltar.`,
+                labels: ['health-check-alert', 'urgent']
+              });
+            }
+
+      - name: Fechar issues de alerta se sucesso
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: existingIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'health-check-alert'
+            });
+            
+            for (const issue of existingIssues) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `✅ **Sistema Recuperado**\n\nO health check passou com sucesso às ${new Date().toISOString()}\n\nO sistema está operacional novamente.`
+              });
+              
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+            }
