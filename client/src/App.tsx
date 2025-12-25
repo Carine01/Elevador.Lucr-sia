@@ -19,6 +19,8 @@ import CalendarioEstrategico from "./pages/CalendarioEstrategico";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DiagnosticoElevare from "./pages/DiagnosticoElevare";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUsers from "./pages/AdminUsers";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 // Protected Route wrapper - redirects to login if not authenticated
@@ -82,6 +84,10 @@ function Router() {
       <Route path="/dashboard/fluxo-clientes">{() => <ProtectedRoute component={FluxoClientes} />}</Route>
       <Route path="/dashboard/agenda-estrategica">{() => <ProtectedRoute component={AgendaEstrategica} />}</Route>
       <Route path="/dashboard/calendario">{() => <ProtectedRoute component={CalendarioEstrategico} />}</Route>
+      
+      {/* Admin Routes */}
+      <Route path="/admin">{() => <ProtectedRoute component={AdminDashboard} />}</Route>
+      <Route path="/admin/users">{() => <ProtectedRoute component={AdminUsers} />}</Route>
       
       {/* Fallback */}
       <Route path="/404" component={NotFound} />

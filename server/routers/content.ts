@@ -1,13 +1,67 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { db } from "../db";
-import { contentGeneration } from "../../drizzle/schema";
+import { contentGeneration, subscription as subscriptionTable } from "../../drizzle/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { llm } from "../_core/llm";
 import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
+import { TRPCError } from "@trpc/server";
+
+// ✅ Helper centralizado de validação de créditos
+async function checkCredits(userId: number, required: number) {
+  const dbInstance = await db;
+  if (!dbInstance) {
+    throw new TRPCError({ 
+      code: "INTERNAL_SERVER_ERROR", 
+      message: "Banco de dados não disponível" 
+    });
+  }
+
+  const [sub] = await dbInstance.select()
+    .from(subscriptionTable)
+    .where(eq(subscriptionTable.userId, userId))
+    .limit(1);
+  
+  if (!sub) {
+    throw new TRPCError({ 
+      code: "FORBIDDEN", 
+      message: "Nenhuma assinatura encontrada. Faça upgrade." 
+    });
+  }
+  
+  if (sub.plan === "free") {
+    throw new TRPCError({ 
+      code: "FORBIDDEN", 
+      message: "Plano PRO necessário para esta funcionalidade." 
+    });
+  }
+  
+  // -1 significa créditos ilimitados
+  if (sub.creditsRemaining !== -1 && sub.creditsRemaining < required) {
+    throw new TRPCError({ 
+      code: "FORBIDDEN", 
+      message: `Créditos insuficientes. Necessário: ${required}, Disponível: ${sub.creditsRemaining}` 
+    });
+  }
+  
+  return sub;
+}
+
+// ✅ Helper para debitar créditos após sucesso
+async function debitCredits(subscriptionId: number, amount: number, currentCredits: number) {
+  const dbInstance = await db;
+  if (!dbInstance) return;
+
+  // Se tem créditos ilimitados (-1), não debita
+  if (currentCredits === -1) return;
+
+  await dbInstance.update(subscriptionTable)
+    .set({ creditsRemaining: currentCredits - amount })
+    .where(eq(subscriptionTable.id, subscriptionId));
+}
 
 export const contentRouter = router({
   // ============================================
@@ -22,6 +76,9 @@ export const contentRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // ✅ VALIDAÇÃO NO BACKEND
+      const subscription = await checkCredits(ctx.user.id, 2);
+
       try {
         const response = await llm.chat.completions.create({
           model: "gemini-2.5-flash",
@@ -46,7 +103,15 @@ export const contentRouter = router({
         }
 
         // Salvar no banco
-        const [saved] = await db
+        const dbInstance = await db;
+        if (!dbInstance) {
+          throw new TRPCError({ 
+            code: "INTERNAL_SERVER_ERROR", 
+            message: "Banco de dados não disponível" 
+          });
+        }
+
+        const [saved] = await dbInstance
           .insert(contentGeneration)
           .values({
             userId: ctx.user.id,
@@ -58,6 +123,9 @@ export const contentRouter = router({
           })
           .$returningId();
 
+        // ✅ DÉBITO APÓS SUCESSO
+        await debitCredits(subscription.id, 2, subscription.creditsRemaining);
+
         logger.info('Generic content generated', { 
           type: input.type, 
           userId: ctx.user.id 
@@ -68,7 +136,7 @@ export const contentRouter = router({
           content: String(content),
         };
       } catch (error) {
-        if (error instanceof AIServiceError) {
+        if (error instanceof AIServiceError || error instanceof TRPCError) {
           throw error;
         }
         
@@ -78,7 +146,7 @@ export const contentRouter = router({
           type: input.type,
         });
         
-        throw new AIServiceError('Erro ao gerar conteúdo. Tente novamente.', error);
+        throw new AIServiceError('Erro ao gerar conteúdo. Seus créditos não foram debitados.', error);
       }
     }),
 
@@ -93,6 +161,9 @@ export const contentRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // ✅ VALIDAÇÃO NO BACKEND
+      const subscription = await checkCredits(ctx.user.id, 10);
+
       const prompt = `Você é um especialista em marketing de conteúdo para clínicas de estética.
 
 Crie um e-book completo sobre: "${input.topic}"
@@ -163,7 +234,15 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
         }
 
         // Salvar no banco
-        const [saved] = await db
+        const dbInstance = await db;
+        if (!dbInstance) {
+          throw new TRPCError({ 
+            code: "INTERNAL_SERVER_ERROR", 
+            message: "Banco de dados não disponível" 
+          });
+        }
+
+        const [saved] = await dbInstance
           .insert(contentGeneration)
           .values({
             userId: ctx.user.id,
@@ -175,9 +254,12 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
               chapters: input.chapters,
               tone: input.tone,
             }),
-            creditsUsed: 5, // E-book custa 5 créditos
+            creditsUsed: 10,
           })
           .$returningId();
+
+        // ✅ DÉBITO APÓS SUCESSO
+        await debitCredits(subscription.id, 10, subscription.creditsRemaining);
 
         logger.info('E-book generated successfully', { 
           ebookId: saved.id, 
@@ -190,7 +272,7 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           ...ebook,
         };
       } catch (error) {
-        if (error instanceof AIServiceError) {
+        if (error instanceof AIServiceError || error instanceof TRPCError) {
           throw error;
         }
         
@@ -200,7 +282,7 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           input,
         });
         
-        throw new AIServiceError('Não foi possível gerar o e-book. Tente novamente.', error);
+        throw new AIServiceError('Não foi possível gerar o e-book. Seus créditos não foram debitados.', error);
       }
     }),
 
@@ -221,7 +303,15 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
         });
 
         // Atualizar metadata do e-book com URL da capa
-        const [ebook] = await db
+        const dbInstance = await db;
+        if (!dbInstance) {
+          throw new TRPCError({ 
+            code: "INTERNAL_SERVER_ERROR", 
+            message: "Banco de dados não disponível" 
+          });
+        }
+
+        const [ebook] = await dbInstance
           .select()
           .from(contentGeneration)
           .where(
@@ -239,7 +329,7 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
         const metadata = safeParse(ebook.metadata) || {};
         metadata.coverUrl = imageUrl;
 
-        await db
+        await dbInstance
           .update(contentGeneration)
           .set({
             metadata: JSON.stringify(metadata),
@@ -253,7 +343,7 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           coverUrl: imageUrl,
         };
       } catch (error) {
-        if (error instanceof NotFoundError) {
+        if (error instanceof NotFoundError || error instanceof TRPCError) {
           throw error;
         }
         
@@ -284,6 +374,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // ✅ VALIDAÇÃO NO BACKEND
+      const subscription = await checkCredits(ctx.user.id, 1);
+
       const prompt = `Você é um especialista em criar prompts para geração de imagens com IA.
 
 Crie um prompt otimizado para ${input.platform} baseado em:
@@ -340,7 +433,15 @@ Forneça no formato JSON:
         }
 
         // Salvar no banco
-        await db.insert(contentGeneration).values({
+        const dbInstance = await db;
+        if (!dbInstance) {
+          throw new TRPCError({ 
+            code: "INTERNAL_SERVER_ERROR", 
+            message: "Banco de dados não disponível" 
+          });
+        }
+
+        await dbInstance.insert(contentGeneration).values({
           userId: ctx.user.id,
           type: "prompt",
           title: input.description.substring(0, 100),
@@ -352,11 +453,14 @@ Forneça no formato JSON:
           creditsUsed: 1,
         });
 
+        // ✅ DÉBITO APÓS SUCESSO
+        await debitCredits(subscription.id, 1, subscription.creditsRemaining);
+
         logger.info('Prompt generated', { userId: ctx.user.id });
 
         return result;
       } catch (error) {
-        if (error instanceof AIServiceError) {
+        if (error instanceof AIServiceError || error instanceof TRPCError) {
           throw error;
         }
         
@@ -365,7 +469,7 @@ Forneça no formato JSON:
           userId: ctx.user.id,
         });
         
-        throw new AIServiceError('Erro ao gerar prompt. Tente novamente.', error);
+        throw new AIServiceError('Erro ao gerar prompt. Seus créditos não foram debitados.', error);
       }
     }),
 
@@ -382,6 +486,9 @@ Forneça no formato JSON:
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // ✅ VALIDAÇÃO NO BACKEND
+      const subscription = await checkCredits(ctx.user.id, 2);
+
       const prompt = `Você é um especialista em copywriting para anúncios de estética.
 
 Crie um anúncio completo para:
@@ -444,7 +551,15 @@ Use técnicas de neurovendas e gatilhos mentais.`;
         }
 
         // Salvar no banco
-        await db.insert(contentGeneration).values({
+        const dbInstance = await db;
+        if (!dbInstance) {
+          throw new TRPCError({ 
+            code: "INTERNAL_SERVER_ERROR", 
+            message: "Banco de dados não disponível" 
+          });
+        }
+
+        await dbInstance.insert(contentGeneration).values({
           userId: ctx.user.id,
           type: "ad",
           title: `Anúncio: ${input.product}`,
@@ -456,11 +571,14 @@ Use técnicas de neurovendas e gatilhos mentais.`;
           creditsUsed: 2,
         });
 
+        // ✅ DÉBITO APÓS SUCESSO
+        await debitCredits(subscription.id, 2, subscription.creditsRemaining);
+
         logger.info('Ad generated', { userId: ctx.user.id, product: input.product });
 
         return ad;
       } catch (error) {
-        if (error instanceof AIServiceError) {
+        if (error instanceof AIServiceError || error instanceof TRPCError) {
           throw error;
         }
         
@@ -469,7 +587,7 @@ Use técnicas de neurovendas e gatilhos mentais.`;
           userId: ctx.user.id,
         });
         
-        throw new AIServiceError('Erro ao gerar anúncio. Tente novamente.', error);
+        throw new AIServiceError('Erro ao gerar anúncio. Seus créditos não foram debitados.', error);
       }
     }),
 
@@ -483,13 +601,18 @@ Use técnicas de neurovendas e gatilhos mentais.`;
       })
     )
     .query(async ({ ctx, input }) => {
+      const dbInstance = await db;
+      if (!dbInstance) {
+        return [];
+      }
+
       // Query unificada
       const whereConditions = [eq(contentGeneration.userId, ctx.user.id)];
       if (input.type) {
         whereConditions.push(eq(contentGeneration.type, input.type));
       }
       
-      const results = await db
+      const results = await dbInstance
         .select()
         .from(contentGeneration)
         .where(and(...whereConditions))
@@ -512,7 +635,12 @@ Use técnicas de neurovendas e gatilhos mentais.`;
       })
     )
     .query(async ({ ctx, input }) => {
-      const [content] = await db
+      const dbInstance = await db;
+      if (!dbInstance) {
+        throw new NotFoundError("Banco de dados não disponível");
+      }
+
+      const [content] = await dbInstance
         .select()
         .from(contentGeneration)
         .where(
@@ -542,7 +670,15 @@ Use técnicas de neurovendas e gatilhos mentais.`;
       })
     )
     .mutation(async ({ ctx, input }) => {
-      await db
+      const dbInstance = await db;
+      if (!dbInstance) {
+        throw new TRPCError({ 
+          code: "INTERNAL_SERVER_ERROR", 
+          message: "Banco de dados não disponível" 
+        });
+      }
+
+      await dbInstance
         .delete(contentGeneration)
         .where(
           and(
