@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# Default permissions for GITHUB_TOKEN
+permissions:
+  contents: read
+
 jobs:
   # ==========================================
   # JOB 1: TESTES DE SEGURANÇA

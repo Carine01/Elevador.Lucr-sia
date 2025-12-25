@@ -6,6 +6,11 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch: # Permite execução manual
 
+# Default permissions for GITHUB_TOKEN
+permissions:
+  contents: read
+  issues: write  # Needed to create/close issues
+
 env:
   PRODUCTION_URL: "https://acceptable-elegance-production-0f9f.up.railway.app"
 
