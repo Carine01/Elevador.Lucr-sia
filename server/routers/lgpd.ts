@@ -23,7 +23,7 @@ import { ENV } from "../_core/env";
 
 // Stripe client para cancelamento de assinatura
 const stripe = ENV.STRIPE_SECRET_KEY && ENV.STRIPE_SECRET_KEY !== 'sk_test_placeholder'
-  ? new Stripe(ENV.STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" })
+  ? new Stripe(ENV.STRIPE_SECRET_KEY, { apiVersion: "2025-10-29.clover" as const })
   : null;
 
 export const lgpdRouter = router({
@@ -73,14 +73,14 @@ export const lgpdRouter = router({
           targetAudience: brandData.targetAudience,
           brandValues: brandData.brandValues,
         } : null,
-        contentGenerations: contentData.map(c => ({
+        contentGenerations: contentData.map((c: typeof contentData[number]) => ({
           id: c.id,
           type: c.type,
           title: c.title,
           content: c.content,
           createdAt: c.createdAt,
         })),
-        leads: leadsData.map(l => ({
+        leads: leadsData.map((l: typeof leadsData[number]) => ({
           id: l.id,
           nome: l.nome,
           email: l.email,
@@ -89,19 +89,19 @@ export const lgpdRouter = router({
           status: l.status,
           createdAt: l.createdAt,
         })),
-        agendamentos: agendamentosData.map(a => ({
+        agendamentos: agendamentosData.map((a: typeof agendamentosData[number]) => ({
           id: a.id,
           clienteNome: a.clienteNome,
           procedimento: a.procedimento,
           data: a.data,
           status: a.status,
         })),
-        bioRadarDiagnosis: bioRadarData.map(b => ({
+        bioRadarDiagnosis: bioRadarData.map((b: typeof bioRadarData[number]) => ({
           instagramHandle: b.instagramHandle,
           score: b.score,
           createdAt: b.createdAt,
         })),
-        calendarPosts: calendarData.map(p => ({
+        calendarPosts: calendarData.map((p: typeof calendarData[number]) => ({
           titulo: p.titulo,
           tipo: p.tipo,
           dataAgendada: p.dataAgendada,
