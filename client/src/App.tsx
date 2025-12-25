@@ -19,6 +19,7 @@ import CalendarioEstrategico from "./pages/CalendarioEstrategico";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import DiagnosticoElevare from "./pages/DiagnosticoElevare";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import { useAuth } from "@/_core/hooks/useAuth";
 
 // Protected Route wrapper - redirects to login if not authenticated
@@ -40,6 +41,34 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
   
   if (!isAuthenticated) {
     return <Redirect to="/login" />;
+  }
+  
+  return <Component />;
+}
+
+// Admin Route wrapper - redirects non-admins
+function AdminRoute({ component: Component }: { component: React.ComponentType }) {
+  const { isAuthenticated, loading, user } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 mb-4 animate-pulse">
+            <span className="text-2xl">🔒</span>
+          </div>
+          <p className="text-slate-400 font-medium">Verificando acesso...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Redirect to="/login" />;
+  }
+  
+  if (user?.role !== "admin") {
+    return <Redirect to="/dashboard" />;
   }
   
   return <Component />;
@@ -70,6 +99,9 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/radar-bio" component={RadarBio} />
       <Route path="/diagnostico" component={DiagnosticoElevare} />
+      
+      {/* Admin Routes */}
+      <Route path="/admin">{() => <AdminRoute component={AdminDashboard} />}</Route>
       
       {/* Protected Routes - redirect to login if not authenticated */}
       <Route path="/dashboard">{() => <ProtectedRoute component={Dashboard} />}</Route>
