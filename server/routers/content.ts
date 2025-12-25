@@ -497,7 +497,7 @@ Use técnicas de neurovendas e gatilhos mentais.`;
         .limit(input.limit);
 
       // BUG-011: Parse seguro e eficiente
-      return results.map((item) => ({
+      return results.map((item: typeof results[0]) => ({
         ...item,
         content: safeParse(item.content),
         metadata: safeParse(item.metadata),

@@ -81,10 +81,10 @@ export const crmRouter = router({
       // Filtrar no JS por simplicidade (Drizzle MySQL não suporta bem AND dinâmico)
       let filtered = leadsList;
       if (input.status) {
-        filtered = filtered.filter((l) => l.status === input.status);
+        filtered = filtered.filter((l: typeof leadsList[0]) => l.status === input.status);
       }
       if (input.temperatura) {
-        filtered = filtered.filter((l) => l.temperatura === input.temperatura);
+        filtered = filtered.filter((l: typeof leadsList[0]) => l.temperatura === input.temperatura);
       }
 
       // Contar total
@@ -260,13 +260,13 @@ export const crmRouter = router({
       // Filtrar por data e status
       let filtered = agendamentosList;
       if (input.dataInicio) {
-        filtered = filtered.filter((a) => a.data >= input.dataInicio!);
+        filtered = filtered.filter((a: typeof agendamentosList[0]) => a.data >= input.dataInicio!);
       }
       if (input.dataFim) {
-        filtered = filtered.filter((a) => a.data <= input.dataFim!);
+        filtered = filtered.filter((a: typeof agendamentosList[0]) => a.data <= input.dataFim!);
       }
       if (input.status) {
-        filtered = filtered.filter((a) => a.status === input.status);
+        filtered = filtered.filter((a: typeof agendamentosList[0]) => a.status === input.status);
       }
 
       return { success: true, agendamentos: filtered };
@@ -349,22 +349,22 @@ export const crmRouter = router({
 
     const totalLeads = leadsData.length;
     const leadsPorStatus = {
-      novo: leadsData.filter((l) => l.status === "novo").length,
-      contatado: leadsData.filter((l) => l.status === "contatado").length,
-      agendado: leadsData.filter((l) => l.status === "agendado").length,
-      convertido: leadsData.filter((l) => l.status === "convertido").length,
-      perdido: leadsData.filter((l) => l.status === "perdido").length,
+      novo: leadsData.filter((l: typeof leadsData[0]) => l.status === "novo").length,
+      contatado: leadsData.filter((l: typeof leadsData[0]) => l.status === "contatado").length,
+      agendado: leadsData.filter((l: typeof leadsData[0]) => l.status === "agendado").length,
+      convertido: leadsData.filter((l: typeof leadsData[0]) => l.status === "convertido").length,
+      perdido: leadsData.filter((l: typeof leadsData[0]) => l.status === "perdido").length,
     };
 
     const leadsPorTemperatura = {
-      frio: leadsData.filter((l) => l.temperatura === "frio").length,
-      morno: leadsData.filter((l) => l.temperatura === "morno").length,
-      quente: leadsData.filter((l) => l.temperatura === "quente").length,
+      frio: leadsData.filter((l: typeof leadsData[0]) => l.temperatura === "frio").length,
+      morno: leadsData.filter((l: typeof leadsData[0]) => l.temperatura === "morno").length,
+      quente: leadsData.filter((l: typeof leadsData[0]) => l.temperatura === "quente").length,
     };
 
     // Valor total estimado
     const valorTotalEstimado = leadsData.reduce(
-      (sum, l) => sum + (l.valorEstimado || 0),
+      (sum: number, l: typeof leadsData[0]) => sum + (l.valorEstimado || 0),
       0
     );
 
@@ -385,12 +385,12 @@ export const crmRouter = router({
       .where(eq(agendamentos.userId, ctx.user.id));
 
     const faturamentoMes = agendamentosRealizados
-      .filter((a) => a.data.startsWith(mesAtual) && a.status === "realizado")
-      .reduce((sum, a) => sum + a.valor, 0);
+      .filter((a: typeof agendamentosRealizados[0]) => a.data.startsWith(mesAtual) && a.status === "realizado")
+      .reduce((sum: number, a: typeof agendamentosRealizados[0]) => sum + a.valor, 0);
 
     const faturamentoPrevisto = agendamentosRealizados
-      .filter((a) => a.data.startsWith(mesAtual) && a.status !== "cancelado")
-      .reduce((sum, a) => sum + a.valor, 0);
+      .filter((a: typeof agendamentosRealizados[0]) => a.data.startsWith(mesAtual) && a.status !== "cancelado")
+      .reduce((sum: number, a: typeof agendamentosRealizados[0]) => sum + a.valor, 0);
 
     return {
       success: true,

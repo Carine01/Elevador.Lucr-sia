@@ -417,8 +417,8 @@ export default function AgendaEstrategica() {
                       <div className="flex items-center gap-2">
                         <User className="w-4 h-4 text-slate-400" />
                         <span className="text-white font-medium">{agendamento.clienteNome}</span>
-                        <Badge className={statusConfig[agendamento.status].color}>
-                          {statusConfig[agendamento.status].label}
+                        <Badge className={statusConfig[agendamento.status as keyof typeof statusConfig].color}>
+                          {statusConfig[agendamento.status as keyof typeof statusConfig].label}
                         </Badge>
                       </div>
                       <p className="text-slate-400 text-sm mt-1">{agendamento.procedimento}</p>

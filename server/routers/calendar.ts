@@ -129,16 +129,16 @@ export const calendarRouter = router({
       // Filtrar
       let filtered = posts;
       if (input.dataInicio) {
-        filtered = filtered.filter((p) => p.dataAgendada >= input.dataInicio!);
+        filtered = filtered.filter((p: typeof posts[0]) => p.dataAgendada >= input.dataInicio!);
       }
       if (input.dataFim) {
-        filtered = filtered.filter((p) => p.dataAgendada <= input.dataFim!);
+        filtered = filtered.filter((p: typeof posts[0]) => p.dataAgendada <= input.dataFim!);
       }
       if (input.tipo) {
-        filtered = filtered.filter((p) => p.tipo === input.tipo);
+        filtered = filtered.filter((p: typeof posts[0]) => p.tipo === input.tipo);
       }
       if (input.status) {
-        filtered = filtered.filter((p) => p.status === input.status);
+        filtered = filtered.filter((p: typeof posts[0]) => p.status === input.status);
       }
 
       return { success: true, posts: filtered };
@@ -165,7 +165,7 @@ export const calendarRouter = router({
         .orderBy(calendarioPosts.dataAgendada, calendarioPosts.horario);
 
       const weekPosts = posts.filter(
-        (p) => p.dataAgendada >= input.weekStart && p.dataAgendada <= weekEnd
+        (p: typeof posts[0]) => p.dataAgendada >= input.weekStart && p.dataAgendada <= weekEnd
       );
 
       // Agrupar por dia
@@ -174,7 +174,7 @@ export const calendarRouter = router({
         const date = new Date(startDate);
         date.setDate(date.getDate() + i);
         const dateStr = date.toISOString().split("T")[0];
-        postsByDay[dateStr] = weekPosts.filter((p) => p.dataAgendada === dateStr);
+        postsByDay[dateStr] = weekPosts.filter((p: typeof posts[0]) => p.dataAgendada === dateStr);
       }
 
       return { success: true, posts: weekPosts, postsByDay };
@@ -392,22 +392,22 @@ Retorne em JSON:
         .from(calendarioPosts)
         .where(eq(calendarioPosts.userId, ctx.user.id));
 
-      const postsMes = posts.filter((p) => p.dataAgendada.startsWith(input.mes));
+      const postsMes = posts.filter((p: typeof posts[0]) => p.dataAgendada.startsWith(input.mes));
 
       const stats = {
         totalPosts: postsMes.length,
-        pendentes: postsMes.filter((p) => p.status === "pendente").length,
-        publicados: postsMes.filter((p) => p.status === "publicado").length,
-        cancelados: postsMes.filter((p) => p.status === "cancelado").length,
+        pendentes: postsMes.filter((p: typeof posts[0]) => p.status === "pendente").length,
+        publicados: postsMes.filter((p: typeof posts[0]) => p.status === "publicado").length,
+        cancelados: postsMes.filter((p: typeof posts[0]) => p.status === "cancelado").length,
         porTipo: {
-          autoridade: postsMes.filter((p) => p.tipo === "autoridade").length,
-          desejo: postsMes.filter((p) => p.tipo === "desejo").length,
-          fechamento: postsMes.filter((p) => p.tipo === "fechamento").length,
-          conexao: postsMes.filter((p) => p.tipo === "conexao").length,
+          autoridade: postsMes.filter((p: typeof posts[0]) => p.tipo === "autoridade").length,
+          desejo: postsMes.filter((p: typeof posts[0]) => p.tipo === "desejo").length,
+          fechamento: postsMes.filter((p: typeof posts[0]) => p.tipo === "fechamento").length,
+          conexao: postsMes.filter((p: typeof posts[0]) => p.tipo === "conexao").length,
         },
         engajamentoTotal: postsMes
-          .filter((p) => p.engajamento)
-          .reduce((sum, p) => {
+          .filter((p: typeof posts[0]) => p.engajamento)
+          .reduce((sum: number, p: typeof posts[0]) => {
             try {
               const eng = JSON.parse(p.engajamento || "{}");
               return sum + (eng.likes || 0) + (eng.comentarios || 0);
