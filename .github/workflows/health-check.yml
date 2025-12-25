@@ -6,6 +6,9 @@ on:
     - cron: '*/5 * * * *'
   workflow_dispatch: # Permite execução manual
 
+env:
+  PRODUCTION_URL: "https://acceptable-elegance-production-0f9f.up.railway.app"
+
 jobs:
   check-health:
     name: Verificar Saúde da Produção
@@ -19,7 +22,7 @@ jobs:
         id: health
         run: |
           # URL de produção do Railway
-          PROD_URL="https://acceptable-elegance-production-0f9f.up.railway.app"
+          PROD_URL="${{ env.PRODUCTION_URL }}"
           
           RESPONSE=$(curl -s -w "\n%{http_code}" $PROD_URL/api/trpc/health.check || echo "000")
           HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
@@ -38,7 +41,7 @@ jobs:
 
       - name: Testar Autenticação
         run: |
-          PROD_URL="https://acceptable-elegance-production-0f9f.up.railway.app"
+          PROD_URL="${{ env.PRODUCTION_URL }}"
           
           # Tenta acessar endpoint protegido sem auth (deve retornar 401 ou erro)
           HTTP_CODE=$(curl -s -w "%{http_code}" -o /dev/null $PROD_URL/api/trpc/auth.me || echo "000")
@@ -54,7 +57,7 @@ jobs:
 
       - name: Testar Rate Limiting
         run: |
-          PROD_URL="https://acceptable-elegance-production-0f9f.up.railway.app"
+          PROD_URL="${{ env.PRODUCTION_URL }}"
           
           echo "Testando rate limiting com múltiplas requisições..."
           
@@ -77,7 +80,7 @@ jobs:
 
       - name: Verificar tempo de resposta
         run: |
-          PROD_URL="https://acceptable-elegance-production-0f9f.up.railway.app"
+          PROD_URL="${{ env.PRODUCTION_URL }}"
           
           START_TIME=$(date +%s%3N)
           HTTP_CODE=$(curl -s -w "%{http_code}" -o /dev/null $PROD_URL/api/trpc/health.check)

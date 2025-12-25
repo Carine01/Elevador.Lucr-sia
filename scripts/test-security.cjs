@@ -13,6 +13,11 @@ console.log('🔒 Executando testes de segurança...\n');
 let errors = 0;
 let warnings = 0;
 
+// Configuração
+const CONFIG_KEYS = {
+  CORS_ALLOWED_ORIGINS: 'allowedOrigins',
+};
+
 // ==========================================
 // TESTE 1: Verificar filtros de userId
 // ==========================================
@@ -91,7 +96,7 @@ console.log('📋 Teste 4: Verificando CORS...');
 if (!indexContent.includes('cors(')) {
   console.error('   ❌ CORS não está configurado!');
   errors++;
-} else if (!indexContent.includes('allowedOrigins')) {
+} else if (!indexContent.includes(CONFIG_KEYS.CORS_ALLOWED_ORIGINS)) {
   console.warn('   ⚠️  CORS sem whitelist (aceita qualquer origem)');
   warnings++;
 } else {

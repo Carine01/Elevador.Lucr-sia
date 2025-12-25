@@ -5,6 +5,19 @@
 
 import { publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
+import { readFileSync } from 'fs';
+import { join } from 'path';
+
+// Read version from package.json
+let appVersion = '1.0.0';
+try {
+  const packageJson = JSON.parse(
+    readFileSync(join(process.cwd(), 'package.json'), 'utf-8')
+  );
+  appVersion = packageJson.version || '1.0.0';
+} catch (error) {
+  console.warn('Could not read version from package.json, using default');
+}
 
 export const healthRouter = router({
   check: publicProcedure.query(async () => {
@@ -29,7 +42,7 @@ export const healthRouter = router({
     return {
       status: 'healthy',
       timestamp,
-      version: '1.0.0',
+      version: appVersion,
       environment: process.env.NODE_ENV || 'development',
       database: dbStatus,
       uptime: process.uptime(),

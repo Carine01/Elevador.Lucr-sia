@@ -13,6 +13,12 @@ console.log('🏥 Executando testes de saúde...\n');
 let passed = 0;
 let failed = 0;
 
+// Configuração
+const ENDPOINTS = {
+  STRIPE_WEBHOOK: '/api/stripe/webhook',
+  STRIPE_VERIFY: 'stripe.webhooks.constructEvent',
+};
+
 // ==========================================
 // TESTE 1: Health check endpoint existe
 // ==========================================
@@ -65,10 +71,10 @@ console.log('📋 Teste 3: Verificando webhook Stripe...');
 const indexFile = path.join(__dirname, '..', 'server', '_core', 'index.ts');
 const indexContent = fs.readFileSync(indexFile, 'utf8');
 
-if (!indexContent.includes('/api/stripe/webhook')) {
+if (!indexContent.includes(ENDPOINTS.STRIPE_WEBHOOK)) {
   console.error('   ❌ Webhook Stripe não configurado!');
   failed++;
-} else if (!indexContent.includes('stripe.webhooks.constructEvent')) {
+} else if (!indexContent.includes(ENDPOINTS.STRIPE_VERIFY)) {
   console.error('   ❌ Webhook sem verificação de assinatura!');
   failed++;
 } else {
