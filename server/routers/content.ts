@@ -8,6 +8,7 @@ import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
+import { consumeCredits } from "../_core/credits";
 
 export const contentRouter = router({
   // ============================================
@@ -62,6 +63,9 @@ export const contentRouter = router({
           type: input.type, 
           userId: ctx.user.id 
         });
+
+        // Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'post', `Conteúdo genérico: ${input.type}`);
 
         return {
           id: saved.id,
@@ -184,6 +188,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           userId: ctx.user.id,
           topic: input.topic 
         });
+
+        // Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'ebook', `E-book: ${input.topic}`);
 
         return {
           id: saved.id,
@@ -354,6 +361,9 @@ Forneça no formato JSON:
 
         logger.info('Prompt generated', { userId: ctx.user.id });
 
+        // Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'reel_script', `Prompt: ${input.description.substring(0, 50)}`);
+
         return result;
       } catch (error) {
         if (error instanceof AIServiceError) {
@@ -457,6 +467,9 @@ Use técnicas de neurovendas e gatilhos mentais.`;
         });
 
         logger.info('Ad generated', { userId: ctx.user.id, product: input.product });
+
+        // Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'ad', `Anúncio: ${input.product}`);
 
         return ad;
       } catch (error) {
