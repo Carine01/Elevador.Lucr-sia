@@ -197,12 +197,6 @@ export default function EbookGenerator() {
                     </>
                   )}
                 </Button>
-
-                {!canGenerate && (
-                  <p className="text-sm text-amber-400 text-center">
-                    ⚠️ Você precisa de {REQUIRED_CREDITS} créditos para gerar e-books
-                  </p>
-                )}
               </div>
             </Card>
           </div>
