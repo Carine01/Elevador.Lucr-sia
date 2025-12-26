@@ -277,6 +277,11 @@ async function startServer() {
     credentials: true
   }));
 
+  // ==================== REQUEST LOGGING ====================
+  // Logging automático de todas as requests com correlation ID
+  const { requestLoggingMiddleware } = await import('./logging-middleware');
+  app.use(requestLoggingMiddleware);
+
   // ==================== RATE LIMITING ====================
   // BUG-004: Adicionar rate limiting
   const publicApiLimiter = rateLimit({
@@ -381,6 +386,11 @@ async function startServer() {
       createContext,
     })
   );
+
+  // ==================== ERROR HANDLING ====================
+  // Middleware de error logging (deve ser o último middleware)
+  const { errorLoggingMiddleware } = await import('./logging-middleware');
+  app.use(errorLoggingMiddleware);
 
   // ==================== STATIC FILES / VITE ====================
   // development mode uses Vite, production mode uses static files
