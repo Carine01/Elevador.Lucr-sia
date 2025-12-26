@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { CreditBadge } from "./CreditBadge";
 
 interface ElevareDashboardLayoutProps {
   children: React.ReactNode;
@@ -233,14 +234,7 @@ export default function ElevareDashboardLayout({
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <Card className="bg-purple-50 border-purple-200 px-4 py-2">
-              <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-purple-600" />
-                <span className="text-sm font-medium text-purple-700">
-                  100 créditos
-                </span>
-              </div>
-            </Card>
+            <CreditBadge />
           </div>
         </div>
 

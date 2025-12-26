@@ -1,4 +1,5 @@
 import ElevareDashboardLayout from "@/components/ElevareDashboardLayout";
+import { CreditGuard } from "@/components/CreditGuard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,8 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
 
+const REQUIRED_CREDITS = 20;
+
 export default function EbookGenerator() {
   const [topic, setTopic] = useState("");
   const [targetAudience, setTargetAudience] = useState("");
@@ -34,15 +37,19 @@ export default function EbookGenerator() {
     limit: 10,
   });
 
+  const canGenerate = 
+    subscription?.plan === 'profissional' || 
+    subscription?.creditsRemaining === -1 ||
+    (subscription?.creditsRemaining ?? 0) >= REQUIRED_CREDITS;
+
   const handleGenerate = async () => {
     if (!topic.trim()) {
       toast.error("Por favor, digite um tópico para o e-book");
       return;
     }
 
-    // Verificar créditos
-    if (subscription && subscription.plan === "free") {
-      toast.error("Upgrade para PRO para gerar e-books");
+    if (!canGenerate) {
+      toast.error("Créditos insuficientes para gerar e-book");
       return;
     }
 
@@ -72,7 +79,8 @@ export default function EbookGenerator() {
   };
 
   return (
-    <ElevareDashboardLayout>
+    <CreditGuard requiredCredits={REQUIRED_CREDITS} featureName="geração de e-books">
+      <ElevareDashboardLayout>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -172,7 +180,7 @@ export default function EbookGenerator() {
                 {/* Generate Button */}
                 <Button
                   onClick={handleGenerate}
-                  disabled={generating || !topic.trim()}
+                  disabled={generating || !topic.trim() || !canGenerate}
                   className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-6 text-lg"
                 >
                   {generating ? (
@@ -180,6 +188,8 @@ export default function EbookGenerator() {
                       <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                       Gerando E-book...
                     </>
+                  ) : !canGenerate ? (
+                    'Créditos insuficientes'
                   ) : (
                     <>
                       <Sparkles className="w-5 h-5 mr-2" />
@@ -188,9 +198,9 @@ export default function EbookGenerator() {
                   )}
                 </Button>
 
-                {subscription?.plan === "free" && (
+                {!canGenerate && (
                   <p className="text-sm text-amber-400 text-center">
-                    ⚠️ Upgrade para PRO para gerar e-books
+                    ⚠️ Você precisa de {REQUIRED_CREDITS} créditos para gerar e-books
                   </p>
                 )}
               </div>
@@ -298,5 +308,6 @@ export default function EbookGenerator() {
         )}
       </div>
     </ElevareDashboardLayout>
+    </CreditGuard>
   );
 }

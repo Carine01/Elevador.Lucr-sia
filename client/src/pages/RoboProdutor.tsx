@@ -1,4 +1,5 @@
 import ElevareDashboardLayout from "@/components/ElevareDashboardLayout";
+import { CreditGuard } from "@/components/CreditGuard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,6 +24,8 @@ import {
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+
+const REQUIRED_CREDITS = 10;
 
 export default function RoboProdutor() {
   // Prompt Generator State
@@ -52,14 +55,19 @@ export default function RoboProdutor() {
   const generateAdMutation = trpc.content.generateAd.useMutation();
   const { data: subscription } = trpc.subscription.getSubscription.useQuery();
 
+  const canGenerate = 
+    subscription?.plan === 'profissional' || 
+    subscription?.creditsRemaining === -1 ||
+    (subscription?.creditsRemaining ?? 0) >= REQUIRED_CREDITS;
+
   const handleGeneratePrompt = async () => {
     if (!promptDescription.trim()) {
       toast.error("Por favor, descreva a imagem que deseja gerar");
       return;
     }
 
-    if (subscription && subscription.plan === "free") {
-      toast.error("Upgrade para PRO para gerar prompts");
+    if (!canGenerate) {
+      toast.error("Créditos insuficientes para gerar prompt");
       return;
     }
 
@@ -88,8 +96,8 @@ export default function RoboProdutor() {
       return;
     }
 
-    if (subscription && subscription.plan === "free") {
-      toast.error("Upgrade para PRO para gerar anúncios");
+    if (!canGenerate) {
+      toast.error("Créditos insuficientes para gerar anúncio");
       return;
     }
 
@@ -119,7 +127,8 @@ export default function RoboProdutor() {
   };
 
   return (
-    <ElevareDashboardLayout>
+    <CreditGuard requiredCredits={REQUIRED_CREDITS} featureName="geração de prompts/anúncios">
+      <ElevareDashboardLayout>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -219,7 +228,7 @@ export default function RoboProdutor() {
 
                   <Button
                     onClick={handleGeneratePrompt}
-                    disabled={generatingPrompt || !promptDescription.trim()}
+                    disabled={generatingPrompt || !promptDescription.trim() || !canGenerate}
                     className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-6"
                   >
                     {generatingPrompt ? (
@@ -227,6 +236,8 @@ export default function RoboProdutor() {
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                         Gerando...
                       </>
+                    ) : !canGenerate ? (
+                      'Créditos insuficientes'
                     ) : (
                       <>
                         <Sparkles className="w-5 h-5 mr-2" />
@@ -404,7 +415,7 @@ export default function RoboProdutor() {
 
                   <Button
                     onClick={handleGenerateAd}
-                    disabled={generatingAd || !adProduct.trim()}
+                    disabled={generatingAd || !adProduct.trim() || !canGenerate}
                     className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-6"
                   >
                     {generatingAd ? (
@@ -412,6 +423,8 @@ export default function RoboProdutor() {
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                         Gerando...
                       </>
+                    ) : !canGenerate ? (
+                      'Créditos insuficientes'
                     ) : (
                       <>
                         <Megaphone className="w-5 h-5 mr-2" />
@@ -529,5 +542,6 @@ export default function RoboProdutor() {
         </Tabs>
       </div>
     </ElevareDashboardLayout>
+    </CreditGuard>
   );
 }

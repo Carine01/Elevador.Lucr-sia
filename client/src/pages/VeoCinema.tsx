@@ -1,4 +1,5 @@
 import ElevareDashboardLayout from "@/components/ElevareDashboardLayout";
+import { CreditGuard } from "@/components/CreditGuard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,8 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
 
+const REQUIRED_CREDITS = 10;
+
 export default function VeoCinema() {
   const [procedimento, setProcedimento] = useState("");
   const [estilo, setEstilo] = useState("cinematografico");
@@ -28,10 +31,21 @@ export default function VeoCinema() {
   const [generating, setGenerating] = useState(false);
 
   const generateMutation = trpc.content.generateContent.useMutation();
+  const { data: subscription } = trpc.subscription.getSubscription.useQuery();
+
+  const canGenerate = 
+    subscription?.plan === 'profissional' || 
+    subscription?.creditsRemaining === -1 ||
+    (subscription?.creditsRemaining ?? 0) >= REQUIRED_CREDITS;
 
   const handleGenerate = async () => {
     if (!procedimento.trim()) {
       toast.error("Digite o nome do procedimento");
+      return;
+    }
+
+    if (!canGenerate) {
+      toast.error("Créditos insuficientes para gerar roteiro");
       return;
     }
 
@@ -97,7 +111,8 @@ Seja específico e profissional. O roteiro deve ser executável por uma produtor
   };
 
   return (
-    <ElevareDashboardLayout>
+    <CreditGuard requiredCredits={REQUIRED_CREDITS} featureName="geração de roteiros">
+      <ElevareDashboardLayout>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -200,7 +215,7 @@ Seja específico e profissional. O roteiro deve ser executável por uma produtor
 
               <Button
                 onClick={handleGenerate}
-                disabled={generating || !procedimento.trim()}
+                disabled={generating || !procedimento.trim() || !canGenerate}
                 className="w-full bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold py-6"
               >
                 {generating ? (
@@ -208,6 +223,8 @@ Seja específico e profissional. O roteiro deve ser executável por uma produtor
                     <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                     Criando Roteiro...
                   </>
+                ) : !canGenerate ? (
+                  'Créditos insuficientes'
                 ) : (
                   <>
                     <Video className="w-5 h-5 mr-2" />
@@ -286,5 +303,6 @@ Seja específico e profissional. O roteiro deve ser executável por uma produtor
         </div>
       </div>
     </ElevareDashboardLayout>
+    </CreditGuard>
   );
 }
