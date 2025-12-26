@@ -6,12 +6,23 @@ import { eq } from 'drizzle-orm';
 import { logger } from '../_core/logger';
 import { ENV } from '../_core/env';
 
+// Type extensions for Stripe objects with runtime properties
+interface StripeSubscriptionWithPeriod extends Stripe.Subscription {
+  current_period_end: number;
+}
+
+interface StripeInvoiceWithSubscription extends Stripe.Invoice {
+  subscription: string | Stripe.Subscription;
+}
+
 const router = Router();
 const stripe = new Stripe(ENV.STRIPE_SECRET_KEY, {
   apiVersion: '2025-10-29.clover' as const,
 });
 
 // Mapa de IDs processados (idempotência)
+// NOTA: Em alta escala, considere usar Redis ou outro cache distribuído
+// Este cache em memória é limpo após 1 hora e não persiste entre restarts
 const processedEvents = new Set<string>();
 
 router.post('/webhook', async (req, res) => {
@@ -106,7 +117,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Buscar subscription no Stripe para obter detalhes
-  const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionId) as StripeSubscriptionWithPeriod;
   const priceId = stripeSubscription.items.data[0].price.id;
 
   // Mapear priceId para plano
@@ -140,9 +151,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // Type assertion for current_period_end which exists at runtime
-  const currentPeriodEnd = (stripeSubscription as any).current_period_end as number;
-
   // Atualizar assinatura
   await db
     .update(subscription)
@@ -152,7 +160,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripeSubscriptionId: subscriptionId,
       creditsRemaining: creditsMap[plan],
       monthlyCreditsLimit: creditsMap[plan],
-      renewalDate: new Date(currentPeriodEnd * 1000),
+      renewalDate: new Date(stripeSubscription.current_period_end * 1000),
     })
     .where(eq(subscription.userId, userSub.userId));
 
@@ -187,15 +195,13 @@ async function handleSubscriptionUpdated(stripeSubscription: Stripe.Subscription
   }
 
   const status = stripeSubscription.status === 'active' ? 'active' : 'inactive';
-
-  // Type assertion for current_period_end which exists at runtime
-  const currentPeriodEnd = (stripeSubscription as any).current_period_end as number;
+  const subscriptionWithPeriod = stripeSubscription as StripeSubscriptionWithPeriod;
 
   await db
     .update(subscription)
     .set({
       status,
-      renewalDate: new Date(currentPeriodEnd * 1000),
+      renewalDate: new Date(subscriptionWithPeriod.current_period_end * 1000),
     })
     .where(eq(subscription.id, userSub.id));
 
@@ -253,8 +259,10 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     return;
   }
 
-  // Type assertion for subscription property which exists at runtime
-  const subscriptionId = (invoice as any).subscription as string;
+  const invoiceWithSub = invoice as StripeInvoiceWithSubscription;
+  const subscriptionId = typeof invoiceWithSub.subscription === 'string'
+    ? invoiceWithSub.subscription
+    : invoiceWithSub.subscription?.id;
 
   if (!subscriptionId) {
     return;
@@ -294,8 +302,10 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     return;
   }
 
-  // Type assertion for subscription property which exists at runtime
-  const subscriptionId = (invoice as any).subscription as string;
+  const invoiceWithSub = invoice as StripeInvoiceWithSubscription;
+  const subscriptionId = typeof invoiceWithSub.subscription === 'string'
+    ? invoiceWithSub.subscription
+    : invoiceWithSub.subscription?.id;
 
   if (!subscriptionId) {
     return;
