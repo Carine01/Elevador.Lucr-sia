@@ -1,4 +1,5 @@
 import ElevareDashboardLayout from "@/components/ElevareDashboardLayout";
+import { CreditGuard } from "@/components/CreditGuard";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,8 @@ import { toast } from "sonner";
 import { Streamdown } from "streamdown";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+const REQUIRED_CREDITS = 10;
+
 export default function AdsManager() {
   // Campaign Planner State
   const [objetivo, setObjetivo] = useState("agendamentos");
@@ -49,10 +52,21 @@ export default function AdsManager() {
   const [generatingAd, setGeneratingAd] = useState(false);
 
   const generateMutation = trpc.content.generateContent.useMutation();
+  const { data: subscription } = trpc.subscription.getSubscription.useQuery();
+
+  const canGenerate = 
+    subscription?.plan === 'profissional' || 
+    subscription?.creditsRemaining === -1 ||
+    (subscription?.creditsRemaining ?? 0) >= REQUIRED_CREDITS;
 
   const handleGeneratePlan = async () => {
     if (!orcamento.trim() || !procedimentos.trim()) {
       toast.error("Preencha orçamento e procedimentos");
+      return;
+    }
+
+    if (!canGenerate) {
+      toast.error("Créditos insuficientes para gerar plano");
       return;
     }
 
@@ -125,6 +139,11 @@ Seja específico e prático. O plano deve ser executável por alguém sem experi
       return;
     }
 
+    if (!canGenerate) {
+      toast.error("Créditos insuficientes para gerar anúncio");
+      return;
+    }
+
     setGeneratingAd(true);
     setGeneratedAd(null);
 
@@ -163,7 +182,8 @@ Inclua:
   };
 
   return (
-    <ElevareDashboardLayout>
+    <CreditGuard requiredCredits={REQUIRED_CREDITS} featureName="geração de anúncios">
+      <ElevareDashboardLayout>
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -269,7 +289,7 @@ Inclua:
 
                   <Button
                     onClick={handleGeneratePlan}
-                    disabled={generating || !orcamento.trim() || !procedimentos.trim()}
+                    disabled={generating || !orcamento.trim() || !procedimentos.trim() || !canGenerate}
                     className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-6"
                   >
                     {generating ? (
@@ -277,6 +297,8 @@ Inclua:
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                         Criando Plano...
                       </>
+                    ) : !canGenerate ? (
+                      'Créditos insuficientes'
                     ) : (
                       <>
                         <BarChart3 className="w-5 h-5 mr-2" />
@@ -379,7 +401,7 @@ Inclua:
 
                   <Button
                     onClick={handleGenerateAd}
-                    disabled={generatingAd || !adProcedimento.trim()}
+                    disabled={generatingAd || !adProcedimento.trim() || !canGenerate}
                     className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-semibold py-6"
                   >
                     {generatingAd ? (
@@ -387,6 +409,8 @@ Inclua:
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                         Gerando...
                       </>
+                    ) : !canGenerate ? (
+                      'Créditos insuficientes'
                     ) : (
                       <>
                         <Megaphone className="w-5 h-5 mr-2" />
@@ -452,5 +476,6 @@ Inclua:
         </Tabs>
       </div>
     </ElevareDashboardLayout>
+    </CreditGuard>
   );
 }
