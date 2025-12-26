@@ -603,11 +603,17 @@ Use técnicas de neurovendas e gatilhos mentais.`;
 
       logger.info('PDF exported', { ebookId: input.contentId, userId: ctx.user.id });
 
+      // Gerar nome de arquivo seguro
+      const sanitizedTitle = ebookData.title.replace(/[^a-z0-9]/gi, '_');
+      const filename = sanitizedTitle.length > 0 
+        ? `${sanitizedTitle}.pdf` 
+        : `ebook_${input.contentId}.pdf`;
+
       // Retornar como base64 para download no frontend
       return {
         success: true,
         pdf: pdfBuffer.toString('base64'),
-        filename: `${ebookData.title.replace(/[^a-z0-9]/gi, '_')}.pdf`,
+        filename,
       };
     }),
 });
