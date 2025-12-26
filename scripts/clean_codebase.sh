@@ -46,11 +46,10 @@ safe_remove() {
     if [ -e "$target" ]; then
         rm -rf "$target"
         log_success "Removed: $description ($target)"
-        return 0
     else
         log_info "Not found (OK): $description ($target)"
-        return 1
     fi
+    return 0  # Always return success - "not found" is not an error
 }
 
 # ============================================
