@@ -8,6 +8,7 @@ import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
+import { generateEbookPDF } from "../_core/pdfGenerator";
 
 export const contentRouter = router({
   // ============================================
@@ -556,6 +557,63 @@ Use técnicas de neurovendas e gatilhos mentais.`;
       return {
         success: true,
         message: "Conteúdo deletado com sucesso",
+      };
+    }),
+
+  // Exportar e-book para PDF
+  exportEbookPDF: protectedProcedure
+    .input(
+      z.object({
+        contentId: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Buscar e-book do banco
+      const [ebook] = await db
+        .select()
+        .from(contentGeneration)
+        .where(
+          and(
+            eq(contentGeneration.id, input.contentId),
+            eq(contentGeneration.userId, ctx.user.id),
+            eq(contentGeneration.type, 'ebook')
+          )
+        )
+        .limit(1);
+
+      if (!ebook) {
+        throw new NotFoundError('E-book não encontrado');
+      }
+
+      // Parse do conteúdo
+      const ebookData = safeParse(ebook.content);
+
+      if (!ebookData || !ebookData.chapters) {
+        throw new AIServiceError('Conteúdo do e-book inválido');
+      }
+
+      // Gerar PDF
+      const pdfBuffer = await generateEbookPDF({
+        title: ebookData.title || ebook.title,
+        subtitle: ebookData.subtitle,
+        author: ctx.user.name || 'Elevare AI',
+        chapters: ebookData.chapters,
+        conclusion: ebookData.conclusion,
+      });
+
+      logger.info('PDF exported', { ebookId: input.contentId, userId: ctx.user.id });
+
+      // Gerar nome de arquivo seguro
+      const sanitizedTitle = ebookData.title.replace(/[^a-z0-9]/gi, '_');
+      const filename = sanitizedTitle.length > 0 
+        ? `${sanitizedTitle}.pdf` 
+        : `ebook_${input.contentId}.pdf`;
+
+      // Retornar como base64 para download no frontend
+      return {
+        success: true,
+        pdf: pdfBuffer.toString('base64'),
+        filename,
       };
     }),
 });

@@ -28,6 +28,7 @@ export default function EbookGenerator() {
   const [generating, setGenerating] = useState(false);
 
   const generateEbook = trpc.content.generateEbook.useMutation();
+  const exportPDFMutation = trpc.content.exportEbookPDF.useMutation();
   const { data: subscription } = trpc.subscription.getSubscription.useQuery();
   const { data: contentList } = trpc.content.listGenerated.useQuery({
     type: "ebook",
@@ -66,9 +67,35 @@ export default function EbookGenerator() {
     }
   };
 
-  const handleDownloadPDF = () => {
-    toast.info("Funcionalidade de download em desenvolvimento");
-    // TODO: Implementar geração de PDF
+  const handleDownloadPDF = async (contentId: number, title: string) => {
+    try {
+      toast.info('Gerando PDF...');
+
+      const result = await exportPDFMutation.mutateAsync({ contentId });
+
+      // Converter base64 para blob
+      const binaryString = window.atob(result.pdf);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+
+      // Criar link de download
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = result.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success('PDF baixado com sucesso!');
+    } catch (error) {
+      toast.error('Erro ao gerar PDF. Tente novamente.');
+      console.error(error);
+    }
   };
 
   return (
@@ -209,7 +236,7 @@ export default function EbookGenerator() {
                     <div
                       key={item.id}
                       className="p-3 bg-slate-700/50 rounded-lg border border-slate-600 hover:border-slate-500 transition-colors cursor-pointer"
-                      onClick={() => setGeneratedEbook(item.content)}
+                      onClick={() => setGeneratedEbook({ ...(typeof item.content === 'object' ? item.content : {}), id: item.id })}
                     >
                       <p className="text-white font-medium text-sm truncate">
                         {item.title}
@@ -238,12 +265,22 @@ export default function EbookGenerator() {
               </h2>
               <div className="flex gap-3">
                 <Button
-                  onClick={handleDownloadPDF}
+                  onClick={() => handleDownloadPDF(generatedEbook.id, generatedEbook.title)}
+                  disabled={exportPDFMutation.isPending || !generatedEbook.id}
                   variant="outline"
                   className="border-slate-600 text-slate-300 hover:bg-slate-700"
                 >
-                  <Download className="w-4 h-4 mr-2" />
-                  Baixar PDF
+                  {exportPDFMutation.isPending ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Gerando PDF...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Baixar PDF
+                    </>
+                  )}
                 </Button>
               </div>
             </div>
