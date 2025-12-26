@@ -12,6 +12,7 @@ import { gamificationRouter } from "./routers/gamification";
 import { quizRouter } from "./routers/quiz";
 import { adminRouter } from "./routers/admin";
 import { lgpdRouter } from "./routers/lgpd";
+import { emailRouter } from "./routers/email";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -44,6 +45,9 @@ export const appRouter = router({
   
   // 🔐 LGPD - Conformidade com Lei Geral de Proteção de Dados
   lgpd: lgpdRouter,
+  
+  // 📧 EMAIL - Sistema de emails transacionais
+  email: emailRouter,
 });
 
 export type AppRouter = typeof appRouter;
