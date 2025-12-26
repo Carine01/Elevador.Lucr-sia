@@ -7,7 +7,7 @@ import { llm } from "../_core/llm";
 import { logger } from "../_core/logger";
 import { AIServiceError, RateLimitError, AuthorizationError } from "../_core/errors";
 import { safeParse, assertOwnership } from "../../shared/_core/utils";
-import { consumeCredits } from "../_core/credits";
+import { consumeCredits, checkCredits } from "../_core/credits";
 
 // BUG-004 e BUG-006: Rate limiting por IP para análises gratuitas
 const ipRateLimit = new Map<string, { count: number; resetAt: number }>();
@@ -46,6 +46,11 @@ export const bioRadarRouter = router({
         throw new RateLimitError(
           'Limite de análises gratuitas atingido. Faça login ou aguarde 1 hora para continuar.'
         );
+      }
+
+      // Verificar créditos antes de gerar (apenas para usuários autenticados)
+      if (userId) {
+        await checkCredits(userId, 'bio_analysis');
       }
 
       // Prompt para análise da bio

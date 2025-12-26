@@ -8,7 +8,7 @@ import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
-import { consumeCredits } from "../_core/credits";
+import { consumeCredits, checkCredits } from "../_core/credits";
 
 export const contentRouter = router({
   // ============================================
@@ -24,6 +24,9 @@ export const contentRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        // Verificar créditos antes de gerar
+        await checkCredits(ctx.user.id, 'post');
+        
         const response = await llm.chat.completions.create({
           model: "gemini-2.5-flash",
           messages: [
@@ -97,6 +100,9 @@ export const contentRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Verificar créditos antes de gerar
+      await checkCredits(ctx.user.id, 'ebook');
+      
       const prompt = `Você é um especialista em marketing de conteúdo para clínicas de estética.
 
 Crie um e-book completo sobre: "${input.topic}"
@@ -291,6 +297,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Verificar créditos antes de gerar
+      await checkCredits(ctx.user.id, 'reel_script');
+      
       const prompt = `Você é um especialista em criar prompts para geração de imagens com IA.
 
 Crie um prompt otimizado para ${input.platform} baseado em:
@@ -392,6 +401,9 @@ Forneça no formato JSON:
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Verificar créditos antes de gerar
+      await checkCredits(ctx.user.id, 'ad');
+      
       const prompt = `Você é um especialista em copywriting para anúncios de estética.
 
 Crie um anúncio completo para:
