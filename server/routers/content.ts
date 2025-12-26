@@ -1,6 +1,419 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
-import { db } from "../db";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+};  printEbookAsPDF,  downloadEbookPDF,  generateEbookPDF,export default {}  };    printWindow.print();  printWindow.onload = () => {  // Aguardar carregamento e imprimir    printWindow.document.close();  printWindow.document.write(html);  `;    </html>    </body>      ` : ''}        </div>          <p>${stripMarkdown(ebook.callToAction)}</p>          <h2>Próximos Passos</h2>        <div class="cta">      ${ebook.callToAction ? `      ` : ''}        </div>          <p>${stripMarkdown(ebook.conclusion)}</p>          <h2>Conclusão</h2>        <div class="conclusion">      ${ebook.conclusion ? `      `).join('')}        </div>          </div>            ${chapter.content.split('\n\n').map(p => `<p>${stripMarkdown(p)}</p>`).join('')}          <div class="chapter-content">          <h2>${chapter.title}</h2>          <div class="chapter-number">Capítulo ${chapter.number}</div>        <div class="chapter">      ${ebook.chapters.map(chapter => `      </div>        </div>          <p>${new Date().toLocaleDateString('pt-BR')}</p>          <p>Gerado por Elevare IA</p>        <div class="meta">        ${ebook.description ? `<div class="description">${ebook.description}</div>` : ''}        ${ebook.subtitle ? `<div class="subtitle">${ebook.subtitle}</div>` : ''}        <h1>${ebook.title}</h1>      <div class="cover">    <body>    </head>      </style>        }          }            background: #f5f5f5 !important;          .conclusion, .cta {          }            -webkit-print-color-adjust: exact;            print-color-adjust: exact;          body {        @media print {        }          margin-bottom: 1em;          color: #1a1a1a;        .conclusion h2, .cta h2 {        }          margin: 2em 0;          border-radius: 8px;          padding: 30px;          background: #f9f9f9;          page-break-before: always;        .conclusion, .cta {        }          margin-bottom: 1em;        .chapter-content p {        }          text-align: justify;        .chapter-content {        }          padding-bottom: 0.5em;          border-bottom: 2px solid #eee;          color: #1a1a1a;          margin-bottom: 1em;          font-size: 1.8em;        .chapter h2 {        }          margin-bottom: 0.5em;          letter-spacing: 2px;          text-transform: uppercase;          color: #888;          font-size: 0.9em;        .chapter-number {        }          page-break-before: always;        .chapter {        }          color: #888;          font-size: 0.9em;        .cover .meta {        }          margin: 0 auto 3em;          max-width: 500px;          color: #555;          font-size: 1em;        .cover .description {        }          margin-bottom: 2em;          color: #666;          font-size: 1.3em;        .cover .subtitle {        }          color: #1a1a1a;          margin-bottom: 0.5em;          font-size: 2.5em;        .cover h1 {        }          page-break-after: always;          padding: 100px 0;          text-align: center;        .cover {        }          padding: 20px;          margin: 0 auto;          max-width: 800px;          color: #333;          line-height: 1.6;          font-family: 'Georgia', serif;        body {        }          margin: 2cm;          size: A4;        @page {      <style>      <title>${ebook.title}</title>      <meta charset="UTF-8">    <head>    <html lang="pt-BR">    <!DOCTYPE html>  const html = `  }    throw new Error('Não foi possível abrir janela de impressão. Verifique se popups estão habilitados.');  if (!printWindow) {  const printWindow = window.open('', '_blank');export function printEbookAsPDF(ebook: EbookData): void { */ * Gera PDF usando HTML e print (alternativa mais simples)/**}  }    throw new Error('Não foi possível gerar o PDF. Tente novamente.');    console.error('Erro ao gerar PDF:', error);  } catch (error) {    URL.revokeObjectURL(url);        document.body.removeChild(link);    link.click();    document.body.appendChild(link);    link.download = filename || `${ebook.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;    link.href = url;    const link = document.createElement('a');        const url = URL.createObjectURL(blob);    const blob = await generateEbookPDF(ebook);  try {export async function downloadEbookPDF(ebook: EbookData, filename?: string): Promise<void> { */ * Gera e baixa PDF do e-book/**}  return new Blob([pdfContent], { type: 'application/pdf' });    pdfContent += `trailer\n<<\n/Size ${objects.length + 1}\n/Root 1 0 R\n>>\nstartxref\n${xrefOffset}\n%%EOF`;  // trailer    }    pdfContent += `${offset.toString().padStart(10, '0')} 00000 n \n`;  for (const offset of offsets) {  pdfContent += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;  const xrefOffset = pdfContent.length;  // xref table    }    currentOffset += objStr.length;    pdfContent += objStr;    const objStr = `${i + 1} 0 obj\n${objects[i]}\nendobj\n`;    offsets.push(currentOffset);  for (let i = 0; i < objects.length; i++) {    let currentOffset = pdfContent.length;  const offsets: number[] = [];  // Montar PDF final    objects[1] = `<<\n/Type /Pages\n/Kids [${pageRefs.map(r => `${r} 0 R`).join(' ')}]\n/Count ${pageRefs.length}\n>>`;  // Atualizar objeto Pages    }    createPage(page);  for (const page of pages) {  // Criar as páginas no PDF    }    pages.push(currentPage);  if (currentPage.length > 0) {  // Adicionar última página    }    }      addText(line, 11, false);    for (const line of ctaLines) {    const ctaLines = splitTextIntoLines(stripMarkdown(ebook.callToAction), contentWidth, 11);    addSpace(20);    addText('Próximos Passos', 18, true);  if (ebook.callToAction) {  // CTA    }    addSpace(30);    }      addText(line, 11, false);    for (const line of conclusionLines) {    const conclusionLines = splitTextIntoLines(stripMarkdown(ebook.conclusion), contentWidth, 11);    addSpace(20);    addText('Conclusão', 18, true);  if (ebook.conclusion) {  // Conclusão    }    addSpace(30);        }      addSpace(10);      }        addText(line, 11, false);      for (const line of lines) {      const lines = splitTextIntoLines(paragraph.trim(), contentWidth, 11);    for (const paragraph of paragraphs) {        const paragraphs = cleanContent.split('\n\n');    const cleanContent = stripMarkdown(chapter.content);    // Conteúdo do capítulo        addSpace(20);    addText(chapter.title, 18, true);    addSpace(10);    addText(`Capítulo ${chapter.number}`, 12, true);    // Título do capítulo  for (const chapter of ebook.chapters) {  // Capítulos    yPosition = pageHeight - margin;  currentPage = [];  pages.push([...currentPage]);  addText(new Date().toLocaleDateString('pt-BR'), 10, false);  addText('Gerado por Elevare IA', 10, false);  addSpace(60);  }    }      addText(line, 11, false);    for (const line of descLines) {    const descLines = splitTextIntoLines(stripMarkdown(ebook.description), contentWidth, 11);    addSpace(40);  if (ebook.description) {  }    addText(ebook.subtitle, 14, false);    addSpace(20);  if (ebook.subtitle) {  addText(ebook.title, 24, true);  yPosition = pageHeight - 200;  // Página de capa    };    }      yPosition = pageHeight - margin;      currentPage = [];      pages.push([...currentPage]);    if (yPosition < margin) {    yPosition -= space;  const addSpace = (space: number) => {    };    }      yPosition -= fontSize * lineHeight;      currentPage.push(`BT ${font} ${fontSize} Tf ${margin} ${yPosition} Td (${escapedLine}) Tj ET`);              .replace(/\)/g, '\\)');        .replace(/\(/g, '\\(')        .replace(/\\/g, '\\\\')      const escapedLine = line      // Escapar caracteres especiais do PDF            }        yPosition = pageHeight - margin;        currentPage = [];        pages.push([...currentPage]);      if (yPosition < margin + fontSize) {    for (const line of lines) {        const lines = text.split('\n');    const font = isBold ? '/F2' : '/F1';  const addText = (text: string, fontSize: number, isBold: boolean = false, lineHeight: number = 1.4) => {    let yPosition = pageHeight - margin;  let currentPage: string[] = [];  const pages: string[][] = [];  // Gerar conteúdo das páginas    };    pageRefs.push(pageRef);    const pageRef = addObject(`<<\n/Type /Page\n/Parent 2 0 R\n/MediaBox [0 0 ${pageWidth} ${pageHeight}]\n/Contents ${contentRef} 0 R\n/Resources <<\n/Font <<\n/F1 3 0 R\n/F2 4 0 R\n>>\n>>\n>>`);    const contentRef = addObject(`<<\n/Length ${content.join('\n').length}\n>>\nstream\n${content.join('\n')}\nendstream`);  const createPage = (content: string[]): void => {  // Função para criar página    const fontBoldRef = addObject('<<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica-Bold\n>>');  const fontRef = addObject('<<\n/Type /Font\n/Subtype /Type1\n/BaseFont /Helvetica\n>>');  // Font    const pagesRef = addObject(''); // Será atualizado depois  // Pages (placeholder)    const catalogRef = addObject('<<\n/Type /Catalog\n/Pages 2 0 R\n>>');  // Catalog    };    return objectCount;    objects.push(content);    objectCount++;  const addObject = (content: string): number => {  // Função auxiliar para adicionar objeto    const pageRefs: number[] = [];  const objects: string[] = [];  let objectCount = 0;  let pdfContent = '%PDF-1.4\n';    const contentWidth = pageWidth - (margin * 2);  const margin = 50;  const pageHeight = 842;  const pageWidth = 595; // A4 em pontos  // Criar um PDF simples usando a API de Data URLexport async function generateEbookPDF(ebook: EbookData): Promise<Blob> { */ * Gera PDF do e-book usando Canvas API (sem dependências externas)/**}  return lines;    if (currentLine) lines.push(currentLine);  }    }      currentLine = word;      if (currentLine) lines.push(currentLine);    } else {      currentLine = (currentLine + ' ' + word).trim();    if ((currentLine + ' ' + word).trim().length <= charsPerLine) {  for (const word of words) {    const charsPerLine = Math.floor(maxWidth / (fontSize * 0.5));  // Aproximação de caracteres por linha baseado no tamanho da fonte    let currentLine = '';  const lines: string[] = [];  const words = text.split(' ');function splitTextIntoLines(text: string, maxWidth: number, fontSize: number): string[] {// Quebrar texto em linhas para caber na página}    .trim();    .replace(/^\s*\d+\.\s/gm, '') // Numbered lists    .replace(/^\s*[-*+]\s/gm, '• ') // Bullet points    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Links    .replace(/`([^`]+)`/g, '$1') // Code    .replace(/\*([^*]+)\*/g, '$1') // Italic    .replace(/\*\*([^*]+)\*\*/g, '$1') // Bold    .replace(/#{1,6}\s/g, '') // Headers  return textfunction stripMarkdown(text: string): string {// Remover tags markdown do texto}  return jsPDF;  const { jsPDF } = await import('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');  // @ts-ignore - Import dinâmico do jspdf via CDNasync function loadJsPDF() {// Função para carregar jspdf dinamicamente}  createdAt?: string;  coverUrl?: string | null;  callToAction?: string;  conclusion?: string;  chapters: EbookChapter[];  description?: string;  subtitle?: string;  title: string;interface EbookData {}  content: string;  title: string;  number: number;interface EbookChapter {// Tipos para o e-book */ * Usa jspdf para gerar PDF no lado do clienteimport { db } from "../db";
 import { contentGeneration } from "../../drizzle/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { llm } from "../_core/llm";
@@ -8,6 +421,7 @@ import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
+import { checkCredits, consumeCredits } from "../_core/credits";
 
 export const contentRouter = router({
   // ============================================
@@ -22,6 +436,9 @@ export const contentRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // 🔒 Verificar créditos antes de gerar
+      await checkCredits(ctx.user.id, 'post');
+      
       try {
         const response = await llm.chat.completions.create({
           model: "gemini-2.5-flash",
@@ -58,6 +475,9 @@ export const contentRouter = router({
           })
           .$returningId();
 
+        // 💳 Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'post', `Conteúdo: ${input.type}`);
+
         logger.info('Generic content generated', { 
           type: input.type, 
           userId: ctx.user.id 
@@ -93,6 +513,9 @@ export const contentRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // 🔒 Verificar créditos antes de gerar e-book
+      await checkCredits(ctx.user.id, 'ebook');
+      
       const prompt = `Você é um especialista em marketing de conteúdo para clínicas de estética.
 
 Crie um e-book completo sobre: "${input.topic}"
@@ -179,6 +602,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           })
           .$returningId();
 
+        // 💳 Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'ebook', `E-book: ${input.topic}`);
+
         logger.info('E-book generated successfully', { 
           ebookId: saved.id, 
           userId: ctx.user.id,
@@ -213,6 +639,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // 🔒 Verificar créditos antes de gerar capa
+      await checkCredits(ctx.user.id, 'post');
+      
       try {
         const imageUrl = await imageGeneration.generate({
           prompt: input.prompt,
@@ -245,6 +674,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
             metadata: JSON.stringify(metadata),
           })
           .where(eq(contentGeneration.id, input.ebookId));
+
+        // 💳 Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'post', 'Capa de e-book');
 
         logger.info('Cover generated for ebook', { ebookId: input.ebookId });
 
@@ -284,6 +716,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // 🔒 Verificar créditos antes de gerar prompt
+      await checkCredits(ctx.user.id, 'post');
+      
       const prompt = `Você é um especialista em criar prompts para geração de imagens com IA.
 
 Crie um prompt otimizado para ${input.platform} baseado em:
@@ -352,6 +787,9 @@ Forneça no formato JSON:
           creditsUsed: 1,
         });
 
+        // 💳 Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'post', 'Prompt de imagem');
+
         logger.info('Prompt generated', { userId: ctx.user.id });
 
         return result;
@@ -382,6 +820,9 @@ Forneça no formato JSON:
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // 🔒 Verificar créditos antes de gerar anúncio
+      await checkCredits(ctx.user.id, 'ad');
+      
       const prompt = `Você é um especialista em copywriting para anúncios de estética.
 
 Crie um anúncio completo para:
@@ -455,6 +896,9 @@ Use técnicas de neurovendas e gatilhos mentais.`;
           }),
           creditsUsed: 2,
         });
+
+        // 💳 Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'ad', `Anúncio: ${input.product}`);
 
         logger.info('Ad generated', { userId: ctx.user.id, product: input.product });
 
@@ -556,6 +1000,51 @@ Use técnicas de neurovendas e gatilhos mentais.`;
       return {
         success: true,
         message: "Conteúdo deletado com sucesso",
+      };
+    }),
+
+  // 📄 Exportar e-book para PDF (retorna dados formatados para geração client-side)
+  exportEbookData: protectedProcedure
+    .input(
+      z.object({
+        ebookId: z.number(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const [ebook] = await db
+        .select()
+        .from(contentGeneration)
+        .where(
+          and(
+            eq(contentGeneration.id, input.ebookId),
+            eq(contentGeneration.userId, ctx.user.id),
+            eq(contentGeneration.type, "ebook")
+          )
+        )
+        .limit(1);
+
+      if (!ebook) {
+        throw new NotFoundError("E-book não encontrado");
+      }
+
+      const content = safeParse(ebook.content);
+      const metadata = safeParse(ebook.metadata);
+
+      logger.info('E-book data exported for PDF', { 
+        ebookId: input.ebookId, 
+        userId: ctx.user.id 
+      });
+
+      return {
+        id: ebook.id,
+        title: content?.title || ebook.title,
+        subtitle: content?.subtitle || '',
+        description: content?.description || '',
+        chapters: content?.chapters || [],
+        conclusion: content?.conclusion || '',
+        callToAction: content?.callToAction || '',
+        coverUrl: metadata?.coverUrl || null,
+        createdAt: ebook.createdAt,
       };
     }),
 });

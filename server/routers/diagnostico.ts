@@ -3,26 +3,10 @@ import { publicProcedure, router } from "../_core/trpc";
 import { llm } from "../_core/llm";
 import { logger } from "../_core/logger";
 import { AIServiceError, RateLimitError } from "../_core/errors";
+import { checkDiagnosticoLimit } from "../_core/rateLimiter";
 
-// Rate limiting por IP
-const ipRateLimit = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const limit = ipRateLimit.get(ip);
-  
-  if (!limit || now > limit.resetAt) {
-    ipRateLimit.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 }); // 1h
-    return true;
-  }
-  
-  if (limit.count >= 10) {
-    return false;
-  }
-  
-  limit.count++;
-  return true;
-}
+// 🔴 Rate limiting por IP para diagnósticos
+// Agora centralizado em _core/rateLimiter.ts
 
 // Prompts específicos por nível de Bio
 function getPromptPorNivel(nivelBio: string, scoreBio: number): string {
@@ -167,7 +151,7 @@ export const diagnosticoRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const clientIp = ctx.req.ip || ctx.req.socket.remoteAddress || 'unknown';
-      if (!checkRateLimit(clientIp)) {
+      if (!checkDiagnosticoLimit(clientIp)) {
         throw new RateLimitError('Limite atingido. Aguarde 1 hora.');
       }
 

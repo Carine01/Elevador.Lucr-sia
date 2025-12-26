@@ -7,26 +7,11 @@ import { llm } from "../_core/llm";
 import { logger } from "../_core/logger";
 import { AIServiceError, RateLimitError, AuthorizationError } from "../_core/errors";
 import { safeParse, assertOwnership } from "../../shared/_core/utils";
+import { consumeCredits, checkCredits } from "../_core/credits";
+import { checkFreeBioRadarLimit } from "../_core/rateLimiter";
 
-// BUG-004 e BUG-006: Rate limiting por IP para análises gratuitas
-const ipRateLimit = new Map<string, { count: number; resetAt: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const limit = ipRateLimit.get(ip);
-  
-  if (!limit || now > limit.resetAt) {
-    ipRateLimit.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 }); // 1h
-    return true;
-  }
-  
-  if (limit.count >= 5) { // 5 análises por hora para não autenticados
-    return false;
-  }
-  
-  limit.count++;
-  return true;
-}
+// 🔴 Rate limiting por IP para análises gratuitas
+// Agora centralizado em _core/rateLimiter.ts
 
 export const bioRadarRouter = router({
   // Analisar bio do Instagram
@@ -41,7 +26,7 @@ export const bioRadarRouter = router({
       
       // BUG-004: Rate limiting para usuários não autenticados
       const clientIp = ctx.req.ip || ctx.req.socket.remoteAddress || 'unknown';
-      if (!ctx.user && !checkRateLimit(clientIp)) {
+      if (!ctx.user && !checkFreeBioRadarLimit(clientIp)) {
         throw new RateLimitError(
           'Limite de análises gratuitas atingido. Faça login ou aguarde 1 hora para continuar.'
         );
@@ -119,6 +104,11 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
             score: analysis.score,
           })
           .$returningId();
+
+        // 💳 Consumir créditos após análise bem-sucedida (apenas para usuários autenticados)
+        if (userId) {
+          await consumeCredits(userId, 'bio_analysis', `Análise: @${input.instagramHandle}`);
+        }
 
         logger.info('Bio analysis completed', { 
           diagnosisId: savedDiagnosis.id, 

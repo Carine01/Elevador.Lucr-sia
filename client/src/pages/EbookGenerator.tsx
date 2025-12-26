@@ -11,11 +11,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { BookOpen, Loader2, Download, Eye, Sparkles } from "lucide-react";
+import { BookOpen, Loader2, Download, Eye, Sparkles, Printer } from "lucide-react";
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
+import { printEbookAsPDF } from "@/lib/pdfGenerator";
+import { CreditGuard, useCredits } from "@/components/CreditGuard";
+import { CreditsDisplay } from "@/components/CreditsDisplay";
 
 export default function EbookGenerator() {
   const [topic, setTopic] = useState("");
@@ -26,6 +29,7 @@ export default function EbookGenerator() {
   const [chapters, setChapters] = useState(5);
   const [generatedEbook, setGeneratedEbook] = useState<any>(null);
   const [generating, setGenerating] = useState(false);
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
 
   const generateEbook = trpc.content.generateEbook.useMutation();
   const { data: subscription } = trpc.subscription.getSubscription.useQuery();
@@ -33,6 +37,8 @@ export default function EbookGenerator() {
     type: "ebook",
     limit: 10,
   });
+  
+  const { hasCredits, creditsRemaining } = useCredits();
 
   const handleGenerate = async () => {
     if (!topic.trim()) {
@@ -41,8 +47,8 @@ export default function EbookGenerator() {
     }
 
     // Verificar créditos
-    if (subscription && subscription.plan === "free") {
-      toast.error("Upgrade para PRO para gerar e-books");
+    if (!hasCredits(20)) { // E-book custa 20 créditos
+      toast.error("Créditos insuficientes. Faça upgrade para gerar e-books.");
       return;
     }
 
@@ -66,9 +72,29 @@ export default function EbookGenerator() {
     }
   };
 
-  const handleDownloadPDF = () => {
-    toast.info("Funcionalidade de download em desenvolvimento");
-    // TODO: Implementar geração de PDF
+  const handleDownloadPDF = async () => {
+    if (!generatedEbook) {
+      toast.error("Nenhum e-book para exportar");
+      return;
+    }
+
+    setDownloadingPDF(true);
+    try {
+      printEbookAsPDF({
+        title: generatedEbook.title || "E-book",
+        subtitle: generatedEbook.subtitle,
+        description: generatedEbook.description,
+        chapters: generatedEbook.chapters || [],
+        conclusion: generatedEbook.conclusion,
+        callToAction: generatedEbook.callToAction,
+      });
+      toast.success("PDF aberto para impressão! Use Ctrl+P para salvar como PDF.");
+    } catch (error) {
+      console.error('Erro ao gerar PDF:', error);
+      toast.error("Erro ao gerar PDF. Verifique se popups estão habilitados.");
+    } finally {
+      setDownloadingPDF(false);
+    }
   };
 
   return (
@@ -188,9 +214,9 @@ export default function EbookGenerator() {
                   )}
                 </Button>
 
-                {subscription?.plan === "free" && (
+                {!hasCredits(20) && (
                   <p className="text-sm text-amber-400 text-center">
-                    ⚠️ Upgrade para PRO para gerar e-books
+                    ⚠️ Você precisa de 20 créditos para gerar e-books. Créditos atuais: {creditsRemaining}
                   </p>
                 )}
               </div>
@@ -240,10 +266,15 @@ export default function EbookGenerator() {
                 <Button
                   onClick={handleDownloadPDF}
                   variant="outline"
+                  disabled={downloadingPDF}
                   className="border-slate-600 text-slate-300 hover:bg-slate-700"
                 >
-                  <Download className="w-4 h-4 mr-2" />
-                  Baixar PDF
+                  {downloadingPDF ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Printer className="w-4 h-4 mr-2" />
+                  )}
+                  {downloadingPDF ? "Gerando..." : "Exportar PDF"}
                 </Button>
               </div>
             </div>
