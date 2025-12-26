@@ -46,11 +46,11 @@ safe_remove() {
     if [ -e "$target" ]; then
         rm -rf "$target"
         log_success "Removed: $description ($target)"
-        return 0
     else
         log_info "Not found (OK): $description ($target)"
-        return 1
     fi
+    # Always return 0 to avoid exit on 'set -e'
+    return 0
 }
 
 # ============================================
