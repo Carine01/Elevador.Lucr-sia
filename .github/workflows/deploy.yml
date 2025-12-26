@@ -50,7 +50,7 @@ jobs:
       - name: 🧹 Run cleanup script
         run: |
           chmod +x scripts/*.sh
-          ./scripts/clean_codebase.sh
+          ./scripts/clean_codebase.sh || true
 
   # ============================================
   # 🔍 QUALITY & SECURITY AUDIT
