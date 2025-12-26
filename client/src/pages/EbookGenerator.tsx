@@ -236,7 +236,7 @@ export default function EbookGenerator() {
                     <div
                       key={item.id}
                       className="p-3 bg-slate-700/50 rounded-lg border border-slate-600 hover:border-slate-500 transition-colors cursor-pointer"
-                      onClick={() => setGeneratedEbook({ ...item.content, id: item.id })}
+                      onClick={() => setGeneratedEbook({ ...(typeof item.content === 'object' ? item.content : {}), id: item.id })}
                     >
                       <p className="text-white font-medium text-sm truncate">
                         {item.title}
@@ -266,7 +266,7 @@ export default function EbookGenerator() {
               <div className="flex gap-3">
                 <Button
                   onClick={() => handleDownloadPDF(generatedEbook.id, generatedEbook.title)}
-                  disabled={exportPDFMutation.isPending}
+                  disabled={exportPDFMutation.isPending || !generatedEbook.id}
                   variant="outline"
                   className="border-slate-600 text-slate-300 hover:bg-slate-700"
                 >
