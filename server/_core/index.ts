@@ -423,6 +423,29 @@ async function startServer() {
 
 startServer().catch((error) => {
   console.error('[Server] ❌ Startup error:', error);
+  console.error('[Server] Stack:', error?.stack);
   logger.error('Failed to start server', error);
   process.exit(1);
+});
+
+// Captura de erros não tratados
+process.on('uncaughtException', (error) => {
+  console.error('[Server] ❌ Uncaught Exception:', error);
+  console.error('[Server] Stack:', error?.stack);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Server] ❌ Unhandled Rejection at:', promise);
+  console.error('[Server] Reason:', reason);
+  process.exit(1);
+});
+
+// Log inicial para confirmar que o módulo foi carregado
+console.log('[Server] 🚀 Module loaded, starting initialization...');
+console.log('[Server] Environment:', {
+  NODE_ENV: process.env.NODE_ENV,
+  PORT: process.env.PORT,
+  DATABASE_URL: process.env.DATABASE_URL ? '***configured***' : '❌ MISSING',
+  JWT_SECRET: process.env.JWT_SECRET ? '***configured***' : '❌ MISSING',
 });
