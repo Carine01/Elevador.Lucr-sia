@@ -8,6 +8,7 @@ import { imageGeneration } from "../_core/imageGeneration";
 import { logger } from "../_core/logger";
 import { AIServiceError, NotFoundError } from "../_core/errors";
 import { safeParse } from "../../shared/_core/utils";
+import { consumeCredits, checkCredits } from "../_core/credits";
 
 export const contentRouter = router({
   // ============================================
@@ -23,6 +24,9 @@ export const contentRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        // Verificar créditos antes de gerar
+        await checkCredits(ctx.user.id, 'post');
+        
         const response = await llm.chat.completions.create({
           model: "gemini-2.5-flash",
           messages: [
@@ -63,6 +67,9 @@ export const contentRouter = router({
           userId: ctx.user.id 
         });
 
+        // Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'post', `Conteúdo genérico: ${input.type}`);
+
         return {
           id: saved.id,
           content: String(content),
@@ -93,6 +100,9 @@ export const contentRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Verificar créditos antes de gerar
+      await checkCredits(ctx.user.id, 'ebook');
+      
       const prompt = `Você é um especialista em marketing de conteúdo para clínicas de estética.
 
 Crie um e-book completo sobre: "${input.topic}"
@@ -184,6 +194,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
           userId: ctx.user.id,
           topic: input.topic 
         });
+
+        // Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'ebook', `E-book: ${input.topic}`);
 
         return {
           id: saved.id,
@@ -284,6 +297,9 @@ Seja detalhado e prático. Cada capítulo deve ter conteúdo rico e acionável.`
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Verificar créditos antes de gerar
+      await checkCredits(ctx.user.id, 'reel_script');
+      
       const prompt = `Você é um especialista em criar prompts para geração de imagens com IA.
 
 Crie um prompt otimizado para ${input.platform} baseado em:
@@ -354,6 +370,9 @@ Forneça no formato JSON:
 
         logger.info('Prompt generated', { userId: ctx.user.id });
 
+        // Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'reel_script', `Prompt: ${input.description.substring(0, 50)}`);
+
         return result;
       } catch (error) {
         if (error instanceof AIServiceError) {
@@ -382,6 +401,9 @@ Forneça no formato JSON:
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Verificar créditos antes de gerar
+      await checkCredits(ctx.user.id, 'ad');
+      
       const prompt = `Você é um especialista em copywriting para anúncios de estética.
 
 Crie um anúncio completo para:
@@ -457,6 +479,9 @@ Use técnicas de neurovendas e gatilhos mentais.`;
         });
 
         logger.info('Ad generated', { userId: ctx.user.id, product: input.product });
+
+        // Consumir créditos após geração bem-sucedida
+        await consumeCredits(ctx.user.id, 'ad', `Anúncio: ${input.product}`);
 
         return ad;
       } catch (error) {
