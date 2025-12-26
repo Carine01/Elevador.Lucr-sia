@@ -209,6 +209,11 @@ async function startServer() {
     });
   });
 
+  // ==================== REQUEST LOGGING ====================
+  // Correlation ID e logging automático de requests
+  const { requestLoggingMiddleware } = await import("./logging-middleware");
+  app.use(requestLoggingMiddleware());
+
   // ==================== SECURITY HEADERS (HELMET) ====================
   // Proteção contra vulnerabilidades web comuns
   app.use(helmet({
