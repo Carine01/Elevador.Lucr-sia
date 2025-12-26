@@ -5,7 +5,6 @@ import net from "net";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
-import Stripe from "stripe";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
@@ -13,18 +12,10 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { ENV, validateEnvOnStartup } from "./env";
 import { logger } from "./logger";
-import { getDb } from "../db";
+import stripeRouter from "../routes/stripe";
 
 // 🔐 VALIDAR VARIÁVEIS CRÍTICAS EM STARTUP
 validateEnvOnStartup();
-import { subscription as subscriptionTable } from "../../drizzle/schema";
-import { eq } from "drizzle-orm";
-import { PLANS } from "../routers/subscription";
-
-// Inicializar Stripe
-const stripe = new Stripe(ENV.STRIPE_SECRET_KEY || "", {
-  apiVersion: "2025-10-29.clover",
-});
 
 // Verificar disponibilidade de porta
 function isPortAvailable(port: number): Promise<boolean> {
@@ -44,142 +35,6 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
     }
   }
   throw new Error(`No available port found starting from ${startPort}`);
-}
-
-// ==================== WEBHOOK HANDLERS ====================
-// BUG-001: Implementar webhook do Stripe
-
-async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const db = await getDb();
-  if (!db) {
-    logger.error('Database not available in webhook handler');
-    return;
-  }
-
-  const userId = parseInt(session.metadata?.userId || '0');
-  const plan = session.metadata?.plan as 'essencial' | 'profissional';
-  
-  if (!userId || !plan) {
-    logger.error('Missing userId or plan in checkout session', { session });
-    return;
-  }
-
-  const planConfig = PLANS[plan];
-  const renewalDate = new Date();
-  renewalDate.setMonth(renewalDate.getMonth() + 1);
-
-  try {
-    await db
-      .update(subscriptionTable)
-      .set({
-        plan,
-        status: 'active',
-        stripeCustomerId: session.customer as string,
-        stripeSubscriptionId: session.subscription as string,
-        creditsRemaining: planConfig.credits === -1 ? -1 : planConfig.credits,
-        monthlyCreditsLimit: planConfig.credits === -1 ? -1 : planConfig.credits,
-        renewalDate,
-      })
-      .where(eq(subscriptionTable.userId, userId));
-
-    logger.info('Checkout completed successfully', { userId, plan });
-  } catch (error) {
-    logger.error('Error handling checkout completed', error);
-    throw error;
-  }
-}
-
-async function handleSubscriptionChange(subscription: Stripe.Subscription) {
-  const db = await getDb();
-  if (!db) return;
-
-  const [userSub] = await db
-    .select()
-    .from(subscriptionTable)
-    .where(eq(subscriptionTable.stripeSubscriptionId, subscription.id))
-    .limit(1);
-
-  if (!userSub) {
-    logger.warn('Subscription not found in database', { subscriptionId: subscription.id });
-    return;
-  }
-
-  const status = subscription.status === 'active' ? 'active' : 
-                 subscription.status === 'canceled' ? 'cancelled' : 'inactive';
-
-  try {
-    await db
-      .update(subscriptionTable)
-      .set({ status })
-      .where(eq(subscriptionTable.id, userSub.id));
-
-    logger.info('Subscription status updated', { subscriptionId: subscription.id, status });
-  } catch (error) {
-    logger.error('Error updating subscription status', error);
-  }
-}
-
-async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-  const db = await getDb();
-  if (!db) return;
-
-  // Extract subscription ID from invoice
-  // Note: The Stripe Invoice type may not include subscription in all versions
-  // We use type assertion here as the property exists at runtime
-  interface InvoiceWithSubscription extends Stripe.Invoice {
-    subscription?: string | Stripe.Subscription;
-  }
-  
-  const invoiceWithSub = invoice as InvoiceWithSubscription;
-  const subscriptionId = typeof invoiceWithSub.subscription === 'string' 
-    ? invoiceWithSub.subscription 
-    : invoiceWithSub.subscription?.id;
-
-  if (!subscriptionId) {
-    logger.warn('Invalid subscription in invoice', { invoiceId: invoice.id });
-    return;
-  }
-
-  const [userSub] = await db
-    .select()
-    .from(subscriptionTable)
-    .where(eq(subscriptionTable.stripeSubscriptionId, subscriptionId))
-    .limit(1);
-
-  if (!userSub) {
-    logger.warn('Subscription not found for payment', { invoiceId: invoice.id });
-    return;
-  }
-
-  // Check if plan exists in PLANS
-  const planKey = userSub.plan as keyof typeof PLANS;
-  if (!(planKey in PLANS)) {
-    logger.error('Invalid plan in subscription', { plan: userSub.plan });
-    return;
-  }
-
-  const planConfig = PLANS[planKey];
-  const renewalDate = new Date();
-  renewalDate.setMonth(renewalDate.getMonth() + 1);
-
-  try {
-    await db
-      .update(subscriptionTable)
-      .set({
-        creditsRemaining: planConfig.credits,
-        renewalDate,
-      })
-      .where(eq(subscriptionTable.id, userSub.id));
-
-    logger.info('Credits renewed after payment', { userId: userSub.userId, plan: userSub.plan });
-  } catch (error) {
-    logger.error('Error renewing credits', error);
-  }
-}
-
-async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  logger.error('Payment failed for invoice', { invoiceId: invoice.id });
-  // Aqui você pode implementar lógica de notificação ao usuário
 }
 
 // ==================== SERVER SETUP ====================
@@ -307,67 +162,10 @@ async function startServer() {
   });
 
   // ==================== STRIPE WEBHOOK ====================
-  // BUG-001: Webhook do Stripe
+  // BUG-001: Webhook do Stripe - COMPLETAMENTE IMPLEMENTADO
   // IMPORTANTE: Deve vir ANTES do express.json()
-  app.post(
-    '/api/stripe/webhook',
-    express.raw({ type: 'application/json' }),
-    async (req, res) => {
-      const sig = req.headers['stripe-signature'];
-      
-      if (!sig || !ENV.STRIPE_WEBHOOK_SECRET) {
-        logger.warn('Webhook signature missing');
-        return res.status(400).send('Webhook signature missing');
-      }
-
-      let event: Stripe.Event;
-
-      try {
-        event = stripe.webhooks.constructEvent(
-          req.body,
-          sig,
-          ENV.STRIPE_WEBHOOK_SECRET
-        );
-      } catch (err: any) {
-        logger.error(`Webhook signature verification failed`, err);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-      }
-
-      // Processar eventos
-      try {
-        switch (event.type) {
-          case 'checkout.session.completed': {
-            const session = event.data.object as Stripe.Checkout.Session;
-            await handleCheckoutCompleted(session);
-            break;
-          }
-          case 'customer.subscription.updated':
-          case 'customer.subscription.deleted': {
-            const subscription = event.data.object as Stripe.Subscription;
-            await handleSubscriptionChange(subscription);
-            break;
-          }
-          case 'invoice.payment_succeeded': {
-            const invoice = event.data.object as Stripe.Invoice;
-            await handlePaymentSucceeded(invoice);
-            break;
-          }
-          case 'invoice.payment_failed': {
-            const invoice = event.data.object as Stripe.Invoice;
-            await handlePaymentFailed(invoice);
-            break;
-          }
-          default:
-            logger.info('Unhandled webhook event type', { type: event.type });
-        }
-
-        res.json({ received: true });
-      } catch (error) {
-        logger.error('Error processing webhook', error);
-        res.status(500).send('Webhook processing failed');
-      }
-    }
-  );
+  app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+  app.use('/api/stripe', stripeRouter);
 
   // ==================== BODY PARSERS ====================
   // Configure body parser with larger size limit for file uploads
