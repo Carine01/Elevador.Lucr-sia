@@ -87,8 +87,7 @@
     "wouter": "^3.3.5",
     "zod": "^4.1.12",
     "@sentry/node": "^8.0.0",
-    "@sentry/profiling-node": "^8.0.0",
-    "@sentry/trpc": "^8.0.0"
+    "@sentry/profiling-node": "^8.0.0"
   },
   "devDependencies": {
     "@builder.io/vite-plugin-jsx-loc": "^0.1.1",
