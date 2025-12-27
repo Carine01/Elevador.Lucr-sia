@@ -24,6 +24,36 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core
+          'react-vendor': ['react', 'react-dom', 'react-hook-form'],
+          // UI libraries
+          'ui-vendor': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-popover',
+          ],
+          // Data & API
+          'api-vendor': [
+            '@trpc/client',
+            '@trpc/react-query',
+            '@tanstack/react-query',
+          ],
+          // Utilities
+          'utils-vendor': [
+            'date-fns',
+            'clsx',
+            'class-variance-authority',
+            'zod',
+          ],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000,
   },
   server: {
     host: true,
