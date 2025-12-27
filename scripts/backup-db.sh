@@ -10,6 +10,7 @@ DATE=$(date +%Y%m%d-%H%M%S)
 BACKUP_DIR="$HOME/backups/elevare"
 BACKUP_FILE="$BACKUP_DIR/backup-$DATE.sql.gz"
 LOG_FILE="/var/log/elevare-backup.log"
+BACKUP_RETENTION=${BACKUP_RETENTION:-7}  # Número de backups a manter
 
 # Cores para output
 GREEN='\033[0;32m'
@@ -34,21 +35,44 @@ mkdir -p "$BACKUP_DIR"
 
 log "${YELLOW}🔄 Iniciando backup do MySQL Railway...${NC}"
 
-# Carregar variáveis do .env.production
-source .env.production
+# Extrair DATABASE_URL do .env.production
+DATABASE_URL=$(grep "^DATABASE_URL=" .env.production | cut -d '=' -f 2-)
 
-# Verificar se variáveis necessárias existem
-if [ -z "$DB_HOST" ] || [ -z "$DB_PASSWORD" ]; then
-    echo -e "${RED}❌ Erro: Variáveis DB_HOST ou DB_PASSWORD não encontradas no .env.production${NC}"
+# Verificar se DATABASE_URL existe
+if [ -z "$DATABASE_URL" ]; then
+    echo -e "${RED}❌ Erro: DATABASE_URL não encontrada no .env.production${NC}"
+    exit 1
+fi
+
+# Parsear DATABASE_URL (formato: mysql://user:password@host:port/database)
+# Remove o prefixo mysql://
+DB_STRING="${DATABASE_URL#mysql://}"
+
+# Extrai usuário e senha
+DB_USER="${DB_STRING%%:*}"
+DB_TEMP="${DB_STRING#*:}"
+DB_PASSWORD="${DB_TEMP%%@*}"
+
+# Extrai host, porta e database
+DB_TEMP="${DB_STRING#*@}"
+DB_HOST="${DB_TEMP%%:*}"
+DB_TEMP="${DB_TEMP#*:}"
+DB_PORT="${DB_TEMP%%/*}"
+DB_NAME="${DB_TEMP#*/}"
+
+# Validar que todas as variáveis foram extraídas
+if [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_HOST" ] || [ -z "$DB_NAME" ]; then
+    echo -e "${RED}❌ Erro: Não foi possível parsear DATABASE_URL${NC}"
     exit 1
 fi
 
 # Fazer backup
-log "Conectando ao banco: $DB_HOST"
+log "Conectando ao banco: $DB_HOST:$DB_PORT/$DB_NAME"
 mysqldump -h "$DB_HOST" \
-          -u root \
+          -P "$DB_PORT" \
+          -u "$DB_USER" \
           -p"$DB_PASSWORD" \
-          railway \
+          "$DB_NAME" \
           --single-transaction \
           --quick \
           --lock-tables=false \
@@ -66,13 +90,14 @@ else
     exit 1
 fi
 
-# Manter apenas os últimos 7 backups
-log "Limpando backups antigos (mantendo últimos 7)..."
+# Manter apenas os últimos N backups (configurável)
+RETENTION_LIMIT=$((BACKUP_RETENTION + 1))
+log "Limpando backups antigos (mantendo últimos ${BACKUP_RETENTION})..."
 cd "$BACKUP_DIR"
-ls -t backup-*.sql.gz 2>/dev/null | tail -n +8 | xargs -r rm -f
+ls -t backup-*.sql.gz 2>/dev/null | tail -n +${RETENTION_LIMIT} | xargs -r rm -f
 
 # Listar backups disponíveis
 log "Backups disponíveis:"
-ls -lht "$BACKUP_DIR"/backup-*.sql.gz 2>/dev/null | head -7 | tee -a "$LOG_FILE"
+ls -lht "$BACKUP_DIR"/backup-*.sql.gz 2>/dev/null | head -${BACKUP_RETENTION} | tee -a "$LOG_FILE"
 
 log "${GREEN}✅ Processo de backup concluído com sucesso${NC}"

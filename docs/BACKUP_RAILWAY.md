@@ -89,11 +89,17 @@ jobs:
 **Configurar secrets no GitHub:**
 
 1. Ir para: Settings → Secrets and variables → Actions
-2. Adicionar:
-   - `DB_HOST` - Hostname do Railway MySQL
-   - `DB_USER` - `root`
-   - `DB_PASSWORD` - Password do Railway
-   - `DB_NAME` - `railway`
+2. Adicionar secrets extraídos do DATABASE_URL:
+
+   Para Railway, o DATABASE_URL tem formato:
+   `mysql://user:password@host:port/database`
+
+   Extrair e adicionar cada parte:
+   - `DB_HOST` - Hostname (ex: `shinkansen.proxy.rlwy.net`)
+   - `DB_PORT` - Porta (ex: `19512`)
+   - `DB_USER` - Usuário (geralmente `root`)
+   - `DB_PASSWORD` - Password da conexão
+   - `DB_NAME` - Nome do banco (geralmente `railway`)
 
 #### 🔹 Solução 3: Script Local + Cron (Servidor próprio)
 
@@ -102,6 +108,7 @@ Criar `scripts/backup-db.sh`:
 ```bash
 #!/bin/bash
 # Backup automático do MySQL Railway
+# Extrai credenciais do DATABASE_URL e faz backup seguro
 
 DATE=$(date +%Y%m%d-%H%M%S)
 BACKUP_DIR="$HOME/backups/elevare"
@@ -110,12 +117,26 @@ BACKUP_FILE="$BACKUP_DIR/backup-$DATE.sql.gz"
 # Criar diretório se não existir
 mkdir -p $BACKUP_DIR
 
-# Fazer backup (usar variáveis do .env.production)
-source .env.production
+# Extrair DATABASE_URL do .env.production
+DATABASE_URL=$(grep "^DATABASE_URL=" .env.production | cut -d '=' -f 2-)
+
+# Parsear DATABASE_URL (mysql://user:password@host:port/database)
+DB_STRING="${DATABASE_URL#mysql://}"
+DB_USER="${DB_STRING%%:*}"
+DB_TEMP="${DB_STRING#*:}"
+DB_PASSWORD="${DB_TEMP%%@*}"
+DB_TEMP="${DB_STRING#*@}"
+DB_HOST="${DB_TEMP%%:*}"
+DB_TEMP="${DB_TEMP#*:}"
+DB_PORT="${DB_TEMP%%/*}"
+DB_NAME="${DB_TEMP#*/}"
+
+# Fazer backup
 mysqldump -h $DB_HOST \
-          -u root \
+          -P $DB_PORT \
+          -u $DB_USER \
           -p$DB_PASSWORD \
-          railway \
+          $DB_NAME \
           --single-transaction \
           | gzip > $BACKUP_FILE
 
@@ -124,6 +145,8 @@ ls -t $BACKUP_DIR/backup-*.sql.gz | tail -n +8 | xargs rm -f
 
 echo "✅ Backup criado: $BACKUP_FILE"
 ```
+
+**Nota de Segurança:** O script extrai apenas a DATABASE_URL necessária, sem expor outras variáveis de ambiente.
 
 **Configurar cron:**
 
