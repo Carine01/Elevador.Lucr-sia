@@ -7,14 +7,14 @@
  * IMPORTANTE: Só envia emails para o endereço configurado (não envia para usuários reais)
  */
 
-import { sendEmail } from "../server/email/client";
 import {
+  sendEmail,
   welcomeEmail,
   subscriptionConfirmationEmail,
   lowCreditsEmail,
   renewalReminderEmail,
   passwordResetEmail,
-} from "../server/email/templates";
+} from "../server/adapters/emailAdapter";
 
 // 🔧 CONFIGURAÇÃO
 const TEST_EMAIL = process.env.TEST_EMAIL || "your-email@example.com";
@@ -61,6 +61,11 @@ function validateConfig() {
   }
 
   return provider;
+}
+
+// Utilitário: sleep
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // 📧 Testar um template específico
@@ -214,11 +219,6 @@ async function runAllTests() {
     log("red", "💥", `${failed} teste(s) falharam. Verifique a configuração do provider.`);
     process.exit(1);
   }
-}
-
-// Utilitário: sleep
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 // 🚀 Executar
