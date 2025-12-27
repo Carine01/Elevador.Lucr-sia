@@ -109,6 +109,9 @@ export const ENV = {
   STRIPE_PROFISSIONAL_PRICE_ID: getOptionalEnv('STRIPE_PROFISSIONAL_PRICE_ID'),
   STRIPE_WEBHOOK_SECRET: getOptionalEnv('STRIPE_WEBHOOK_SECRET'),
   
+  // Encryption key para criptografia em repouso
+  ENCRYPTION_KEY: getOptionalEnv('ENCRYPTION_KEY', 'change-this-to-secure-32-char-key!'),
+  
   isProduction,
 };
 

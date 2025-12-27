@@ -14,6 +14,7 @@ import { adminRouter } from "./routers/admin";
 import { lgpdRouter } from "./routers/lgpd";
 import { emailRouter } from "./routers/email";
 import { cacheRouter } from "./routers/cache";
+import { twoFactorRouter } from "./routers/twoFactor";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -52,6 +53,9 @@ export const appRouter = router({
   
   // 💾 CACHE - Monitoramento de cache (admin)
   cache: cacheRouter,
+  
+  // 🔐 TWO-FACTOR - Autenticação de dois fatores (admin)
+  twoFactor: twoFactorRouter,
 });
 
 export type AppRouter = typeof appRouter;

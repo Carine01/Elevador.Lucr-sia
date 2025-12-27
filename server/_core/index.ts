@@ -214,6 +214,14 @@ async function startServer() {
   const { requestLoggingMiddleware } = await import("./logging-middleware");
   app.use(requestLoggingMiddleware());
 
+  // ==================== SECURITY: WAF & PROTECTION ====================
+  // Web Application Firewall e proteções de segurança
+  const { wafMiddleware, securityHeaders, forceHTTPS, csrfProtection } = await import("./waf");
+  app.use(forceHTTPS); // Força HTTPS em produção
+  app.use(securityHeaders); // Headers de segurança
+  app.use(wafMiddleware); // WAF (SQL injection, XSS, etc)
+  app.use(csrfProtection); // Proteção CSRF
+
   // ==================== SECURITY HEADERS (HELMET) ====================
   // Proteção contra vulnerabilidades web comuns
   app.use(helmet({
