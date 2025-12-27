@@ -220,6 +220,13 @@ async function startServer() {
     });
   });
 
+  // ==================== SENTRY TEST ERROR ====================
+  // Endpoint controlado para forçar um erro e validar captura no Sentry
+  app.post('/api/test-error', (_req, _res, _next) => {
+    // Lança um erro proposital; o middleware de erro do Sentry irá capturá-lo
+    throw new Error('🔧 Sentry test error triggered intentionally');
+  });
+
   // ==================== REQUEST LOGGING ====================
   // Correlation ID e logging automático de requests
   const { requestLoggingMiddleware } = await import("./logging-middleware");
