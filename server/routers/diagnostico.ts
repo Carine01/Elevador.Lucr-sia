@@ -105,7 +105,7 @@ export const diagnosticoRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const clientIp = ctx.req.ip || ctx.req.socket.remoteAddress || 'unknown';
-      if (!checkRateLimit(clientIp)) {
+      if (!checkDiagnosticoLimit(clientIp)) {
         throw new RateLimitError('Limite atingido. Aguarde 1 hora.');
       }
 
