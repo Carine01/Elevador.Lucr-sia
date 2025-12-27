@@ -48,7 +48,7 @@ export function validateEnvOnStartup(): void {
     
     if (!result.success) {
       console.error("❌ [ENV] ERRO CRÍTICO - Variáveis inválidas:");
-      result.error.errors.forEach(err => {
+      result.error.issues.forEach(err => {
         console.error(`   - ${err.path.join(".")}: ${err.message}`);
       });
       console.error("\n⛔ Servidor não pode iniciar com configuração insegura.");
