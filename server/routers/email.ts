@@ -14,8 +14,8 @@ import {
   lowCreditsEmail,
   renewalReminderEmail,
   passwordResetEmail,
-} from "../email";
-import { logger } from "../_core/logger";
+} from "../adapters/emailAdapter";
+import { logger } from "../adapters/loggingAdapter";
 
 export const emailRouter = router({
   /**

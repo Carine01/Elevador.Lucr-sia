@@ -6,12 +6,32 @@
 
 import { z } from "zod";
 
-// Schema de validação para produção
+// Schema de validação RIGOROSA para produção
 const productionEnvSchema = z.object({
-  JWT_SECRET: z.string().min(32, "JWT_SECRET deve ter no mínimo 32 caracteres"),
-  DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatória"),
-  STRIPE_SECRET_KEY: z.string().startsWith("sk_", "STRIPE_SECRET_KEY deve começar com sk_").optional(),
-  STRIPE_WEBHOOK_SECRET: z.string().startsWith("whsec_", "STRIPE_WEBHOOK_SECRET deve começar com whsec_").optional(),
+  NODE_ENV: z.enum(["production", "development", "test"]),
+  JWT_SECRET: z
+    .string()
+    .min(32, "JWT_SECRET deve ter no mínimo 32 caracteres")
+    .refine(
+      (val) => val !== 'dev-secret-change-in-production-32chars',
+      "JWT_SECRET não pode usar valor padrão de desenvolvimento"
+    ),
+  DATABASE_URL: z
+    .string()
+    .url("DATABASE_URL deve ser uma URL válida")
+    .startsWith("mysql://", "DATABASE_URL deve começar com mysql://"),
+  STRIPE_SECRET_KEY: z
+    .string()
+    .startsWith("sk_live_", "STRIPE_SECRET_KEY deve começar com sk_live_ em produção"),
+  STRIPE_WEBHOOK_SECRET: z
+    .string()
+    .startsWith("whsec_", "STRIPE_WEBHOOK_SECRET deve começar com whsec_"),
+  STRIPE_ESSENCIAL_PRICE_ID: z
+    .string()
+    .startsWith("price_", "STRIPE_ESSENCIAL_PRICE_ID inválido"),
+  STRIPE_PROFISSIONAL_PRICE_ID: z
+    .string()
+    .startsWith("price_", "STRIPE_PROFISSIONAL_PRICE_ID inválido"),
 });
 
 /**

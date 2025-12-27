@@ -3,7 +3,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { db } from "../db";
 import { calendarioPosts, contentGeneration } from "../../drizzle/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
-import { logger } from "../_core/logger";
+import { logger } from "../adapters/loggingAdapter";
 import { llm } from "../_core/llm";
 import { AIServiceError } from "../_core/errors";
 

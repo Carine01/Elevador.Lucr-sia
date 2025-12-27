@@ -4,7 +4,7 @@
  */
 
 import type { Request, Response, NextFunction, RequestHandler } from "express";
-import { Logger, logger } from "./logger";
+import { logger, forRequest, generateCorrelationId } from "../adapters/loggingAdapter";
 
 // ==================== TYPES ====================
 
@@ -89,20 +89,23 @@ export function requestLoggingMiddleware(): RequestHandler {
     const startTime = process.hrtime();
     
     // Get or generate correlation ID
-    const correlationId = 
-      (req.headers["x-correlation-id"] as string) || 
-      Logger.generateCorrelationId();
+    const correlationId =
+      (req.headers["x-correlation-id"] as string) ||
+      generateCorrelationId();
     
     // Add correlation ID to response headers
     res.setHeader("x-correlation-id", correlationId);
     
     // Create request-scoped logger
-    const reqLogger = new Logger({
-      correlationId,
+    // Garantir que o adapter receba o correlationId já definido
+    (req.headers as any)["x-correlation-id"] = correlationId;
+
+    const reqLogger = forRequest({
+      headers: req.headers as Record<string, string | string[] | undefined>,
       method: req.method,
-      requestPath: req.path,
+      path: req.path,
       ip: getClientIp(req),
-      userId: (req as any).user?.id,
+      user: (req as any).user,
     });
 
     // Attach logger to request for use in handlers
@@ -195,7 +198,7 @@ export function errorLoggingMiddleware() {
 declare global {
   namespace Express {
     interface Request {
-      logger?: Logger;
+      logger?: any;
       correlationId?: string;
     }
   }

@@ -3,7 +3,7 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { db } from "../db";
 import { leads, agendamentos } from "../../drizzle/schema";
 import { eq, and, desc, sql, gte, lte } from "drizzle-orm";
-import { logger } from "../_core/logger";
+import { logger } from "../adapters/loggingAdapter";
 
 // ============================================
 // 🚀 CRM ROUTER - FLUXO INTELIGENTE DE CLIENTES

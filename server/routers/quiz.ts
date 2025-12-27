@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, protectedProcedure, router } from "../_core/trpc";
 import { llm } from "../_core/llm";
-import { logger } from "../_core/logger";
+import { logger } from "../adapters/loggingAdapter";
 import { AIServiceError, RateLimitError } from "../_core/errors";
 import { db } from "../db";
 import { diagnosticos, freeTrials, feedback, referrals } from "../../drizzle/schema";

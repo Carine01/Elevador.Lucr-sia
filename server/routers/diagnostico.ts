@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { llm } from "../_core/llm";
-import { logger } from "../_core/logger";
+import { logger } from "../adapters/loggingAdapter";
 import { AIServiceError, RateLimitError } from "../_core/errors";
 import { checkDiagnosticoLimit } from "../_core/rateLimiter";
 

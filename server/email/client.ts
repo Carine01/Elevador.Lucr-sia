@@ -3,7 +3,7 @@
  * Suporte para SendGrid e Resend com fallback automático
  */
 
-import { logger } from "../_core/logger";
+import { logger } from "../adapters/loggingAdapter";
 
 // ==================== TYPES ====================
 

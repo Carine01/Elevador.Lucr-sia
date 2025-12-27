@@ -4,7 +4,7 @@ import { db } from "../db";
 import { users, subscription, diagnosticos, feedback, freeTrials, referrals, contentGeneration } from "../../drizzle/schema";
 import { eq, desc, gte, sql, and, count } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { logger } from "../_core/logger";
+import { logger } from "../adapters/loggingAdapter";
 
 // ============================================
 // 🔒 ADMIN MIDDLEWARE

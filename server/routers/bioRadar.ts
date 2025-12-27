@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { db } from "../db";
-import { bioRadarDiagnosis } from "../../drizzle/schema";
+import { bioRadarDiagnosis, leads } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { llm } from "../_core/llm";
-import { logger } from "../_core/logger";
+import { logger } from "../adapters/loggingAdapter";
 import { AIServiceError, RateLimitError, AuthorizationError } from "../_core/errors";
 import { safeParse, assertOwnership } from "../../shared/_core/utils";
 import { consumeCredits, checkCredits } from "../_core/credits";
@@ -32,22 +32,42 @@ export const bioRadarRouter = router({
         );
       }
 
-      // Prompt para análise da bio
-      const prompt = `Você é um especialista em marketing digital para clínicas de estética. 
-Analise a seguinte bio do Instagram: @${input.instagramHandle}
+      // Prompt para análise da bio - COM NEUROVENDAS
+      const prompt = `Você é um consultor especialista em neurovendas para clínicas de estética.
 
-Como não temos acesso direto à bio, simule uma análise profissional baseada em boas práticas de marketing para estética.
+Analise o perfil do Instagram @${input.instagramHandle} como se fosse uma consultoria REAL e PAGA.
+
+Simule uma análise profissional identificando:
+
+1. **DIAGNÓSTICO COMPORTAMENTAL** (Gatilhos mentais faltando):
+   - Escassez: A bio cria senso de urgência?
+   - Autoridade: Mostra credenciais, experiência, resultados?
+   - Prova Social: Tem depoimentos, números, cases?
+   - Reciprocidade: Oferece algo de valor antes de vender?
+
+2. **ANÁLISE DE CONVERSÃO**:
+   - Headline prende atenção nos primeiros 3 segundos?
+   - Call-to-action está claro e irresistível?
+   - Link na bio está otimizado para conversão?
+   - Bio reflete a jornada emocional da cliente ideal?
+
+3. **OPORTUNIDADES PERDIDAS** (3 erros GRAVES que travam vendas):
+   - O que está fazendo a clínica PERDER agendamentos agora?
+   - Qual elemento está afastando clientes prontas para pagar?
+   - Que gatilho mental crítico está ausente?
 
 Forneça a análise no seguinte formato JSON:
 {
-  "score": <número de 0 a 100>,
-  "strengths": [<lista de 2-4 pontos fortes>],
-  "weaknesses": [<lista de 2-4 pontos fracos>],
-  "recommendations": [<lista de 3-5 recomendações específicas>],
-  "nextSteps": "<texto com próximos passos recomendados>"
+  "score": <número de 0 a 100 (seja crítico e realista)>,
+  "strengths": [<2-3 pontos fortes específicos>],
+  "weaknesses": [<3-4 pontos fracos GRAVES que bloqueiam vendas>],
+  "recommendations": [<5-7 recomendações ACIONÁVEIS com impacto direto em conversão>],
+  "nextSteps": "<Plano de ação de 30 dias com prioridades claras. Termine com: 'Quer implementar isso com um plano personalizado completo? Nossos especialistas podem criar uma estratégia de neurovendas 100% customizada para sua clínica.'>"
 }
 
-Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
+Seja DIRETO, ESPECÍFICO e focado em VENDAS REAIS. Use linguagem de consultoria premium.
+
+`;
 
       try {
         const response = await llm.chat.completions.create({
@@ -139,7 +159,7 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
       }
     }),
 
-  // Salvar lead (email/WhatsApp)
+  // Salvar lead (email/WhatsApp) - COMPLETO
   saveLead: publicProcedure
     .input(
       z.object({
@@ -153,6 +173,7 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
         throw new Error("Forneça pelo menos email ou WhatsApp");
       }
 
+      // 1. Atualizar diagnóstico com dados de contato
       await db
         .update(bioRadarDiagnosis)
         .set({
@@ -161,11 +182,57 @@ Seja específico e prático nas recomendações. Foque em conversão e vendas.`;
         })
         .where(eq(bioRadarDiagnosis.id, input.diagnosisId));
 
-      logger.info('Lead captured', { diagnosisId: input.diagnosisId });
+      // 2. Buscar diagnóstico atualizado para criar lead
+      const [diagnosis] = await db
+        .select()
+        .from(bioRadarDiagnosis)
+        .where(eq(bioRadarDiagnosis.id, input.diagnosisId))
+        .limit(1);
+
+      if (!diagnosis) {
+        throw new Error("Diagnóstico não encontrado");
+      }
+
+      // 3. Criar lead na tabela leads (se tiver userId associado)
+      if (diagnosis.userId) {
+        const leadData = {
+          userId: diagnosis.userId,
+          nome: input.email?.split('@')[0] || 'Lead via Radar Bio',
+          email: input.email || null,
+          telefone: input.whatsapp || null,
+          procedimento: 'Análise Bio Instagram',
+          origem: 'radar_bio' as const,
+          temperatura: 'quente' as const, // Lead que deixou contato = quente
+          status: 'novo' as const,
+          observacoes: `Score: ${diagnosis.score}/100. Instagram: @${diagnosis.instagramHandle}`,
+          ultimoContato: new Date(),
+        };
+
+        await db.insert(leads).values(leadData);
+        
+        logger.info('Lead created in CRM', { 
+          diagnosisId: input.diagnosisId,
+          email: input.email,
+          userId: diagnosis.userId 
+        });
+
+        // 4. TODO: Enviar email de boas-vindas
+        // await sendEmail({
+        //   to: input.email,
+        //   template: 'welcome',
+        //   data: { nome: leadData.nome }
+        // });
+      }
+
+      logger.info('Lead captured', { 
+        diagnosisId: input.diagnosisId,
+        hasEmail: !!input.email,
+        hasWhatsapp: !!input.whatsapp
+      });
 
       return {
         success: true,
-        message: "Lead capturado com sucesso!",
+        message: "Obrigado! Em breve entraremos em contato com insights exclusivos para sua clínica.",
       };
     }),
 

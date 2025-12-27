@@ -6,7 +6,7 @@
 import { z } from "zod";
 import { router, adminProcedure } from "../_core/trpc";
 import { cache, userCache, aiCache, analyticsCache, contentCache } from "../_core/cache";
-import { logger } from "../_core/logger";
+import { logger } from "../adapters/loggingAdapter";
 
 export const cacheRouter = router({
   /**
