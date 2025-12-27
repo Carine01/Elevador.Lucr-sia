@@ -2,8 +2,8 @@ name: Database Backup
 
 on:
   schedule:
-    - cron: '0 3 * * *'  # Diário às 3h AM UTC
-  workflow_dispatch:  # Manual trigger
+    - cron: "0 3 * * *" # Diário às 3h AM UTC
+  workflow_dispatch: # Manual trigger
 
 jobs:
   backup:
@@ -24,18 +24,18 @@ jobs:
                     --quick \
                     --lock-tables=false \
                     > backup-$(date +%Y%m%d-%H%M%S).sql
-      
+
       - name: Compress Backup
         run: |
           gzip backup-*.sql
-      
+
       - name: Upload to GitHub Artifacts
         uses: actions/upload-artifact@v3
         with:
           name: mysql-backup-$(date +%Y%m%d)
           path: backup-*.sql.gz
           retention-days: 7
-      
+
       - name: Backup Summary
         run: |
           echo "✅ Backup completed successfully"

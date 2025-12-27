@@ -30,6 +30,7 @@
 ### 3️⃣ Ativar Backups Automáticos
 
 **Opção A: Se Railway tem aba "Backups"**
+
 1. Clicar na aba **"Backups"** no menu lateral
 2. Clicar em **"Enable Backups"**
 3. Configurar:
@@ -45,6 +46,7 @@ Railway Free Tier **NÃO suporta backups automáticos nativos**.
 **Soluções alternativas:**
 
 #### 🔹 Solução 1: Upgrade para Railway Pro ($5/mês)
+
 - Vai para: Settings → Billing
 - Upgrade para **Railway Pro**
 - Ativa backups automáticos (passos acima)
@@ -58,8 +60,8 @@ name: Database Backup
 
 on:
   schedule:
-    - cron: '0 3 * * *'  # Diário às 3h AM UTC
-  workflow_dispatch:  # Manual trigger
+    - cron: "0 3 * * *" # Diário às 3h AM UTC
+  workflow_dispatch: # Manual trigger
 
 jobs:
   backup:
@@ -75,7 +77,7 @@ jobs:
                     --quick \
                     --lock-tables=false \
                     > backup-$(date +%Y%m%d-%H%M%S).sql
-      
+
       - name: Upload to GitHub Artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -85,6 +87,7 @@ jobs:
 ```
 
 **Configurar secrets no GitHub:**
+
 1. Ir para: Settings → Secrets and variables → Actions
 2. Adicionar:
    - `DB_HOST` - Hostname do Railway MySQL
@@ -123,6 +126,7 @@ echo "✅ Backup criado: $BACKUP_FILE"
 ```
 
 **Configurar cron:**
+
 ```bash
 # Abrir crontab
 crontab -e
@@ -138,17 +142,20 @@ crontab -e
 ### Testar backup manual
 
 **Railway Pro:**
+
 1. Na aba Backups, clicar em **"Create Backup Now"**
 2. Aguardar conclusão (1-5 minutos)
 3. Verificar se backup aparece na lista
 
 **GitHub Actions:**
+
 ```bash
 # Disparar workflow manualmente
 # Ir para: Actions → Database Backup → Run workflow
 ```
 
 **Script Local:**
+
 ```bash
 # Testar manualmente
 ./scripts/backup-db.sh
@@ -177,15 +184,18 @@ mysql -h localhost -u root -p test_database -e "SELECT COUNT(*) FROM users;"
 ## 📊 Monitoramento
 
 ### Railway Pro
+
 - Backups ficam listados na aba "Backups"
 - Railway envia email se backup falhar
 
 ### GitHub Actions
+
 - Acessar: Actions → Database Backup
 - Verificar se workflow roda diariamente
 - Baixar artifacts se necessário
 
 ### Script Local
+
 - Verificar log: `tail -f /var/log/elevare-backup.log`
 - Monitorar espaço em disco: `df -h`
 
@@ -193,11 +203,11 @@ mysql -h localhost -u root -p test_database -e "SELECT COUNT(*) FROM users;"
 
 ## 🔄 Cronograma de Retenção
 
-| Solução | Retenção Padrão | Retenção Recomendada |
-|---------|-----------------|----------------------|
-| Railway Pro | 7 dias | 14 dias |
+| Solução        | Retenção Padrão     | Retenção Recomendada     |
+| -------------- | ------------------- | ------------------------ |
+| Railway Pro    | 7 dias              | 14 dias                  |
 | GitHub Actions | 90 dias (artifacts) | 7 dias (espaço limitado) |
-| Script Local | Ilimitado | 30 dias |
+| Script Local   | Ilimitado           | 30 dias                  |
 
 ---
 
