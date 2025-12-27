@@ -67,22 +67,35 @@ jobs:
   backup:
     runs-on: ubuntu-latest
     steps:
+      - name: Install MySQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mysql-client
+
+      - name: Set Backup Filename
+        id: backup_name
+        run: echo "filename=backup-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_OUTPUT
+
       - name: Backup MySQL
         run: |
           mysqldump -h ${{ secrets.DB_HOST }} \
+                    -P ${{ secrets.DB_PORT || 3306 }} \
                     -u ${{ secrets.DB_USER }} \
                     -p${{ secrets.DB_PASSWORD }} \
                     ${{ secrets.DB_NAME }} \
                     --single-transaction \
                     --quick \
                     --lock-tables=false \
-                    > backup-$(date +%Y%m%d-%H%M%S).sql
+                    > ${{ steps.backup_name.outputs.filename }}.sql
+
+      - name: Compress Backup
+        run: gzip ${{ steps.backup_name.outputs.filename }}.sql
 
       - name: Upload to GitHub Artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: mysql-backup
-          path: backup-*.sql
+          name: mysql-backup-${{ github.run_id }}
+          path: ${{ steps.backup_name.outputs.filename }}.sql.gz
           retention-days: 7
 ```
 
