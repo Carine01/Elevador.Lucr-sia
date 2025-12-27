@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Copy } from "lucide-react";
+import { Play, Copy, Film } from "lucide-react";
 import { Streamdown } from "streamdown";
 
 type GeneratedScriptDisplayProps = {
@@ -15,7 +15,7 @@ export function GeneratedScriptDisplay({
   if (!script) {
     return (
       <Card className="bg-slate-800/30 border-slate-700 border-dashed p-12 flex flex-col items-center justify-center text-center min-h-[400px]">
-        <Play className="w-16 h-16 text-slate-600 mb-4" />
+        <Film className="w-16 h-16 text-slate-600 mb-4" />
         <h3 className="text-xl font-semibold text-slate-400 mb-2">
           Roteiro aparecerá aqui
         </h3>
