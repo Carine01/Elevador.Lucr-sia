@@ -14,9 +14,20 @@ import { serveStatic, setupVite } from "./vite";
 import { ENV, validateEnvOnStartup } from "./env";
 import { logger } from "./logger";
 import { getDb } from "../db";
+import { initSentry, setupGlobalErrorHandlers, captureMessage } from "./sentry";
 
 // 🔐 VALIDAR VARIÁVEIS CRÍTICAS EM STARTUP
 validateEnvOnStartup();
+
+// 🔍 INICIALIZAR SENTRY PARA MONITORAMENTO
+const app = express();
+initSentry(app);
+setupGlobalErrorHandlers();
+captureMessage("🚀 Servidor iniciando", "info", {
+  environment: process.env.NODE_ENV,
+  version: "1.0.0",
+});
+
 import { subscription as subscriptionTable } from "../../drizzle/schema";
 import { eq } from "drizzle-orm";
 import { PLANS } from "../routers/subscription";
