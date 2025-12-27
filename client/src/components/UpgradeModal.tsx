@@ -3,7 +3,7 @@
  * Exibido quando usuário não tem créditos suficientes
  */
 
-import { useNavigate } from "wouter";
+import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -29,7 +29,7 @@ export function UpgradeModal({
   creditsRemaining,
   message,
 }: UpgradeModalProps) {
-  const [, navigate] = useNavigate();
+  const [, navigate] = useLocation();
 
   const handleUpgrade = () => {
     navigate("/pricing");
