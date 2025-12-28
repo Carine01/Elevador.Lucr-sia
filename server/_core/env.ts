@@ -48,8 +48,13 @@ export function validateEnvOnStartup(): void {
     
     if (!result.success) {
       console.error("❌ [ENV] ERRO CRÍTICO - Variáveis inválidas:");
-      result.error.issues.forEach(err => {
-        console.error(`   - ${err.path.join(".")}: ${err.message}`);
+<<<<<<< HEAD
+      result.error.issues.forEach((issue) => {
+        console.error(`   - ${issue.path.join(".")}: ${issue.message}`);
+=======
+      result.error.issues.forEach((issue) => {
+        console.error(`   - ${issue.path.join(".")}: ${issue.message}`);
+>>>>>>> origin/copilot/fix-build-errors-for-deploy
       });
       console.error("\n⛔ Servidor não pode iniciar com configuração insegura.");
       process.exit(1);
