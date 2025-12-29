@@ -39,14 +39,16 @@ async function createAdminUser() {
     // Criar novo usuário admin
     const hashedPassword = await bcrypt.hash(ADMIN_PASSWORD, 10);
 
+
+    // Inserir apenas campos válidos conforme o schema
     const [adminUser] = await db
       .insert(users)
       .values({
-        email: ADMIN_EMAIL,
         name: "Admin Elevare",
-        passwordHash: hashedPassword,
-        role: "admin", // Role admin
-        emailVerified: true,
+        openId: "admin-seed-openid",
+        email: ADMIN_EMAIL,
+        role: "admin",
+        // loginMethod pode ser preenchido se necessário
       })
       .$returningId();
 
