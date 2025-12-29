@@ -12,6 +12,8 @@ Antes de iniciar o deploy, você precisará:
 2. **Banco de dados MySQL** (PlanetScale, Railway, ou AWS RDS)
 3. **Conta Manus** (para OAuth e APIs de IA)
 4. **Plataforma de hospedagem** (Vercel, Railway, ou Render)
+5. **Node.js 18+**
+6. **pnpm 9+**
 
 ---
 
@@ -417,5 +419,3 @@ Sua plataforma Elevare AI NeuroVendas está agora em produção! 🚀
 ---
 
 **Elevare AI NeuroVendas** - Venda como ciência, não como esperança. 🎯
-#   D e p l o y   2 0 2 5 - 1 2 - 2 3   1 5 : 3 3  
- 

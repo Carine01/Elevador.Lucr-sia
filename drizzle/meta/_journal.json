@@ -36,6 +36,13 @@
       "when": 1766459284427,
       "tag": "0004_familiar_goblin_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1766931572917,
+      "tag": "0005_clammy_viper",
+      "breakpoints": true
     }
   ]
 }
