@@ -10,66 +10,38 @@ import { nodeProfilingIntegration } from "@sentry/profiling-node";
  * Inicializar Sentry para capturar erros e performance
  */
 export function initSentry(app: any) {
-  // Só inicializar em produção ou se DSN fornecido
   if (!process.env.SENTRY_DSN) {
     console.warn("⚠️  SENTRY_DSN não configurada - error tracking desativado");
     return;
   }
 
   Sentry.init({
-    // DSN da aplicação no Sentry
     dsn: process.env.SENTRY_DSN,
-
-    // Ambiente
     environment: process.env.NODE_ENV || "development",
-
-    // Taxa de rastreamento (1.0 = 100% em dev, 0.1 = 10% em produção)
     tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
-
-    // Performance profiling (opcional, requer permissões)
     integrations: [
       nodeProfilingIntegration(),
-      new Sentry.Integrations.Http({ tracing: true }),
-      new Sentry.Integrations.Express({
-        request: true,
-        serverName: false,
-        transaction: true,
+      Sentry.httpIntegration(),
+      Sentry.expressIntegration({
+        app,
+        // Você pode adicionar mais opções aqui se necessário
       }),
     ],
-
-    // Dados a ignorar (sensitive)
     beforeSend(event, hint) {
-      // Remover informações sensíveis
       if (event.request) {
         delete event.request.cookies;
-        delete event.request.headers["authorization"];
+        if (event.request.headers) {
+          delete event.request.headers["authorization"];
+        }
       }
-
       if (event.contexts) {
         delete event.contexts.trace?.user_id;
       }
-
       return event;
     },
-
-    // Ignorar URLs internas
-    ignoreUrls: [/\/health/, /\/metrics/, /\/status/],
-
-    // Release version
     release: process.env.APP_VERSION || "1.0.0",
-
-    // Severity level
-    denyUrls: [
-      // Browser plugins
-      /extensions\//i,
-      /^chrome:\/\//i,
-      /detector\.js$/,
-    ],
+    // ignoreUrls e denyUrls não são mais suportados diretamente, use beforeSend para filtrar se necessário
   });
-
-  // Attach Sentry to Express
-  app.use(Sentry.Handlers.requestHandler());
-  app.use(Sentry.Handlers.errorHandler());
 
   return Sentry;
 }
