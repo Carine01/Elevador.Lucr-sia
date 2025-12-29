@@ -157,7 +157,7 @@ export function redactSensitiveFields<T extends Record<string, any>>(
   obj: T,
   sensitiveFields: string[] = ["password", "token", "secret", "apiKey", "creditCard"]
 ): T {
-  const redacted = { ...obj };
+  const redacted: Record<string, any> = { ...obj };
 
   for (const key of Object.keys(redacted)) {
     const lowerKey = key.toLowerCase();
@@ -170,5 +170,5 @@ export function redactSensitiveFields<T extends Record<string, any>>(
     }
   }
 
-  return redacted;
+  return redacted as T;
 }
