@@ -88,12 +88,12 @@ export function getSecret(id: string, version?: number): string | null {
   let secret: Secret | undefined;
 
   if (version !== undefined) {
-    secret = secrets.find((s) => s.version === version && s.isActive);
+    secret = secrets.find((s: Secret) => s.version === version && s.isActive);
   } else {
     // Pega a versão mais recente ativa
     secret = secrets
-      .filter((s) => s.isActive)
-      .sort((a, b) => b.version - a.version)[0];
+      .filter((s: Secret) => s.isActive)
+      .sort((a: Secret, b: Secret) => b.version - a.version)[0];
   }
 
   if (!secret) return null;
@@ -122,8 +122,8 @@ export function getSecret(id: string, version?: number): string | null {
 export function rotateSecret(id: string, newValue?: string): Secret {
   const secrets = SECRETS_STORE.get(id) || [];
   const currentSecret = secrets
-    .filter((s) => s.isActive)
-    .sort((a, b) => b.version - a.version)[0];
+    .filter((s: Secret) => s.isActive)
+    .sort((a: Secret, b: Secret) => b.version - a.version)[0];
 
   const newVersion = currentSecret ? currentSecret.version + 1 : 1;
   const value = newValue || generateSecret();
@@ -155,8 +155,8 @@ export function needsRotation(id: string): boolean {
   if (!secrets || secrets.length === 0) return true;
 
   const activeSecret = secrets
-    .filter((s) => s.isActive)
-    .sort((a, b) => b.version - a.version)[0];
+    .filter((s: Secret) => s.isActive)
+    .sort((a: Secret, b: Secret) => b.version - a.version)[0];
 
   if (!activeSecret) return true;
 
@@ -226,8 +226,8 @@ export function listSecrets(): Array<Omit<Secret, "value">> {
 
   for (const [id, secrets] of SECRETS_STORE.entries()) {
     const activeSecrets = secrets
-      .filter((s) => s.isActive)
-      .sort((a, b) => b.version - a.version);
+      .filter((s: Secret) => s.isActive)
+      .sort((a: Secret, b: Secret) => b.version - a.version);
 
     for (const secret of activeSecrets) {
       result.push({
@@ -251,7 +251,7 @@ export function validateSecret(id: string, valueToValidate: string): boolean {
   if (!secrets) return false;
 
   // Verifica contra todas as versões ativas
-  for (const secret of secrets.filter((s) => s.isActive)) {
+  for (const secret of secrets.filter((s: Secret) => s.isActive)) {
     try {
       const decryptedValue = decrypt(secret.value);
       if (decryptedValue === valueToValidate) {
