@@ -14,7 +14,7 @@
     "test:email": "tsx scripts/test-email-production.ts",
     "test:email:dry": "DRY_RUN=true tsx scripts/test-email-production.ts",
     "validate": "pnpm install --frozen-lockfile && pnpm run build",
-    "prepare": "husky install"
+    "prepare": "husky install || true"
   },
   "engines": {
     "node": ">=18.0.0",
